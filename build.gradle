@@ -6,4 +6,7 @@ plugins {
 
     // Hilt plugin
     id 'com.google.dagger.hilt.android' version '2.44' apply false
+
+    // KSP plugin
+    id 'com.google.devtools.ksp' version '1.7.0-1.0.6' apply false
 }
