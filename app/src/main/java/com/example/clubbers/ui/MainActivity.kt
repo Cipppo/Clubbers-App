@@ -1,4 +1,4 @@
-package com.example.clubbers
+package com.example.clubbers.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
