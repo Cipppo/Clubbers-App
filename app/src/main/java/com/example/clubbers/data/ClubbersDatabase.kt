@@ -5,6 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+/**
+ * The Room database for this app
+ * TODO: Add "followers" tables
+ * TODO: If other tables are needed, create them, create the DAO and add them to the entities list
+ */
 @Database(entities = [User::class, Post::class, Event::class], version = 1, exportSchema = true)
 abstract class ClubbersDatabase : RoomDatabase() {
 

@@ -25,4 +25,8 @@ data class User(
 
     @ColumnInfo(name = "user_bio")
     var userBio: String,
+
+    // TODO: This is a possible attribute for the user
+    @ColumnInfo(name = "is_admin")
+    var isAdmin: Boolean = false
 )
