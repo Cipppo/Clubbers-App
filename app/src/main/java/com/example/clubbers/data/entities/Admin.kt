@@ -24,7 +24,7 @@ data class Admin(
     var adminImage: String,
 
     @ColumnInfo(name = "admin_bio")
-    var adminBio: String,
+    var adminBio: String?,
 
     @ColumnInfo(name = "is_admin")
     var isAdmin: Boolean = true
