@@ -4,24 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.clubbers.data.dao.AdminsDAO
-import com.example.clubbers.data.dao.EventHasTagsDAO
-import com.example.clubbers.data.dao.EventsDAO
-import com.example.clubbers.data.dao.ParticipatesDAO
-import com.example.clubbers.data.dao.PostsDAO
-import com.example.clubbers.data.dao.TagsDAO
-import com.example.clubbers.data.dao.UserFollowsAdminsDAO
-import com.example.clubbers.data.dao.UserFollowsUsersDAO
-import com.example.clubbers.data.dao.UsersDAO
-import com.example.clubbers.data.entities.Admin
-import com.example.clubbers.data.entities.Event
-import com.example.clubbers.data.entities.EventHasTag
-import com.example.clubbers.data.entities.Participates
-import com.example.clubbers.data.entities.Post
-import com.example.clubbers.data.entities.Tag
-import com.example.clubbers.data.entities.User
-import com.example.clubbers.data.entities.UserFollowsAdmin
-import com.example.clubbers.data.entities.UserFollowsUser
+import com.example.clubbers.data.dao.*
+import com.example.clubbers.data.entities.*
 
 /**
  * The Room database for this app
