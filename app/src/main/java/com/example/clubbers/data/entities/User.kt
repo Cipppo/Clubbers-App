@@ -1,15 +1,14 @@
-package com.example.clubbers.data
+package com.example.clubbers.data.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.util.UUID
-
+// TODO: When other features are implemented, add them to the entity
 @Entity(tableName = "users", indices = [Index(value = ["user_name"], unique = true)])
 data class User(
-    @PrimaryKey
-    val userId: String = UUID.randomUUID().toString(),
+    @PrimaryKey(autoGenerate = true)
+    val userId: Int = 0,
 
     @ColumnInfo(name = "user_name")
     var userName: String,
@@ -26,7 +25,6 @@ data class User(
     @ColumnInfo(name = "user_bio")
     var userBio: String,
 
-    // TODO: This is a possible attribute for the user
     @ColumnInfo(name = "is_admin")
     var isAdmin: Boolean = false
 )

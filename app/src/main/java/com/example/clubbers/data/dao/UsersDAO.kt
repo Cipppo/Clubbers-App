@@ -1,9 +1,10 @@
-package com.example.clubbers.data
+package com.example.clubbers.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.clubbers.data.entities.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
