@@ -6,7 +6,7 @@ import androidx.room.Query
 import com.example.clubbers.data.entities.Admin
 import kotlinx.coroutines.flow.Flow
 
-interface AdminDAO {
+interface AdminsDAO {
     // Get all admins
     @Query("SELECT * FROM admins ORDER BY admin_name ASC")
     fun getAdmins(): Flow<List<Admin>>

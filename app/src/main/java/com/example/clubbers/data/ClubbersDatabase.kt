@@ -4,7 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.clubbers.data.dao.AdminDAO
+import com.example.clubbers.data.dao.AdminsDAO
+import com.example.clubbers.data.dao.EventHasTagsDAO
+import com.example.clubbers.data.dao.EventsDAO
+import com.example.clubbers.data.dao.ParticipatesDAO
+import com.example.clubbers.data.dao.PostsDAO
+import com.example.clubbers.data.dao.TagsDAO
+import com.example.clubbers.data.dao.UserFollowsAdminsDAO
+import com.example.clubbers.data.dao.UserFollowsUsersDAO
 import com.example.clubbers.data.dao.UsersDAO
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.Event
@@ -35,8 +42,14 @@ abstract class ClubbersDatabase : RoomDatabase() {
 
     // DAOs
     abstract fun usersDAO(): UsersDAO
-    abstract fun adminsDAO(): AdminDAO
-    // TODO: insert other DAOs here
+    abstract fun adminsDAO(): AdminsDAO
+    abstract fun postsDAO(): PostsDAO
+    abstract fun eventsDAO(): EventsDAO
+    abstract fun tagsDAO(): TagsDAO
+    abstract fun participatesDAO(): ParticipatesDAO
+    abstract fun eventHasTagsDAO(): EventHasTagsDAO
+    abstract fun userFollowsUsersDAO(): UserFollowsUsersDAO
+    abstract fun userFollowsAdminsDAO(): UserFollowsAdminsDAO
 
     companion object {
         @Volatile
