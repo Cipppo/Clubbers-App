@@ -2,10 +2,16 @@ package com.example.clubbers.data.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "events")
+@Entity(tableName = "events", foreignKeys = [
+    ForeignKey(entity = Admin::class,
+        parentColumns = arrayOf("adminId"),
+        childColumns = arrayOf("event_admin_id"),
+        onDelete = ForeignKey.CASCADE)
+])
 data class Event(
     @PrimaryKey(autoGenerate = true)
     val eventId: Int = 0,
@@ -33,4 +39,7 @@ data class Event(
 
     @ColumnInfo(name = "participants")
     val participants: Int = 0,
+
+    @ColumnInfo(name = "event_admin_id")
+    val eventAdminId: Int
 )
