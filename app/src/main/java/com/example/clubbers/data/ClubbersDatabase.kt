@@ -8,15 +8,29 @@ import com.example.clubbers.data.dao.AdminDAO
 import com.example.clubbers.data.dao.UsersDAO
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.data.entities.EventHasTag
+import com.example.clubbers.data.entities.Participates
 import com.example.clubbers.data.entities.Post
+import com.example.clubbers.data.entities.Tag
 import com.example.clubbers.data.entities.User
+import com.example.clubbers.data.entities.UserFollowsAdmin
+import com.example.clubbers.data.entities.UserFollowsUser
 
 /**
  * The Room database for this app
- * TODO: Add "followers" tables
- * TODO: If other tables are needed, create them, create the DAO and add them to the entities list
  */
-@Database(entities = [User::class, Admin::class, Post::class, Event::class], version = 1, exportSchema = true)
+@Database(entities = [
+    User::class,
+    Admin::class,
+    Post::class,
+    Event::class,
+    Post::class,
+    Tag::class,
+    UserFollowsUser::class,
+    UserFollowsAdmin::class,
+    Participates::class,
+    EventHasTag::class
+                     ], version = 1, exportSchema = true)
 abstract class ClubbersDatabase : RoomDatabase() {
 
     // DAOs
