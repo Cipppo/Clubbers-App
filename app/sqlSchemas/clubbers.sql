@@ -23,11 +23,11 @@ USE `clubbers` ;
 CREATE TABLE IF NOT EXISTS `clubbers`.`Admin` (
   `admin_id` INT NOT NULL,
   `admin_name` VARCHAR(255) NOT NULL,
-  `admin_email` VARCHAR(45) NULL,
-  `admin_password` VARCHAR(45) NULL,
-  `admin_image` VARCHAR(45) NULL,
+  `admin_email` VARCHAR(45) NOT NULL,
+  `admin_password` VARCHAR(45) NOT NULL,
+  `admin_image` VARCHAR(45) NOT NULL,
   `admin_bio` VARCHAR(45) NULL,
-  `isAdmin` TINYINT(1) NULL DEFAULT NULL,
+  `isAdmin` TINYINT(1) NOT NULL,
   PRIMARY KEY (`admin_id`),
   UNIQUE INDEX `admin_name_UNIQUE` (`admin_name` ASC) VISIBLE)
 ENGINE = InnoDB
@@ -40,15 +40,18 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `clubbers`.`Event` (
   `event_id` INT NOT NULL,
-  `location` VARCHAR(255) NOT NULL,
+  `event_name` VARCHAR(45) NOT NULL,
+  `event_image` VARCHAR(45) NOT NULL,
+  `event_location` VARCHAR(255) NOT NULL,
+  `event_description` VARCHAR(255) NULL,
   `start_time` DATETIME NOT NULL,
   `end_time` DATETIME NOT NULL,
-  `maxParticipants` INT NULL,
-  `adminId` INT NULL DEFAULT NULL,
+  `max_participants` INT NULL,
+  `admin_id` INT NULL DEFAULT NULL,
   PRIMARY KEY (`event_id`),
-  INDEX `adminId` (`adminId` ASC) VISIBLE,
+  INDEX `adminId` (`admin_id` ASC) VISIBLE,
   CONSTRAINT `event_ibfk_1`
-    FOREIGN KEY (`adminId`)
+    FOREIGN KEY (`admin_id`)
     REFERENCES `clubbers`.`Admin` (`admin_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -61,11 +64,11 @@ COLLATE = utf8mb4_0900_ai_ci;
 CREATE TABLE IF NOT EXISTS `clubbers`.`User` (
   `user_id` INT NOT NULL,
   `user_name` VARCHAR(30) NOT NULL,
-  `user_email` VARCHAR(60) NULL,
-  `user_password` VARCHAR(45) NULL,
-  `user_image` VARCHAR(45) NULL,
+  `user_email` VARCHAR(60) NOT NULL,
+  `user_password` VARCHAR(45) NOT NULL,
+  `user_image` VARCHAR(45) NOT NULL,
   `user_bio` VARCHAR(255) NULL,
-  `isAdmin` TINYINT(0) NULL DEFAULT NULL,
+  `isAdmin` TINYINT(0) NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE INDEX `username_UNIQUE` (`user_name` ASC) VISIBLE)
 ENGINE = InnoDB
