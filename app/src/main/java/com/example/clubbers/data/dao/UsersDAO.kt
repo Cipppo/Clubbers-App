@@ -17,6 +17,10 @@ interface UsersDAO {
     @Query("SELECT * FROM users WHERE userId = :userId")
     fun getUserById(userId: String): Flow<User>
 
+    // Get user by username
+    @Query("SELECT * FROM users WHERE user_name = :userName")
+    fun getUserByUserName(userName: String): Flow<User>
+
     // Insert user
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(user: User)
