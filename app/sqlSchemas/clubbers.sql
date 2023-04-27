@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `clubbers`.`Event` (
   `start_time` DATETIME NOT NULL,
   `end_time` DATETIME NOT NULL,
   `max_participants` INT NULL,
+  `participants` INT NOT NULL,
   `admin_id` INT NULL DEFAULT NULL,
   PRIMARY KEY (`event_id`),
   INDEX `adminId` (`admin_id` ASC) VISIBLE,
@@ -77,9 +78,9 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- -----------------------------------------------------
--- Table `clubbers`.`Participate`
+-- Table `clubbers`.`Participates`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `clubbers`.`Participate` (
+CREATE TABLE IF NOT EXISTS `clubbers`.`Participates` (
   `user_id` INT NOT NULL,
   `event_id` INT NOT NULL,
   PRIMARY KEY (`user_id`, `event_id`),
@@ -100,6 +101,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `clubbers`.`Post` (
   `post_id` INT NOT NULL,
+  `post_title` VARCHAR(45) NOT NULL,
   `post_image` VARCHAR(45) NULL,
   `post_caption` VARCHAR(45) NOT NULL,
   `eventId` INT NULL DEFAULT NULL,
