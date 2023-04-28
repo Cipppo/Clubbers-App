@@ -13,11 +13,11 @@ interface EventsDAO {
     fun getEvents(): Flow<List<Event>>
 
     // Get event by id
-    @Query("SELECT * FROM events WHERE eventId = :eventId")
+    @Query("SELECT * FROM events WHERE event_id = :eventId")
     fun getEventById(eventId: String): Flow<Event>
 
     // Insert event
-    @Query("INSERT INTO events (eventId, event_name, event_description, time_start, time_end, " +
+    @Query("INSERT INTO events (event_id, event_name, event_description, time_start, time_end, " +
             "event_location, event_image) " +
             "VALUES (:eventId, :eventName, :eventDescription, :timeStart, :timeEnd, " +
             ":eventLocation, :eventImage)")
@@ -25,6 +25,6 @@ interface EventsDAO {
                        timeStart: Date, timeEnd: Date, eventLocation: String, eventImage: String)
 
     // Delete event
-    @Query("DELETE FROM events WHERE eventId = :eventId")
+    @Query("DELETE FROM events WHERE event_id = :eventId")
     suspend fun delete(eventId: Int)
 }

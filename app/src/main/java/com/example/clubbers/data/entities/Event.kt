@@ -14,6 +14,7 @@ import java.util.Date
 ])
 data class Event(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "event_id")
     val eventId: Int = 0,
 
     @ColumnInfo(name = "event_name")

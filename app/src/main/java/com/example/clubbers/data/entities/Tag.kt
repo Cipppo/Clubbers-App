@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "tags")
 data class Tag(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "tag_id")
     val tagId: Int = 0,
 
     @ColumnInfo(name = "tag_name")

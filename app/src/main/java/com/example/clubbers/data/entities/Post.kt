@@ -17,6 +17,7 @@ import androidx.room.PrimaryKey
 ])
 data class Post(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "post_id")
     val postId: Int = 0,
 
     @ColumnInfo(name = "post_title")
