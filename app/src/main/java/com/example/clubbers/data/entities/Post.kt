@@ -29,9 +29,9 @@ data class Post(
     @ColumnInfo(name = "post_caption")
     var postCaption: String,
 
-    @ColumnInfo(name = "post_user_id")
+    @ColumnInfo(name = "user_id")
     var postUserId: Int,
 
-    @ColumnInfo(name = "post_event_id")
+    @ColumnInfo(name = "event_id")
     var postEventId: Int
 )
