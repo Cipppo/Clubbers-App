@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
             val password = password.text;
 
             //Need to change this with the credentials control in the database
+            //Just a try
             if(isEmpty(username) || isEmpty(password)){
                 logtext.text = "Empty";
             }else{
