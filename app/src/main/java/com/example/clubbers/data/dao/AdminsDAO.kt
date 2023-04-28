@@ -13,7 +13,7 @@ interface AdminsDAO {
 
     // Get admin by id
     @Query("SELECT * FROM admins WHERE admin_id = :adminId")
-    fun getAdminById(adminId: String): Flow<Admin>
+    fun getAdminById(adminId: Int): Flow<Admin>
 
     // Get admin by admin_name
     @Query("SELECT * FROM admins WHERE admin_name = :adminName")
@@ -25,5 +25,5 @@ interface AdminsDAO {
 
     // Delete admin
     @Query("DELETE FROM admins WHERE admin_id = :adminId")
-    suspend fun delete(adminId: String)
+    suspend fun delete(adminId: Int)
 }

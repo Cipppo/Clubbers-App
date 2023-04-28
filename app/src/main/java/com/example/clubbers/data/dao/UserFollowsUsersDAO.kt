@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface UserFollowsUsersDAO {
     // get all users a user follows
     @Query("SELECT * FROM user_follows_user WHERE follower_id = :userId")
-    fun getUsers(userId: Int): Flow<List<UserFollowsUser>>
+    fun getFollowed(userId: Int): Flow<List<UserFollowsUser>>
 
     // get all users that follow a user
     @Query("SELECT * FROM user_follows_user WHERE followed_id = :userId")

@@ -15,7 +15,7 @@ interface UsersDAO {
 
     // Get user by id
     @Query("SELECT * FROM users WHERE user_id = :userId")
-    fun getUserById(userId: String): Flow<User>
+    fun getUserById(userId: Int): Flow<User>
 
     // Get user by username
     @Query("SELECT * FROM users WHERE user_name = :userName")
@@ -27,5 +27,5 @@ interface UsersDAO {
 
     // Delete user
     @Query("DELETE FROM users WHERE user_id = :userId")
-    suspend fun delete(userId: String)
+    suspend fun delete(userId: Int)
 }
