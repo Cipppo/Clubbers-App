@@ -1,16 +1,17 @@
 package com.example.clubbers.data.repos
 
 import com.example.clubbers.data.dao.UserFollowsAdminsDAO
-import com.example.clubbers.data.entities.UserFollowsAdmin
+import com.example.clubbers.data.entities.Admin
+import com.example.clubbers.data.entities.User
 import kotlinx.coroutines.flow.Flow
 
 class UserFollowsAdminsRepository(private val userFollowsAdminsDAO: UserFollowsAdminsDAO) {
 
-    fun getUsers(adminId: Int): Flow<List<UserFollowsAdmin>> {
+    fun getUsers(adminId: Int): Flow<List<User>> {
         return userFollowsAdminsDAO.getUsers(adminId)
     }
 
-    fun getFollowed(userId: Int): Flow<List<UserFollowsAdmin>> {
+    fun getAdmins(userId: Int): Flow<List<Admin>> {
         return userFollowsAdminsDAO.getAdmins(userId)
     }
 

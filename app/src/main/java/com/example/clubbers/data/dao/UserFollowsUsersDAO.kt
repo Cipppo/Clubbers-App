@@ -2,18 +2,18 @@ package com.example.clubbers.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.example.clubbers.data.entities.UserFollowsUser
+import com.example.clubbers.data.entities.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserFollowsUsersDAO {
     // get all users a user follows
     @Query("SELECT * FROM user_follows_user WHERE follower_id = :userId")
-    fun getFollowed(userId: Int): Flow<List<UserFollowsUser>>
+    fun getFollowed(userId: Int): Flow<List<User>>
 
     // get all users that follow a user
     @Query("SELECT * FROM user_follows_user WHERE followed_id = :userId")
-    fun getFollowers(userId: Int): Flow<List<UserFollowsUser>>
+    fun getFollowers(userId: Int): Flow<List<User>>
 
     // insert a user following a user
     @Query("INSERT INTO user_follows_user (follower_id, followed_id) VALUES (:followerId, :followedId)")

@@ -11,6 +11,10 @@ class TagsRepository(private val tagsDAO: TagsDAO) {
         tagsDAO.insert(tag)
     }
 
+    suspend fun updateTag(tag: Tag) {
+        tagsDAO.update(tag)
+    }
+
     suspend fun deleteTag(tag: Tag) {
         tagsDAO.delete(tag.tagId)
     }

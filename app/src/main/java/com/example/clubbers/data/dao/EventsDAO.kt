@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.Event
 import kotlinx.coroutines.flow.Flow
 
@@ -20,6 +21,10 @@ interface EventsDAO {
     // Insert event
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(event: Event)
+
+    // Update event
+    @Update
+    suspend fun update(event: Event)
 
     // Delete event
     @Query("DELETE FROM events WHERE event_id = :eventId")

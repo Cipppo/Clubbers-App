@@ -12,6 +12,10 @@ class AdminsRepository(private val adminsDAO: AdminsDAO) {
         adminsDAO.insert(admin)
     }
 
+    suspend fun updateAdmin(admin: Admin) {
+        adminsDAO.update(admin)
+    }
+
     suspend fun deleteAdmin(admin: Admin) {
         adminsDAO.delete(admin.adminId)
     }

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.Post
 import kotlinx.coroutines.flow.Flow
 
@@ -24,6 +25,10 @@ interface PostsDAO {
     // Insert post
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(post: Post)
+
+    // Update post
+    @Update
+    suspend fun update(post: Post)
 
     // Delete post
     @Query("DELETE FROM posts WHERE post_id = :postId")

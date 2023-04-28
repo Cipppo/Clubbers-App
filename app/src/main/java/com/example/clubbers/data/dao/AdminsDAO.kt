@@ -3,6 +3,7 @@ package com.example.clubbers.data.dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.Admin
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,10 @@ interface AdminsDAO {
     // Insert admin
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(admin: Admin)
+
+    // Update admin
+    @Update
+    suspend fun update(admin: Admin)
 
     // Delete admin
     @Query("DELETE FROM admins WHERE admin_id = :adminId")

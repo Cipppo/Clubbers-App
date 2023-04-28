@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.Tag
 import kotlinx.coroutines.flow.Flow
 
@@ -20,6 +21,10 @@ interface TagsDAO {
     // Insert tag
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(tag: Tag)
+
+    // Update tag
+    @Update
+    suspend fun update(tag: Tag)
 
     // Delete tag
     @Query("DELETE FROM tags WHERE tag_id = :tagId")

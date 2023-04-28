@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.User
 import kotlinx.coroutines.flow.Flow
 
@@ -24,6 +25,10 @@ interface UsersDAO {
     // Insert user
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(user: User)
+
+    // Update user
+    @Update(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun update(user: User)
 
     // Delete user
     @Query("DELETE FROM users WHERE user_id = :userId")

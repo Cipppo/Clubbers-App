@@ -12,6 +12,10 @@ class PostsRepository(private val postsDAO: PostsDAO) {
         postsDAO.insert(post)
     }
 
+    suspend fun updatePost(post: Post) {
+        postsDAO.update(post)
+    }
+
     suspend fun deletePost(post: Post) {
         postsDAO.delete(post.postId)
     }

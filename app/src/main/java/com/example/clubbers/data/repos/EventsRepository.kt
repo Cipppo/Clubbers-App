@@ -12,6 +12,10 @@ class EventsRepository(private val eventsDAO: EventsDAO) {
         eventsDAO.insert(event)
     }
 
+    suspend fun updateEvent(event: Event) {
+        eventsDAO.update(event)
+    }
+
     suspend fun deleteEvent(event: Event) {
         eventsDAO.delete(event.eventId)
     }
