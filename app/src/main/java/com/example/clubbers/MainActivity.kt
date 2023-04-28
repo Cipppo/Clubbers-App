@@ -1,6 +1,10 @@
 package com.example.clubbers
 
 import android.os.Bundle
+import android.text.TextUtils.isEmpty
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,16 +18,24 @@ import com.example.clubbers.ui.theme.ClubbersTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
-        setContent {
-            ClubbersTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+        setContentView(R.layout.login);
+
+        var username = findViewById<EditText>(R.id.emailEntry);
+        var password = findViewById<EditText>(R.id.passwordEntry);
+        var loginButton = findViewById<Button>(R.id.loginButton);
+        var logtext = findViewById<TextView>(R.id.logfield);
+
+        loginButton.setOnClickListener(){
+            val username = username.text;
+            val password = password.text;
+
+            //Need to change this with the credentials control in the database
+            if(isEmpty(username) || isEmpty(password)){
+                logtext.text = "Empty";
+            }else{
+                logtext.text = "NotEmpty";
             }
         }
     }
