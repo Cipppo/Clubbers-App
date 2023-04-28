@@ -1,0 +1,21 @@
+package com.example.clubbers.data.repos
+
+import com.example.clubbers.data.dao.TagsDAO
+import com.example.clubbers.data.entities.Tag
+
+class TagsRepository(private val tagsDAO: TagsDAO) {
+
+    val tags = tagsDAO.getTags()
+
+    suspend fun insertNewTag(tag: Tag) {
+        tagsDAO.insert(tag)
+    }
+
+    suspend fun deleteTag(tag: Tag) {
+        tagsDAO.delete(tag.tagId)
+    }
+
+    fun getTagById(tagId: Int) {
+        tagsDAO.getTagById(tagId)
+    }
+}
