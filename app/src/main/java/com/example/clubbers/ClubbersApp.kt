@@ -13,6 +13,10 @@ sealed class ClubbersApp(val name: String) {
     object Settings : ClubbersApp("Settings Screen")
     object User : ClubbersApp("User Profile")
 
+    //user registration Screens
+    object Login : ClubbersApp("Login")
+    object Registration : ClubbersApp("Registration Page")
+
     // TODO: If there will be more screens, add them here
 }
 
