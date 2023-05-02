@@ -16,7 +16,7 @@ fun DiscoverScreen(
     Scaffold { innerPadding ->
         Column (modifier.padding(innerPadding)) {
             // Text at the center of the screen
-            Text(text = "Today Screen")
+            Text(text = "Discover Screen")
         }
     }
 }

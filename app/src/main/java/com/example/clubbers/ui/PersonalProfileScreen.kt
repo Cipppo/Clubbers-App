@@ -16,7 +16,7 @@ fun PersonalProfileScreen(
     Scaffold { innerPadding ->
         Column (modifier.padding(innerPadding)) {
             // Text at the center of the screen
-            Text(text = "Today Screen")
+            Text(text = "Personal Profile Screen")
         }
     }
 }
