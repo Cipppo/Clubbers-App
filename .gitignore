@@ -46,3 +46,7 @@ google-services.json
 # Android Profiling
 *.hprof
 *.mwb.bak
+
+# DB generated schemas
+app/schemas/*
+!app/schemas/README
