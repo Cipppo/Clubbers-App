@@ -1,11 +1,16 @@
 package com.example.clubbers
 
 import android.app.Application
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -55,20 +62,37 @@ fun BottomAppBarFunction (
 ) {
     BottomAppBar (
         actions = {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(Icons.Filled.Home, contentDescription = "Add Post")
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(Icons.Filled.Home, contentDescription = "Go to Home Screen")
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_calendar_today_24),
+                        contentDescription = "Go to Today's Events"
+                    )
+                }
+                FloatingActionButton(
+                    onClick = { /*TODO*/ },
+                    containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add Post")
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(Icons.Filled.Search, contentDescription = "Add Post")
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(Icons.Filled.Person, contentDescription = "Add Post")
+                }
             }
         },
-        modifier = modifier,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /*TODO*/ },
-                containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add Post")
-            }
-        }
+        modifier = modifier
     )
 }
 
