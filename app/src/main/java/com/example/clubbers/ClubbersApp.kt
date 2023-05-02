@@ -155,11 +155,38 @@ fun NavigationApp (
         bottomBar = {
             BottomAppBarFunction(
                 currentScreen = currentScreen,
-                onHomeButtonClicked = { navController.navigate(AppScreen.Home.name) },
-                onTodayButtonClicked = { navController.navigate(AppScreen.Today.name) },
-                onNewPostButtonClicked = { navController.navigate(AppScreen.NewPost.name) },
-                onDiscoverButtonClicked = { navController.navigate(AppScreen.Discover.name) },
-                onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) }
+                onHomeButtonClicked = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                                      },
+                onTodayButtonClicked = {
+                    if (currentScreen == AppScreen.Today.name) {
+                        navController.popBackStack()
+                        navController.navigate(AppScreen.Today.name)
+                    } else
+                        navController.navigate(AppScreen.Today.name)
+                                       },
+                onNewPostButtonClicked = {
+                    if (currentScreen == AppScreen.NewPost.name) {
+                        navController.popBackStack()
+                        navController.navigate(AppScreen.NewPost.name)
+                    } else
+                        navController.navigate(AppScreen.NewPost.name)
+                                         },
+                onDiscoverButtonClicked = {
+                    if (currentScreen == AppScreen.Discover.name) {
+                        navController.popBackStack()
+                        navController.navigate(AppScreen.Discover.name)
+                    } else
+                        navController.navigate(AppScreen.Discover.name)
+                                          },
+                onProfileButtonClicked = {
+                    if (currentScreen == AppScreen.Profile.name) {
+                        navController.popBackStack()
+                        navController.navigate(AppScreen.Profile.name)
+                    } else
+                        navController.navigate(AppScreen.Profile.name)
+                }
             )
         }
     ) { innerPadding ->
