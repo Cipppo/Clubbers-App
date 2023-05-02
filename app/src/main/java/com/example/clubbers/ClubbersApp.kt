@@ -18,11 +18,13 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -30,7 +32,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.HomeScreen
+import com.example.clubbers.ui.NewPostScreen
+import com.example.clubbers.ui.PersonalProfileScreen
+import com.example.clubbers.ui.TodayScreen
 import dagger.hilt.android.HiltAndroidApp
 
 sealed class AppScreen(val name: String) {
@@ -58,6 +64,11 @@ class ClubbersApp : Application() {
 @Composable
 fun BottomAppBarFunction (
     currentScreen: String,
+    onHomeButtonClicked: () -> Unit,
+    onTodayButtonClicked: () -> Unit,
+    onNewPostButtonClicked: () -> Unit,
+    onDiscoverButtonClicked: () -> Unit,
+    onProfileButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar (
@@ -68,27 +79,63 @@ fun BottomAppBarFunction (
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Filled.Home, contentDescription = "Go to Home Screen")
-                }
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(
+                    onClick = onHomeButtonClicked
+                ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_calendar_today_24),
-                        contentDescription = "Go to Today's Events"
+                        Icons.Filled.Home,
+                        contentDescription = "Go to Home Screen",
+                        tint = if (currentScreen == AppScreen.Home.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
+                }
+                IconButton(
+                    onClick = onTodayButtonClicked
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
+                        contentDescription = "Go to Today's Events",
+                        tint = if (currentScreen == AppScreen.Today.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
                     )
                 }
                 FloatingActionButton(
-                    onClick = { /*TODO*/ },
+                    onClick = onNewPostButtonClicked,
                     containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
                     elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add Post")
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Add Post",
+                        tint = if (currentScreen == AppScreen.NewPost.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
                 }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Filled.Search, contentDescription = "Add Post")
+                IconButton(onClick = onDiscoverButtonClicked) {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = "Discover",
+                        tint = if (currentScreen == AppScreen.Discover.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
                 }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Filled.Person, contentDescription = "Add Post")
+                IconButton(onClick = onProfileButtonClicked) {
+                    Icon(
+                        Icons.Filled.Person,
+                        contentDescription = "Personal Profile",
+                        tint = if (currentScreen == AppScreen.Profile.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
                 }
             }
         },
@@ -106,7 +153,14 @@ fun NavigationApp (
 
     Scaffold(
         bottomBar = {
-            BottomAppBarFunction(currentScreen = currentScreen)
+            BottomAppBarFunction(
+                currentScreen = currentScreen,
+                onHomeButtonClicked = { navController.navigate(AppScreen.Home.name) },
+                onTodayButtonClicked = { navController.navigate(AppScreen.Today.name) },
+                onNewPostButtonClicked = { navController.navigate(AppScreen.NewPost.name) },
+                onDiscoverButtonClicked = { navController.navigate(AppScreen.Discover.name) },
+                onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) }
+            )
         }
     ) { innerPadding ->
         NavigationGraph(navController, innerPadding)
@@ -127,6 +181,26 @@ private fun NavigationGraph(
         // Home Screen
         composable(route = AppScreen.Home.name) {
             HomeScreen()
+        }
+
+        // Today's Events Screen
+        composable(route = AppScreen.Today.name) {
+            TodayScreen()
+        }
+
+        // New Post Screen
+        composable(route = AppScreen.NewPost.name) {
+            NewPostScreen()
+        }
+
+        // Discover Screen
+        composable(route = AppScreen.Discover.name) {
+            DiscoverScreen()
+        }
+
+        // Personal Profile Screen
+        composable(route = AppScreen.Profile.name) {
+            PersonalProfileScreen()
         }
     }
 }
