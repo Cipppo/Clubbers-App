@@ -7,12 +7,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "posts", foreignKeys = [
     ForeignKey(entity = User::class,
-        parentColumns = arrayOf("userId"),
-        childColumns = arrayOf("post_user_id"),
+        parentColumns = arrayOf("user_id"),
+        childColumns = arrayOf("user_id"),
         onDelete = ForeignKey.CASCADE),
     ForeignKey(entity = Event::class,
-        parentColumns = arrayOf("eventId"),
-        childColumns = arrayOf("post_event_id"),
+        parentColumns = arrayOf("event_id"),
+        childColumns = arrayOf("event_id"),
         onDelete = ForeignKey.CASCADE)
 ])
 data class Post(

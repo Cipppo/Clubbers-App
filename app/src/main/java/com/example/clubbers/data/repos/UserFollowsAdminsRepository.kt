@@ -3,6 +3,7 @@ package com.example.clubbers.data.repos
 import com.example.clubbers.data.dao.UserFollowsAdminsDAO
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
+import com.example.clubbers.data.entities.UserFollowsAdmin
 import kotlinx.coroutines.flow.Flow
 
 class UserFollowsAdminsRepository(private val userFollowsAdminsDAO: UserFollowsAdminsDAO) {
@@ -15,11 +16,11 @@ class UserFollowsAdminsRepository(private val userFollowsAdminsDAO: UserFollowsA
         return userFollowsAdminsDAO.getAdmins(userId)
     }
 
-    suspend fun insert(userId: Int, adminId: Int) {
-        userFollowsAdminsDAO.insert(userId, adminId)
+    suspend fun insert(userFollowsAdmin: UserFollowsAdmin) {
+        userFollowsAdminsDAO.insert(userFollowsAdmin)
     }
 
-    suspend fun delete(userId: Int, adminId: Int) {
-        userFollowsAdminsDAO.delete(userId, adminId)
+    suspend fun delete(userFollowsAdmin: UserFollowsAdmin) {
+        userFollowsAdminsDAO.delete(userFollowsAdmin)
     }
 }

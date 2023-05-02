@@ -2,6 +2,7 @@ package com.example.clubbers.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.clubbers.data.entities.Participates
 import com.example.clubbers.data.repos.ParticipatesRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,12 +19,12 @@ class ParticipatesViewModel @Inject constructor(
         repository.getEvents(userId)
     }
 
-    fun addNewParticipant(userId: Int, eventId: Int) = viewModelScope.launch {
-        repository.insert(userId, eventId)
+    fun addNewParticipant(participates: Participates) = viewModelScope.launch {
+        repository.insert(participates)
     }
 
-    fun deleteParticipant(userId: Int, eventId: Int) = viewModelScope.launch {
-        repository.delete(userId, eventId)
+    fun deleteParticipant(participates: Participates) = viewModelScope.launch {
+        repository.delete(participates)
     }
 
     fun deleteAllParticipantsFromEvent(eventId: Int) = viewModelScope.launch {

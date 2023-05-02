@@ -2,6 +2,7 @@ package com.example.clubbers.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.clubbers.data.entities.UserFollowsUser
 import com.example.clubbers.data.repos.UserFollowsUsersRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,11 +19,11 @@ class UserFollowsUsersViewModel @Inject constructor(
         repository.getFollowed(userId)
     }
 
-    fun insert(followerId: Int, followedId: Int) = viewModelScope.launch {
-        repository.insert(followerId, followedId)
+    fun insert(userFollowsUser: UserFollowsUser) = viewModelScope.launch {
+        repository.insert(userFollowsUser)
     }
 
-    fun delete(followerId: Int, followedId: Int) = viewModelScope.launch {
-        repository.delete(followerId, followedId)
+    fun delete(userFollowsUser: UserFollowsUser) = viewModelScope.launch {
+        repository.delete(userFollowsUser)
     }
 }

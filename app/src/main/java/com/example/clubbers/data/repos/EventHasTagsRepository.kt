@@ -24,8 +24,8 @@ class EventHasTagsRepository(private val eventHasTagsDAO: EventHasTagsDAO) {
         eventHasTagsDAO.insertMultiple(eventHasTags)
     }
 
-    suspend fun delete(eventId: Int, tagId: Int) {
-        eventHasTagsDAO.delete(eventId, tagId)
+    suspend fun delete(eventHasTag: EventHasTag) {
+        eventHasTagsDAO.delete(eventHasTag)
     }
 
     suspend fun deleteAll(eventId: Int) {

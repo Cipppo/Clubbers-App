@@ -8,7 +8,7 @@ import java.util.Date
 
 @Entity(tableName = "events", foreignKeys = [
     ForeignKey(entity = Admin::class,
-        parentColumns = arrayOf("adminId"),
+        parentColumns = arrayOf("admin_id"),
         childColumns = arrayOf("event_admin_id"),
         onDelete = ForeignKey.CASCADE)
 ])

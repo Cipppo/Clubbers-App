@@ -27,8 +27,8 @@ class EventHasTagsViewModel @Inject constructor(
         repository.insertMultiple(eventHasTags)
     }
 
-    fun deleteTagFromEvent(eventId: Int, tagId: Int) = viewModelScope.launch {
-        repository.delete(eventId, tagId)
+    fun deleteTagFromEvent(eventHasTag: EventHasTag) = viewModelScope.launch {
+        repository.delete(eventHasTag)
     }
 
     fun deleteAllTagsForEvent(eventId: Int) = viewModelScope.launch {

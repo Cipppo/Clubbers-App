@@ -1,5 +1,6 @@
 package com.example.clubbers.data.dao
 
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -7,6 +8,7 @@ import androidx.room.Update
 import com.example.clubbers.data.entities.Admin
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface AdminsDAO {
     // Get all admins
     @Query("SELECT * FROM admins ORDER BY admin_name ASC")
