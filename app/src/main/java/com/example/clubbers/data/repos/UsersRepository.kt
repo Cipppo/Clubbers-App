@@ -27,4 +27,8 @@ class UsersRepository(private val usersDAO: UsersDAO) {
     fun getUserByUserName(userName: String): Flow<User> {
         return usersDAO.getUserByUserName(userName)
     }
+
+    fun getUserByEmail(userEmail: String): Flow<User>{
+        return usersDAO.getUserByEmail(userEmail)
+    }
 }
