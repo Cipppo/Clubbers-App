@@ -166,7 +166,7 @@ fun NavigationApp (
              * if (currentScreen != AppScreen.Login.name)
              */
                 BottomAppBarFunction(
-                    currentScreen = AppScreen.Login.name,
+                    currentScreen = currentScreen,
                     onHomeButtonClicked = {
                         navController.backQueue.clear()
                         navController.navigate(AppScreen.Home.name)
