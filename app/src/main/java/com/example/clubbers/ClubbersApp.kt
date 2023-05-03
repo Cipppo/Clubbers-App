@@ -40,6 +40,8 @@ import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.clubbers.ui.LoginScreen
+import com.example.clubbers.ui.RegistrationScreen
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -155,15 +157,15 @@ fun NavigationApp (
     navController: NavHostController = rememberNavController()
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
 
     Scaffold(
         bottomBar = {
             BottomAppBarFunction(
-                currentScreen = currentScreen,
+                currentScreen = AppScreen.Login.name,
                 onHomeButtonClicked = {
                     navController.backQueue.clear()
-                    navController.navigate(AppScreen.Home.name)
+                    navController.navigate(AppScreen.Login.name)
                                       },
                 onTodayButtonClicked = {
                     if (currentScreen == AppScreen.Today.name) {
@@ -237,6 +239,14 @@ private fun NavigationGraph(
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
             PersonalProfileScreen()
+        }
+
+        composable(route = AppScreen.Login.name){
+            LoginScreen()
+        }
+
+        composable(route = AppScreen.Registration.name){
+            RegistrationScreen()
         }
     }
 }
