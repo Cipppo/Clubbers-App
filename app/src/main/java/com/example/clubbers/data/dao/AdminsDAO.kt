@@ -18,6 +18,10 @@ interface AdminsDAO {
     @Query("SELECT * FROM admins WHERE admin_id = :adminId")
     fun getAdminById(adminId: Int): Flow<Admin>
 
+    // Get admin by Email
+    @Query("SELECT * FROM admins WHERE admin_email = :adminMail")
+    fun getAdminByMail(adminMail: String): Flow<Admin>
+
     // Get admin by admin_name
     @Query("SELECT * FROM admins WHERE admin_name = :adminName")
     fun getAdminByAdminName(adminName: String): Flow<Admin>
