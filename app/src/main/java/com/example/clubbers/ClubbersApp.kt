@@ -55,8 +55,8 @@ sealed class AppScreen(val name: String) {
     object User : AppScreen("User Profile")
 
     //user registration Screens
-    object Login : ClubbersApp("Login")
-    object Registration : ClubbersApp("Registration Page")
+    object Login : AppScreen("Login")
+    object Registration : AppScreen("Registration Page")
 
     // TODO: If there will be more screens, add them here
 }
