@@ -3,19 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name="ClubbersApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/clubbers_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/clubbers_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Clubbers"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Clubbers">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
