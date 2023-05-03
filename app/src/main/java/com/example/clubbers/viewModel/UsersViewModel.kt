@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.repos.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,11 +36,7 @@ class UsersViewModel @Inject constructor(
         repository.deleteUser(user)
     }
 
-    fun getUserById(userId: Int) = viewModelScope.launch {
-        repository.getUserById(userId)
-    }
+    fun getUserById(userId: Int): Flow<User> = repository.getUserById(userId)
 
-    fun getUserByUserName(userName: String) = viewModelScope.launch {
-        repository.getUserByUserName(userName)
-    }
+    fun getUserByUserName(userName: String) = repository.getUserByUserName(userName)
 }
