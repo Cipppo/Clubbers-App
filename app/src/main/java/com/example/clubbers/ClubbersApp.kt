@@ -165,7 +165,7 @@ fun NavigationApp (
                 currentScreen = AppScreen.Login.name,
                 onHomeButtonClicked = {
                     navController.backQueue.clear()
-                    navController.navigate(AppScreen.Login.name)
+                    navController.navigate(AppScreen.Home.name)
                                       },
                 onTodayButtonClicked = {
                     if (currentScreen == AppScreen.Today.name) {
@@ -210,7 +210,7 @@ private fun NavigationGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Home.name,
+        startDestination = AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
         // Home Screen
