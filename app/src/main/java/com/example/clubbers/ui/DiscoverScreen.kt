@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
@@ -42,20 +44,32 @@ fun DiscoverScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold { innerPadding ->
-        Column (
+        Column(
             modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
+                .fillMaxSize()) {
             SearchBar(
                 modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                    .background(Color.Transparent)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
             )
-            PostList(usersViewModel = usersViewModel)
+            Divider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                thickness = 1.dp,
+                modifier = modifier.
+                        shadow(5.dp, RoundedCornerShape(1.dp))
+            )
+            LazyColumn(
+                modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                items(20) {
+                    PostItem(username = "User $it")
+                }
+            }
         }
     }
 }
@@ -132,6 +146,8 @@ fun PostItem(username: String) {
                     .padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
+            Text(text = "Tags: tag1, tag2, tag3", style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.padding(top = 8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -150,7 +166,7 @@ fun PostList(usersViewModel: UsersViewModel) {
     for (i in 0..20) {
 //        val user = usersViewModel.getUserById(post.postUserId).collectAsState(initial = null).value
 //        val username = user?.userName ?: ""
-        val username = "username"
+        val username = "username $i"
         /**
          * TODO: Get the profile picture from the user
          * val context = LocalContext.current
