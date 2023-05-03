@@ -161,41 +161,45 @@ fun NavigationApp (
 
     Scaffold(
         bottomBar = {
-            BottomAppBarFunction(
-                currentScreen = AppScreen.Login.name,
-                onHomeButtonClicked = {
-                    navController.backQueue.clear()
-                    navController.navigate(AppScreen.Home.name)
-                                      },
-                onTodayButtonClicked = {
-                    if (currentScreen == AppScreen.Today.name) {
-                        navController.popBackStack()
-                        navController.navigate(AppScreen.Today.name)
-                    } else
-                        navController.navigate(AppScreen.Today.name)
-                                       },
-                onNewPostButtonClicked = {
-                    if (currentScreen == AppScreen.NewPost.name) {
-                        navController.popBackStack()
-                        navController.navigate(AppScreen.NewPost.name)
-                    } else
-                        navController.navigate(AppScreen.NewPost.name)
-                                         },
-                onDiscoverButtonClicked = {
-                    if (currentScreen == AppScreen.Discover.name) {
-                        navController.popBackStack()
-                        navController.navigate(AppScreen.Discover.name)
-                    } else
-                        navController.navigate(AppScreen.Discover.name)
-                                          },
-                onProfileButtonClicked = {
-                    if (currentScreen == AppScreen.Profile.name) {
-                        navController.popBackStack()
-                        navController.navigate(AppScreen.Profile.name)
-                    } else
-                        navController.navigate(AppScreen.Profile.name)
-                }
-            )
+            /**
+             * TODO: When the login will work surround bottomAppBar with this if statement:
+             * if (currentScreen != AppScreen.Login.name)
+             */
+                BottomAppBarFunction(
+                    currentScreen = AppScreen.Login.name,
+                    onHomeButtonClicked = {
+                        navController.backQueue.clear()
+                        navController.navigate(AppScreen.Home.name)
+                    },
+                    onTodayButtonClicked = {
+                        if (currentScreen == AppScreen.Today.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.Today.name)
+                        } else
+                            navController.navigate(AppScreen.Today.name)
+                    },
+                    onNewPostButtonClicked = {
+                        if (currentScreen == AppScreen.NewPost.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.NewPost.name)
+                        } else
+                            navController.navigate(AppScreen.NewPost.name)
+                    },
+                    onDiscoverButtonClicked = {
+                        if (currentScreen == AppScreen.Discover.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.Discover.name)
+                        } else
+                            navController.navigate(AppScreen.Discover.name)
+                    },
+                    onProfileButtonClicked = {
+                        if (currentScreen == AppScreen.Profile.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.Profile.name)
+                        } else
+                            navController.navigate(AppScreen.Profile.name)
+                    }
+                )
         }
     ) { innerPadding ->
         NavigationGraph(navController, innerPadding)
