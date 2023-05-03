@@ -37,7 +37,9 @@ import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.TodayScreen
+import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
+import androidx.hilt.navigation.compose.hiltViewModel
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -222,7 +224,10 @@ private fun NavigationGraph(
 
         // Discover Screen
         composable(route = AppScreen.Discover.name) {
-            DiscoverScreen()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            DiscoverScreen(
+                usersViewModel = usersViewModel
+            )
         }
 
         // Personal Profile Screen
