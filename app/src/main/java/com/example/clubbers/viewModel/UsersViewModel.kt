@@ -38,5 +38,5 @@ class UsersViewModel @Inject constructor(
 
     fun getUserById(userId: Int): Flow<User> = repository.getUserById(userId)
 
-    fun getUserByUserName(userName: String) = repository.getUserByUserName(userName)
+    fun getUserByUserName(userName: String): Flow<User> = repository.getUserByUserName(userName)
 }
