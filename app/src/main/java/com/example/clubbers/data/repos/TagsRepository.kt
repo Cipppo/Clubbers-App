@@ -2,6 +2,7 @@ package com.example.clubbers.data.repos
 
 import com.example.clubbers.data.dao.TagsDAO
 import com.example.clubbers.data.entities.Tag
+import kotlinx.coroutines.flow.Flow
 
 class TagsRepository(private val tagsDAO: TagsDAO) {
 
@@ -19,7 +20,7 @@ class TagsRepository(private val tagsDAO: TagsDAO) {
         tagsDAO.delete(tag.tagId)
     }
 
-    fun getTagById(tagId: Int) {
-        tagsDAO.getTagById(tagId)
+    fun getTagById(tagId: Int): Flow<Tag> {
+        return tagsDAO.getTagById(tagId)
     }
 }

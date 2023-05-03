@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.repos.EventsRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,9 +30,7 @@ class EventsViewModel @Inject constructor(
         repository.deleteEvent(event)
     }
 
-    fun getEventById(eventId: Int) = viewModelScope.launch {
-        repository.getEventById(eventId)
-    }
+    fun getEventById(eventId: Int): Flow<Event> = repository.getEventById(eventId)
 
     fun updateEvent(event: Event) = viewModelScope.launch {
         repository.updateEvent(event)

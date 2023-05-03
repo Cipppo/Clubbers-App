@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Post
 import com.example.clubbers.data.repos.PostsRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -13,13 +14,9 @@ class PostsViewModel @Inject constructor(
 
     val posts = repository.posts
 
-    fun getPostsByUserId(userId: Int) {
-        repository.getPostsByUserId(userId)
-    }
+    fun getPostsByUserId(userId: Int): Flow<List<Post>> = repository.getPostsByUserId(userId)
 
-    fun getPostById(postId: Int) {
-        repository.getPostById(postId)
-    }
+    fun getPostById(postId: Int): Flow<Post> = repository.getPostById(postId)
 
     fun addNewPost(post: Post) = viewModelScope.launch {
         repository.insertNewPost(post)

@@ -2,8 +2,11 @@ package com.example.clubbers.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.entities.EventHasTag
+import com.example.clubbers.data.entities.Tag
 import com.example.clubbers.data.repos.EventHasTagsRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -11,13 +14,9 @@ class EventHasTagsViewModel @Inject constructor(
     private val repository: EventHasTagsRepository
 ) : ViewModel() {
 
-    fun getTagsByEventId(eventId: Int) = viewModelScope.launch {
-        repository.getTagsByEventId(eventId)
-    }
+    fun getTagsByEventId(eventId: Int): Flow<List<Tag>> = repository.getTagsByEventId(eventId)
 
-    fun getEventsByTagId(tagId: Int) = viewModelScope.launch {
-        repository.getEventsByTagId(tagId)
-    }
+    fun getEventsByTagId(tagId: Int): Flow<List<Event>> = repository.getEventsByTagId(tagId)
 
     fun addNewTagToEvent(eventHasTag: EventHasTag) = viewModelScope.launch {
         repository.insert(eventHasTag)
