@@ -8,12 +8,13 @@ import java.util.Date
 
 @Entity(tableName = "events", foreignKeys = [
     ForeignKey(entity = Admin::class,
-        parentColumns = arrayOf("adminId"),
+        parentColumns = arrayOf("admin_id"),
         childColumns = arrayOf("event_admin_id"),
         onDelete = ForeignKey.CASCADE)
 ])
 data class Event(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "event_id")
     val eventId: Int = 0,
 
     @ColumnInfo(name = "event_name")

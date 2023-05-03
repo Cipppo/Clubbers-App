@@ -1,0 +1,4 @@
+This file is here only to keep this directory in the repository.
+The directory is needed by the application to store the database.
+It is not used by the application.
+Delete it if you want to.

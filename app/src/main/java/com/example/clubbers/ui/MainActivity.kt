@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.clubbers.NavigationApp
 import com.example.clubbers.ui.theme.ClubbersTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
                      * TODO: Call the navigation app here
                      *  has to be implemented in ClubbersApp
                      */
+                    NavigationApp()
                 }
             }
         }

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.User
 import kotlinx.coroutines.flow.Flow
 
@@ -14,8 +15,8 @@ interface UsersDAO {
     fun getUsers(): Flow<List<User>>
 
     // Get user by id
-    @Query("SELECT * FROM users WHERE userId = :userId")
-    fun getUserById(userId: String): Flow<User>
+    @Query("SELECT * FROM users WHERE user_id = :userId")
+    fun getUserById(userId: Int): Flow<User>
 
     // Get user by username
     @Query("SELECT * FROM users WHERE user_name = :userName")
@@ -25,7 +26,11 @@ interface UsersDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(user: User)
 
+    // Update user
+    @Update(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun update(user: User)
+
     // Delete user
-    @Query("DELETE FROM users WHERE userId = :userId")
-    suspend fun delete(userId: String)
+    @Query("DELETE FROM users WHERE user_id = :userId")
+    suspend fun delete(userId: Int)
 }

@@ -1,10 +1,12 @@
 package com.example.clubbers.data.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.clubbers.data.entities.Event
 import kotlinx.coroutines.flow.Flow
-import java.util.Date
 
 @Dao
 interface EventsDAO {
@@ -13,18 +15,18 @@ interface EventsDAO {
     fun getEvents(): Flow<List<Event>>
 
     // Get event by id
-    @Query("SELECT * FROM events WHERE eventId = :eventId")
-    fun getEventById(eventId: String): Flow<Event>
+    @Query("SELECT * FROM events WHERE event_id = :eventId")
+    fun getEventById(eventId: Int): Flow<Event>
 
     // Insert event
-    @Query("INSERT INTO events (eventId, event_name, event_description, time_start, time_end, " +
-            "event_location, event_image) " +
-            "VALUES (:eventId, :eventName, :eventDescription, :timeStart, :timeEnd, " +
-            ":eventLocation, :eventImage)")
-    suspend fun insert(eventId: Int, eventName: String, eventDescription: String,
-                       timeStart: Date, timeEnd: Date, eventLocation: String, eventImage: String)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(event: Event)
+
+    // Update event
+    @Update
+    suspend fun update(event: Event)
 
     // Delete event
-    @Query("DELETE FROM events WHERE eventId = :eventId")
+    @Query("DELETE FROM events WHERE event_id = :eventId")
     suspend fun delete(eventId: Int)
 }
