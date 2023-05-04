@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -107,7 +108,9 @@ fun RegistrationScreen(){
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Send),
             value = passwordConf.value,
-            onValueChange = {passwordConf.value = it}
+            onValueChange = {value ->
+                passwordConf.value = value
+            }
         )
         Spacer(modifier = Modifier.height(20.dp))
         Button(
