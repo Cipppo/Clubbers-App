@@ -159,7 +159,7 @@ fun NewPostScreen(
                 text = it.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp))
+            )
         }
 
         // Post button
