@@ -229,7 +229,9 @@ private fun NavigationGraph(
 
         // New Post Screen
         composable(route = AppScreen.NewPost.name) {
-            NewPostScreen()
+            NewPostScreen(
+                onPost = { navController.navigate(AppScreen.Home.name) }
+            )
         }
 
         // Discover Screen
