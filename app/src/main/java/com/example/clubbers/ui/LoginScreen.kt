@@ -2,6 +2,7 @@ package com.example.clubbers.ui
 
 import android.graphics.fonts.FontFamily
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -24,7 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.textInputServiceFactory
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,17 +38,26 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.clubbers.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun LoginScreen(){
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        Image(
+            painter = painterResource(R.drawable.backpic),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+    }
     Column(
         modifier = Modifier
-            .padding(20.dp)
-            .fillMaxSize()
-            .background(Color.White),
+            .padding(20.dp).fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -55,7 +68,8 @@ fun LoginScreen(){
         Text(
             text = "Welcome Clubber!",
             style = TextStyle(
-                fontSize = 30.sp
+                fontSize = 30.sp,
+                color = MaterialTheme.colorScheme.primary
             )
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -101,4 +115,9 @@ fun LoginScreen(){
             )
         )
     }
+}
+
+fun attemptLogin(email: String, password: String): Boolean{
+    // Need to attach to Backend by executing a query
+    return true;
 }
