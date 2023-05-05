@@ -74,6 +74,29 @@ fun RegistrationScreen(){
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ){
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                Image(
+                    painter = painterResource(R.drawable.default_avatar),
+                    contentDescription = "DefaultAvatar",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                )
+                Text(text = "ScattaUnaFoto")
+            }
+        }
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
             TextField(
                 label = { Text(text = "First Name") },
                 value = firstName.value,
@@ -101,27 +124,6 @@ fun RegistrationScreen(){
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {email.value = it}
         )
-        Spacer(modifier = Modifier.height(5.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
-            ){
-                Image(
-                    painter = painterResource(R.drawable.default_avatar),
-                    contentDescription = "DefaultAvatar",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                )
-                Text(text = "ScattaUnaFoto")
-            }
-
-        }
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
             label = { Text(text = "Password")},
