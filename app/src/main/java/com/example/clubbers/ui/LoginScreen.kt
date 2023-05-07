@@ -38,13 +38,16 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.room.Room
 import com.example.clubbers.R
+import com.example.clubbers.data.ClubbersDatabase
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun LoginScreen(){
+fun LoginScreen(
+    switchToRegister: () -> Unit
+){
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -109,7 +112,7 @@ fun LoginScreen(){
         Spacer(modifier = Modifier.height(20.dp))
         ClickableText(
             text = AnnotatedString("New User ? please, register yourself! "),
-            onClick = {},
+            onClick = {switchToRegister()},
             style = TextStyle(
                 fontSize = 14.sp
             )
@@ -117,7 +120,8 @@ fun LoginScreen(){
     }
 }
 
+
+@Composable
 fun attemptLogin(email: String, password: String): Boolean{
-    // Need to attach to Backend by executing a query
     return true;
 }
