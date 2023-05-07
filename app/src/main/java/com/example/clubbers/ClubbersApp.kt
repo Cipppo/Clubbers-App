@@ -40,6 +40,7 @@ import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.RegistrationScreen
 
@@ -210,7 +211,7 @@ private fun NavigationGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Registration.name,
+        startDestination = AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
         // Home Screen
@@ -242,7 +243,9 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.Login.name){
-            LoginScreen()
+            LoginScreen(
+                switchToRegister = {navController.navigate(AppScreen.Registration.name)}
+            )
         }
 
         composable(route = AppScreen.Registration.name){
