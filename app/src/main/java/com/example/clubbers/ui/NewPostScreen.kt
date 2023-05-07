@@ -13,13 +13,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +31,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,14 +61,15 @@ fun NewPostScreen(
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
-        context.packageName + ".provider", file
-    )
+        context.packageName + ".provider", file)
 
-    var capturedImageUri by remember {
+    var showPopup by rememberSaveable { mutableStateOf(false) }
+
+    var capturedImageUri by rememberSaveable {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var postCaption by remember { mutableStateOf("") }
+    var postCaption by rememberSaveable { mutableStateOf("") }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -98,25 +101,86 @@ fun NewPostScreen(
     ) {
         Box(
             Modifier
-                .width(120.dp)
-                .height(120.dp)
+                .fillMaxWidth()
+                .aspectRatio(1f)
                 .background(Color.Gray)
                 .clip(RoundedCornerShape(4.dp))
                 .clickable(
                     onClick = {
-                        val permissionCheckResult = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        )
-                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                            cameraLauncher.launch(uri)
+                        if (capturedImageUri.path?.isNotEmpty() == true) {
+                            showPopup = true
                         } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                            val permissionCheckResult = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            )
+                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                                cameraLauncher.launch(uri)
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
                         }
                     }
                 ),
             contentAlignment = Alignment.Center
         ) {
+            if (showPopup) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showPopup = false
+                                       },
+                    title = { Text("Post Preview") },
+                    text = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(
+                                    ImageRequest.Builder(
+                                        LocalContext.current
+                                    ).data(data = capturedImageUri).apply(block = fun ImageRequest.Builder.() {
+                                        crossfade(true)
+                                        placeholder(R.drawable.ic_launcher_foreground)
+                                        error(R.drawable.ic_launcher_foreground)
+                                    }).build()
+                                ),
+                                contentDescription = "Captured Image",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            showPopup = false
+                            capturedImageUri = Uri.EMPTY
+                        },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Take new photo")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {
+                            showPopup = false
+                                         },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
             if (capturedImageUri.path?.isNotEmpty() == true) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -154,12 +218,8 @@ fun NewPostScreen(
 
         // Debug
         Text(text = "Debug: Show saved images in app dir")
-        context.getFilesFromAppDir()?.forEach {
-            Text(
-                text = it.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+        context.getFilesFromAppDir()?.count().let {
+            Text(text = "Number of images: $it")
         }
 
         // Post button
