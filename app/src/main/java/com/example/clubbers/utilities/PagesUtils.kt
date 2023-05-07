@@ -14,14 +14,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,42 +37,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
-import com.example.clubbers.viewModel.UsersViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateSearchTimeLine(modifier: Modifier) {
-    Scaffold { innerPadding ->
-        Column(
-            modifier
+    Scaffold(modifier = modifier) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()) {
-            SearchBar(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth()
-                    .background(Color.Transparent)
-                    .clip(RoundedCornerShape(16.dp))
-            )
-            Divider(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                thickness = 1.dp,
-                modifier = modifier.
-                shadow(5.dp, RoundedCornerShape(1.dp))
-            )
-            LazyColumn(
-                modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                items(20) {
-                    PostItem(username = "User $it")
-                }
+                .fillMaxSize()
+        ) {
+            item {
+                SearchBar(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .fillMaxWidth()
+                        .background(Color.Transparent)
+                )
+            }
+            item {
+                Divider(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                    thickness = 1.dp,
+                    modifier = modifier.
+                        shadow(5.dp, RoundedCornerShape(1.dp))
+                )
+            }
+            items(20) { index ->
+                PostItem(username = "User $index")
             }
         }
     }
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,11 +78,18 @@ fun CreateSearchTimeLine(modifier: Modifier) {
 fun SearchBar(modifier: Modifier = Modifier) {
     var searchText by remember { mutableStateOf("") }
 
-    TextField (
+    OutlinedTextField (
         value = searchText,
         onValueChange = { searchText = it },
         modifier = modifier,
+        shape = MaterialTheme.shapes.small,
         label = { Text(text = "Search") },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+            cursorColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+        ),
         singleLine = true,
         leadingIcon = {
             Icon(
@@ -96,15 +103,18 @@ fun SearchBar(modifier: Modifier = Modifier) {
 
 @Composable
 fun PostItem(username: String) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.small
             ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
     ) {
         Column(Modifier.padding(16.dp)) {
             Row (
@@ -158,23 +168,5 @@ fun PostItem(username: String) {
                 Text(text = "Place", style = MaterialTheme.typography.bodySmall)
             }
         }
-    }
-}
-
-
-@Composable
-fun PostList(usersViewModel: UsersViewModel) {
-    for (i in 0..20) {
-//        val user = usersViewModel.getUserById(post.postUserId).collectAsState(initial = null).value
-//        val username = user?.userName ?: ""
-        val username = "username $i"
-        /**
-         * TODO: Get the profile picture from the user
-         * val context = LocalContext.current
-         * val filesDir = context.filesDir
-         * val proPic = user?.userImage ?: ""
-         * */
-
-        PostItem(username = username)
     }
 }
