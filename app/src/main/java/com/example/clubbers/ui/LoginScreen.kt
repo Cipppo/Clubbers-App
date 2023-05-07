@@ -41,12 +41,19 @@ import androidx.compose.ui.unit.sp
 import androidx.room.Room
 import com.example.clubbers.R
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.data.entities.User
+import com.example.clubbers.viewModel.UsersViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    switchToRegister: () -> Unit
+    switchToRegister: () -> Unit,
+    onLogin: () -> Unit,
+    usersViewModel: UsersViewModel
 ){
     Box(
         modifier = Modifier.fillMaxSize()
@@ -91,7 +98,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = { Log.d("LogButton", password.value.text) },
+                onClick = { attemptLogin(username.value.text, password.value.text, usersViewModel, onLogin)},
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +128,8 @@ fun LoginScreen(
 }
 
 
-@Composable
-fun attemptLogin(email: String, password: String): Boolean{
-    return true;
+fun attemptLogin(email: String, password: String, usersViewModel: UsersViewModel, navigateToHome: () -> Unit): Boolean{
+    val userToLogIn = usersViewModel.getUserByEmail(email)
+
+    return true
 }
