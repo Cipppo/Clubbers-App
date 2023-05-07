@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -95,17 +94,17 @@ fun NewPostScreen(
     }
 
     Column(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .background(Color.Gray, RoundedCornerShape(4.dp))
+                .background(Color.Gray, MaterialTheme.shapes.small)
                 .clickable(
                     onClick = {
                         if (capturedImageUri.path?.isNotEmpty() == true) {
@@ -133,7 +132,7 @@ fun NewPostScreen(
                     title = { Text("Post Preview") },
                     text = {
                         Box(
-                            modifier = Modifier
+                            modifier = modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f),
                             contentAlignment = Alignment.Center
@@ -150,7 +149,7 @@ fun NewPostScreen(
                                 ),
                                 contentDescription = "Captured Image",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = modifier.fillMaxSize()
                             )
                         }
                     },
@@ -194,9 +193,9 @@ fun NewPostScreen(
                     ),
                     contentDescription = "Captured Image",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(MaterialTheme.shapes.small)
                 )
             } else {
                 Icon(
@@ -216,8 +215,8 @@ fun NewPostScreen(
                 textColor = MaterialTheme.colorScheme.onBackground,
                 containerColor = MaterialTheme.colorScheme.background,
             ),
-            shape = RoundedCornerShape(4.dp),
-            modifier = Modifier
+            shape = MaterialTheme.shapes.small,
+            modifier = modifier
                 .fillMaxWidth()
                 .height(110.dp),
             maxLines = 2,
@@ -225,14 +224,14 @@ fun NewPostScreen(
             supportingText = {
                 Text(
                     text = "${postCaption.length} / $maxChar",
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.End,
                 )
             }
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = modifier.weight(1f))
 
         // Debug
 //        Text(text = "Debug: Show saved images in app dir")
@@ -250,15 +249,15 @@ fun NewPostScreen(
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(4.dp)
+            modifier = modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_send_24),
                 contentDescription = "Post photo",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = modifier.width(8.dp))
             Text(text = "Post Photo")
         }
     }
