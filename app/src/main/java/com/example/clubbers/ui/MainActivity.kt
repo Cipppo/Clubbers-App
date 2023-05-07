@@ -1,10 +1,6 @@
 package com.example.clubbers.ui
 
 import android.os.Bundle
-import android.text.TextUtils.isEmpty
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
