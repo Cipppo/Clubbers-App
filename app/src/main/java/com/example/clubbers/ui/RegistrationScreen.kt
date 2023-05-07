@@ -40,12 +40,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.User
+import com.example.clubbers.viewModel.UsersViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun RegistrationScreen(){
+fun RegistrationScreen(
+    usersViewModel: UsersViewModel
+){
     Column(
         modifier = Modifier
             .padding(20.dp)
@@ -146,17 +149,32 @@ fun RegistrationScreen(){
         )
         Spacer(modifier = Modifier.height(20.dp))
         Button(
-            onClick = { Log.d("SENDBUTTON", firstName.value.text.toString()) },
-            enabled = EntriesCheck(firstName.value.text, secondName.value.text, email.value.text, password.value.text, passwordConf.value.text)
+            onClick = { registerNewUser(firstName.value.text, secondName.value.text, email.value.text, password.value.text, usersViewModel) },
+            enabled = entriesCheck(firstName.value.text, secondName.value.text, email.value.text, password.value.text, passwordConf.value.text)
         ) {
            Text("Register")
         }
     }
 }
 
-fun EntriesCheck(firstname: String, secondName: String, email: String, password: String, confirmPassword: String): Boolean{
+fun entriesCheck(firstname: String, secondName: String, email: String, password: String, confirmPassword: String): Boolean{
     if(firstname.isNotBlank() && secondName.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()){
         return true
     }
     return false
+}
+
+fun registerNewUser(firstname: String, secondName: String, email: String, password: String, usersViewModel: UsersViewModel): Unit{
+    val newUser = User(
+        0,
+        firstname,
+        secondName,
+        email,
+        password,
+        "image.jpg",
+        "diocoi",
+        false
+    )
+    usersViewModel.addNewUser(newUser)
+    Log.d("REGNEWUSER", "Nuovo utente registrato")
 }
