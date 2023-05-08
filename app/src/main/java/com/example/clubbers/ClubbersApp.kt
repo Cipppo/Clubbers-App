@@ -1,6 +1,8 @@
 package com.example.clubbers
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -68,6 +70,7 @@ sealed class AppScreen(val name: String) {
 class ClubbersApp : Application() {
     // lazy --> the database and the repository are only created when they're needed
     val database by lazy { ClubbersDatabase.getDatabase(this) }
+
 }
 
 @Composable
@@ -155,7 +158,8 @@ fun BottomAppBarFunction (
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp (
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    sharedPreferences: SharedPreferences
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
@@ -199,7 +203,7 @@ fun NavigationApp (
             )
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding)
+        NavigationGraph(navController, innerPadding, sharedPreferences)
     }
 }
 
@@ -207,7 +211,8 @@ fun NavigationApp (
 private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
-    modifier: Modifier = Modifier
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
@@ -216,7 +221,7 @@ private fun NavigationGraph(
     ) {
         // Home Screen
         composable(route = AppScreen.Home.name) {
-            HomeScreen()
+            HomeScreen(sharedPreferences = sharedPreferences)
         }
 
         // Today's Events Screen
@@ -247,7 +252,8 @@ private fun NavigationGraph(
             LoginScreen(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
                 usersViewModel = usersViewModel,
-                onLogin = {navController.navigate(AppScreen.Home.name)}
+                onLogin = {navController.navigate(AppScreen.Home.name)},
+                sharedPreferences = sharedPreferences
             )
         }
 
