@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.toList
 @Composable
 fun LoginScreen(
     switchToRegister: () -> Unit,
+    switchToAdminRegister: () -> Unit,
     onLogin: () -> Unit,
     usersViewModel: UsersViewModel,
 ){
@@ -124,12 +125,21 @@ fun LoginScreen(
         }
         Spacer(modifier = Modifier.height(20.dp))
         ClickableText(
-            text = AnnotatedString("New User ? please, register yourself! "),
+            text = AnnotatedString("New to Clubbing ? Please, register yourself! "),
             onClick = {switchToRegister()},
             style = TextStyle(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.surface
             )
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        ClickableText(
+            text = AnnotatedString("Are you a club ? Join the community!"),
+            onClick = {switchToAdminRegister()},
+            style = TextStyle(
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.surface,
+            ),
         )
     }
 }
