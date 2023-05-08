@@ -84,7 +84,7 @@ fun LoginScreen(
             text = "Welcome Clubber!",
             style = TextStyle(
                 fontSize = 30.sp,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.surface
             )
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -114,21 +114,13 @@ fun LoginScreen(
                 Text(text = "Login")
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { },
-            style = TextStyle(
-                fontSize = 14.sp,
-            )
-        )
         Spacer(modifier = Modifier.height(20.dp))
         ClickableText(
             text = AnnotatedString("New User ? please, register yourself! "),
             onClick = {switchToRegister()},
             style = TextStyle(
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.surface
             )
         )
     }
