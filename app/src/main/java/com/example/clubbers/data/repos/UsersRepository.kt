@@ -31,4 +31,8 @@ class UsersRepository(private val usersDAO: UsersDAO) {
     fun getUserByEmail(userEmail: String): Flow<User>{
         return usersDAO.getUserByEmail(userEmail)
     }
+
+    fun getAllUsers(): Flow<List<User>>{
+        return usersDAO.getAllUsers()
+    }
 }
