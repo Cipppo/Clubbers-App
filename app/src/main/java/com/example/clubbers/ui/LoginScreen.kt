@@ -1,6 +1,9 @@
 package com.example.clubbers.ui
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.fonts.FontFamily
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -57,7 +60,8 @@ import kotlinx.coroutines.flow.toList
 fun LoginScreen(
     switchToRegister: () -> Unit,
     onLogin: () -> Unit,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    sharedPreferences: SharedPreferences
 ){
     Box(
         modifier = Modifier.fillMaxSize()
@@ -80,6 +84,8 @@ fun LoginScreen(
         val username = remember { mutableStateOf(TextFieldValue()) }
         val password = remember { mutableStateOf(TextFieldValue()) }
         val usersList = usersViewModel.getAllUsers().collectAsState(initial = listOf()).value
+
+
         Text(
             text = "Welcome Clubber!",
             style = TextStyle(
@@ -105,7 +111,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = { attemptLogin(username.value.text, password.value.text, usersList, onLogin) },
+                onClick = { attemptLogin(username.value.text, password.value.text, usersList, onLogin, sharedPreferences) },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -127,10 +133,14 @@ fun LoginScreen(
 }
 
 
-fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit): Unit{
+fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences): Unit{
     var i = usersList.size
     for(user in usersList){
         if(user.userEmail == email && user.userPassword == password){
+            with(sharedPreferences.edit()){
+                putString("USER_LOGGED", email)
+                apply()
+            }
             navigateToHome()
         }
     }
