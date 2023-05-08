@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 // TODO: When other features are implemented, add them to the entity
-@Entity(tableName = "admins", indices = [Index(value = ["admin_name"], unique = true)])
+@Entity(tableName = "admins", indices = [Index(value = ["admin_name", "admin_email"], unique = true)])
 data class Admin(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "admin_id")

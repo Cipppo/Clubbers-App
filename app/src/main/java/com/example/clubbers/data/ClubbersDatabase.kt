@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.clubbers.data.dao.*
 import com.example.clubbers.data.entities.*
+import com.example.clubbers.data.views.UsersAndAdminsView
 import com.example.clubbers.utilities.DateConverter
 
 /**
@@ -22,7 +23,10 @@ import com.example.clubbers.utilities.DateConverter
     UserFollowsAdmin::class,
     Participates::class,
     EventHasTag::class
-                     ], version = 1, exportSchema = true)
+                     ],
+    views = [
+        UsersAndAdminsView::class
+            ], version = 1, exportSchema = true)
 @TypeConverters(DateConverter::class)
 abstract class ClubbersDatabase : RoomDatabase() {
 
@@ -36,6 +40,7 @@ abstract class ClubbersDatabase : RoomDatabase() {
     abstract fun eventHasTagsDAO(): EventHasTagsDAO
     abstract fun userFollowsUsersDAO(): UserFollowsUsersDAO
     abstract fun userFollowsAdminsDAO(): UserFollowsAdminsDAO
+    abstract fun usersAndAdminsViewsDAO(): UsersAndAdminsViewsDAO
 
     companion object {
         @Volatile

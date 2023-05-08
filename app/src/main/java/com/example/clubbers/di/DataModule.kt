@@ -10,6 +10,7 @@ import com.example.clubbers.data.repos.PostsRepository
 import com.example.clubbers.data.repos.TagsRepository
 import com.example.clubbers.data.repos.UserFollowsAdminsRepository
 import com.example.clubbers.data.repos.UserFollowsUsersRepository
+import com.example.clubbers.data.repos.UsersAndAdminsViewsRepository
 import com.example.clubbers.data.repos.UsersRepository
 import dagger.Module
 import dagger.Provides
@@ -65,4 +66,9 @@ object DataModule {
     @Provides
     fun provideUserFollowsAdminsRepository(@ApplicationContext context: Context) =
         UserFollowsAdminsRepository((context.applicationContext as ClubbersApp).database.userFollowsAdminsDAO())
+
+    @Singleton
+    @Provides
+    fun provideUsersAndAdminsViewsRepository(@ApplicationContext context: Context) =
+        UsersAndAdminsViewsRepository((context.applicationContext as ClubbersApp).database.usersAndAdminsViewsDAO())
 }
