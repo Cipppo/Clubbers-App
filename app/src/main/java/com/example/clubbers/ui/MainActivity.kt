@@ -17,7 +17,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        val sharedPreferences = getPreferences(Context.MODE_PRIVATE)
         setContent {
             ClubbersTheme {
                 // A surface container using the 'background' color from the theme
@@ -29,7 +28,7 @@ class MainActivity : ComponentActivity() {
                      * TODO: Call the navigation app here
                      *  has to be implemented in ClubbersApp
                      */
-                    NavigationApp(sharedPreferences = sharedPreferences)
+                    NavigationApp()
                 }
             }
         }

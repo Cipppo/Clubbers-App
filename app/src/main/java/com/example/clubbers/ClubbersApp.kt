@@ -2,7 +2,6 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -165,8 +164,7 @@ fun BottomAppBarFunction (
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp (
-    navController: NavHostController = rememberNavController(),
-    sharedPreferences: SharedPreferences
+    navController: NavHostController = rememberNavController()
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
@@ -223,7 +221,7 @@ fun NavigationApp (
                 )
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding, sharedPreferences)
+        NavigationGraph(navController, innerPadding)
     }
 }
 
@@ -231,8 +229,7 @@ fun NavigationApp (
 private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
-    sharedPreferences: SharedPreferences,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
@@ -241,7 +238,7 @@ private fun NavigationGraph(
     ) {
         // Home Screen
         composable(route = AppScreen.Home.name) {
-            HomeScreen(sharedPreferences = sharedPreferences)
+            HomeScreen()
         }
 
         // Today's Events Screen
@@ -289,7 +286,6 @@ private fun NavigationGraph(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
                 usersViewModel = usersViewModel,
                 onLogin = {navController.navigate(AppScreen.Home.name)},
-                sharedPreferences = sharedPreferences
             )
         }
 
@@ -297,7 +293,8 @@ private fun NavigationGraph(
         composable(route = AppScreen.Registration.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             RegistrationScreen(
-                usersViewModel = usersViewModel
+                usersViewModel = usersViewModel,
+                onRegister = {navController.navigate(AppScreen.Home.name)},
             )
         }
     }

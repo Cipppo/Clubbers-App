@@ -1,5 +1,7 @@
 package com.example.clubbers.ui
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Paint
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -19,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -30,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -47,7 +51,8 @@ import com.example.clubbers.viewModel.UsersViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    onRegister: () -> Unit,
 ){
     Column(
         modifier = Modifier
@@ -62,7 +67,7 @@ fun RegistrationScreen(
         val email = remember { mutableStateOf(TextFieldValue()) }
         val password = remember { mutableStateOf(TextFieldValue()) }
         val passwordConf = remember { mutableStateOf(TextFieldValue()) }
-
+        val sharedPreferences = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
 
         Text(
             text = "Are you ready ?",
@@ -149,7 +154,7 @@ fun RegistrationScreen(
         )
         Spacer(modifier = Modifier.height(20.dp))
         Button(
-            onClick = { registerNewUser(firstName.value.text, secondName.value.text, email.value.text, password.value.text, usersViewModel) },
+            onClick = { registerNewUser(firstName.value.text, secondName.value.text, email.value.text, password.value.text, usersViewModel, onRegister, sharedPreferences) },
             enabled = entriesCheck(firstName.value.text, secondName.value.text, email.value.text, password.value.text, passwordConf.value.text)
         ) {
            Text("Register")
@@ -158,13 +163,13 @@ fun RegistrationScreen(
 }
 
 fun entriesCheck(firstname: String, secondName: String, email: String, password: String, confirmPassword: String): Boolean{
-    if(firstname.isNotBlank() && secondName.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()){
+    if(firstname.isNotBlank() && secondName.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && password == confirmPassword){
         return true
     }
     return false
 }
 
-fun registerNewUser(firstname: String, secondName: String, email: String, password: String, usersViewModel: UsersViewModel): Unit{
+fun registerNewUser(firstname: String, secondName: String, email: String, password: String, usersViewModel: UsersViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences): Unit{
     val newUser = User(
         0,
         firstname,
@@ -176,5 +181,10 @@ fun registerNewUser(firstname: String, secondName: String, email: String, passwo
         false
     )
     usersViewModel.addNewUser(newUser)
+    with(sharedPreferences.edit()) {
+        putString("USER_LOGGED", email)
+        apply()
+    }
+    onRegister()
     Log.d("REGNEWUSER", "Nuovo utente registrato")
 }
