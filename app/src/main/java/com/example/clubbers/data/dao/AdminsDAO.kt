@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AdminsDAO {
     // Get all admins
-    @Query("SELECT * FROM admins ORDER BY admin_name ASC")
+    @Query("SELECT * FROM admins ORDER BY admin_username ASC")
     fun getAdmins(): Flow<List<Admin>>
 
     // Get admin by id
@@ -21,10 +21,6 @@ interface AdminsDAO {
     // Get admin by Email
     @Query("SELECT * FROM admins WHERE admin_email = :adminMail")
     fun getAdminByMail(adminMail: String): Flow<Admin>
-
-    // Get admin by admin_name
-    @Query("SELECT * FROM admins WHERE admin_name = :adminName")
-    fun getAdminByAdminName(adminName: String): Flow<Admin>
 
     // Insert admin
     @Insert(onConflict = OnConflictStrategy.IGNORE)
