@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,13 +35,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.ui.DiscoverScreen
+import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
-import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 
 sealed class AppScreen(val name: String) {
@@ -55,6 +55,7 @@ sealed class AppScreen(val name: String) {
 
     // Other Screens
     object Event : AppScreen("Event Details")
+    object EventSelection : AppScreen("Select Event")
     object Settings : AppScreen("Settings Screen")
     object User : AppScreen("User Profile")
 
@@ -182,11 +183,20 @@ fun NavigationApp (
                             navController.navigate(AppScreen.Today.name)
                     },
                     onNewPostButtonClicked = {
-                        if (currentScreen == AppScreen.NewPost.name) {
-                            navController.popBackStack()
-                            navController.navigate(AppScreen.NewPost.name)
-                        } else
-                            navController.navigate(AppScreen.NewPost.name)
+                        when (currentScreen) {
+                            AppScreen.EventSelection.name -> {
+                                navController.popBackStack()
+                                navController.navigate(AppScreen.EventSelection.name)
+                            }
+                            AppScreen.NewPost.name -> {
+                                navController.popBackStack(
+                                    route = AppScreen.EventSelection.name,
+                                    inclusive = true
+                                )
+                                navController.navigate(AppScreen.EventSelection.name)
+                            }
+                            else -> navController.navigate(AppScreen.EventSelection.name)
+                        }
                     },
                     onDiscoverButtonClicked = {
                         if (currentScreen == AppScreen.Discover.name) {
@@ -227,7 +237,14 @@ private fun NavigationGraph(
 
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
-            TodayScreen()
+            TodayScreen(
+                onEventClicked = { navController.navigate(AppScreen.Event.name) }
+            )
+        }
+
+        // Event Screen
+        composable(route = AppScreen.Event.name) {
+            EventScreen()
         }
 
         // New Post Screen
@@ -237,11 +254,17 @@ private fun NavigationGraph(
             )
         }
 
+        // Event Selection Screen
+        composable(route = AppScreen.EventSelection.name) {
+            SelectEventForPostScreen(
+                onEventSelected = { navController.navigate(AppScreen.NewPost.name) }
+            )
+        }
+
         // Discover Screen
         composable(route = AppScreen.Discover.name) {
-            val usersViewModel = hiltViewModel<UsersViewModel>()
             DiscoverScreen(
-                usersViewModel = usersViewModel
+                onEventClicked = { navController.navigate(AppScreen.Event.name) },
             )
         }
 
@@ -250,10 +273,12 @@ private fun NavigationGraph(
             PersonalProfileScreen()
         }
 
+        // Login Screen
         composable(route = AppScreen.Login.name){
             LoginScreen()
         }
 
+        // Registration Screen
         composable(route = AppScreen.Registration.name){
             RegistrationScreen()
         }
