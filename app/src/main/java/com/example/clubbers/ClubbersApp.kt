@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
@@ -23,9 +24,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,14 +37,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.HomeScreen
+import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
+import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.clubbers.ui.LoginScreen
-import com.example.clubbers.ui.RegistrationScreen
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -148,6 +150,7 @@ fun BottomAppBarFunction (
             }
         },
         modifier = modifier
+            .shadow(10.dp, RoundedCornerShape(1.dp))
     )
 }
 
