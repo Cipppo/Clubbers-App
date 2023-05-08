@@ -11,21 +11,28 @@ import android.os.Environment
 import android.os.SystemClock
 import android.provider.MediaStore
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 
 // Debug function to get all files from the app directory
-fun Context.getFilesFromAppDir(): Array<out File>? {
+fun Context.getFilesFromAppDir(): List<String> {
     val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-    return storageDir?.listFiles()
+    val files = mutableListOf<String>()
+    storageDir?.walkTopDown()?.forEach { file ->
+        if (file.isFile) {
+            files.add("${storageDir.name}/${file.name}")
+        }
+    }
+    return files
 }
 
 /**
  * TODO: When the login is implemented, save the image to the user's directory
  */
-fun saveImage(context: Context, contentResolver: ContentResolver, capturedImageUri: Uri) {
+fun saveImage(context: Context, contentResolver: ContentResolver, capturedImageUri: Uri, photoType: String) {
     val bitmap = getBitmap(capturedImageUri, contentResolver)
 
     // Save image to gallery
@@ -40,7 +47,16 @@ fun saveImage(context: Context, contentResolver: ContentResolver, capturedImageU
     outputStream?.close()
 
     // Save image to app directory
-    val appDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    val directoryName = when(photoType) {
+        "Event" -> "Events"
+        "Post" -> "Posts"
+        "ProPic" -> "ProPics"
+        else -> throw IllegalArgumentException("Invalid photo type")
+    }
+    val appDir = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), directoryName)
+    if (!appDir.exists()) {
+        appDir.mkdir()
+    }
     val file = File(appDir, "Image_" + SystemClock.currentThreadTimeMillis() + ".jpg")
     val fileOutputStream = file.outputStream()
     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)

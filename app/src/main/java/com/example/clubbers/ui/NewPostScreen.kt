@@ -48,6 +48,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.utilities.createImageFile
+import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import java.util.Objects
 
@@ -234,16 +235,17 @@ fun NewPostScreen(
         Spacer(modifier = modifier.weight(1f))
 
         // Debug
-//        Text(text = "Debug: Show saved images in app dir")
-//        context.getFilesFromAppDir()?.count().let {
-//            Text(text = "Number of images: $it")
-//        }
+        Text(text = "Debug: Show last saved image in app dir")
+        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
+            lastFile?.let { Text(text = it) }
+        }
 
         // Post button
         Button(
             onClick = {
+                val photoType = "Post"
                 if (capturedImageUri.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri)
+                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
                     onPost()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
