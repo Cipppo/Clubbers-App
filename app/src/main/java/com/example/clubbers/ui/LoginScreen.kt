@@ -97,7 +97,7 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
-            label = { Text(text = "Username") },
+            label = { Text(text = "Email") },
             value = username.value,
             onValueChange = {
                 username.value = it
