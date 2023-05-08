@@ -1,7 +1,6 @@
 package com.example.clubbers
 
 import android.app.Application
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -46,10 +46,6 @@ import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.example.clubbers.ui.LoginScreen
-import com.example.clubbers.ui.RegistrationScreen
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -294,7 +290,10 @@ private fun NavigationGraph(
             val usersViewModel = hiltViewModel<UsersViewModel>()
             RegistrationScreen(
                 usersViewModel = usersViewModel,
-                onRegister = {navController.navigate(AppScreen.Home.name)},
+                onRegister = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                             },
             )
         }
     }
