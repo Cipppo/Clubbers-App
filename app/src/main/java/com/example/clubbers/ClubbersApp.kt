@@ -1,6 +1,8 @@
 package com.example.clubbers
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -43,7 +45,12 @@ import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
+import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.clubbers.ui.LoginScreen
+import com.example.clubbers.ui.RegistrationScreen
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -158,10 +165,11 @@ fun BottomAppBarFunction (
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp (
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    sharedPreferences: SharedPreferences
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
 
     Scaffold(
         bottomBar = {
@@ -215,7 +223,7 @@ fun NavigationApp (
                 )
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding)
+        NavigationGraph(navController, innerPadding, sharedPreferences)
     }
 }
 
@@ -223,7 +231,8 @@ fun NavigationApp (
 private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
-    modifier: Modifier = Modifier
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
@@ -232,7 +241,7 @@ private fun NavigationGraph(
     ) {
         // Home Screen
         composable(route = AppScreen.Home.name) {
-            HomeScreen()
+            HomeScreen(sharedPreferences = sharedPreferences)
         }
 
         // Today's Events Screen
@@ -275,12 +284,21 @@ private fun NavigationGraph(
 
         // Login Screen
         composable(route = AppScreen.Login.name){
-            LoginScreen()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            LoginScreen(
+                switchToRegister = {navController.navigate(AppScreen.Registration.name)},
+                usersViewModel = usersViewModel,
+                onLogin = {navController.navigate(AppScreen.Home.name)},
+                sharedPreferences = sharedPreferences
+            )
         }
 
         // Registration Screen
         composable(route = AppScreen.Registration.name){
-            RegistrationScreen()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            RegistrationScreen(
+                usersViewModel = usersViewModel
+            )
         }
     }
 }

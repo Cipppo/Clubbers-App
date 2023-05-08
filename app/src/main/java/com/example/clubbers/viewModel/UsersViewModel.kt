@@ -41,4 +41,6 @@ class UsersViewModel @Inject constructor(
     fun getUserByUserName(userName: String): Flow<User> = repository.getUserByUserName(userName)
 
     fun getUserByEmail(userEmail: String): Flow<User> = repository.getUserByEmail(userEmail)
+
+    fun getAllUsers(): Flow<List<User>> = repository.getAllUsers()
 }
