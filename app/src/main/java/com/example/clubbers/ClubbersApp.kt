@@ -167,10 +167,7 @@ fun NavigationApp (
 
     Scaffold(
         bottomBar = {
-            /**
-             * TODO: When the login will work surround bottomAppBar with this if statement:
-             * if (currentScreen != AppScreen.Login.name)
-             */
+            if (currentScreen != AppScreen.Login.name) {
                 BottomAppBarFunction(
                     currentScreen = currentScreen,
                     onHomeButtonClicked = {
@@ -190,6 +187,7 @@ fun NavigationApp (
                                 navController.popBackStack()
                                 navController.navigate(AppScreen.EventSelection.name)
                             }
+
                             AppScreen.NewPost.name -> {
                                 navController.popBackStack(
                                     route = AppScreen.EventSelection.name,
@@ -197,6 +195,7 @@ fun NavigationApp (
                                 )
                                 navController.navigate(AppScreen.EventSelection.name)
                             }
+
                             else -> navController.navigate(AppScreen.EventSelection.name)
                         }
                     },
@@ -215,6 +214,7 @@ fun NavigationApp (
                             navController.navigate(AppScreen.Profile.name)
                     }
                 )
+            }
         }
     ) { innerPadding ->
         NavigationGraph(navController, innerPadding)
