@@ -42,8 +42,11 @@ import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.clubbers.data.entities.Admin
+import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.viewModel.AdminsViewModel
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -62,6 +65,7 @@ sealed class AppScreen(val name: String) {
     object Login : AppScreen("Login")
     object Registration : AppScreen("Registration Page")
 
+    object AdminRegistration : AppScreen("Admin Registration Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -250,10 +254,17 @@ private fun NavigationGraph(
             PersonalProfileScreen()
         }
 
+        composable(route = AppScreen.AdminRegistration.name){
+
+            ClubRegistrationScreen(
+            )
+        }
+
         composable(route = AppScreen.Login.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             LoginScreen(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
+                switchToAdminRegister = {navController.navigate((AppScreen.AdminRegistration.name))},
                 usersViewModel = usersViewModel,
                 onLogin = {navController.navigate(AppScreen.Home.name)},
             )
@@ -266,5 +277,7 @@ private fun NavigationGraph(
                 onRegister = {navController.navigate(AppScreen.Home.name)},
             )
         }
+
+
     }
 }
