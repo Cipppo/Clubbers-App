@@ -1,7 +1,7 @@
 package com.example.clubbers.utilities
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,13 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CreateSearchTimeLine(modifier: Modifier) {
     Scaffold(modifier = modifier) { innerPadding ->
@@ -48,24 +47,20 @@ fun CreateSearchTimeLine(modifier: Modifier) {
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            item {
+            stickyHeader {
                 SearchBar(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .fillMaxWidth()
-                        .background(Color.Transparent)
                 )
-            }
-            item {
                 Divider(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                     thickness = 1.dp,
-                    modifier = modifier.
-                        shadow(5.dp, RoundedCornerShape(1.dp))
+                    modifier = modifier.shadow(5.dp, RoundedCornerShape(1.dp))
                 )
             }
             items(20) { index ->
-                PostItem(username = "User $index")
+                EventItem(username = "User $index")
             }
         }
     }
@@ -86,9 +81,9 @@ fun SearchBar(modifier: Modifier = Modifier) {
         label = { Text(text = "Search") },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary,
-            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         singleLine = true,
         leadingIcon = {
@@ -102,7 +97,7 @@ fun SearchBar(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun PostItem(username: String) {
+fun EventItem(username: String) {
     ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
