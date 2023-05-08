@@ -2,6 +2,7 @@ package com.example.clubbers.utilities
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,7 +41,7 @@ import com.example.clubbers.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun CreateSearchTimeLine(modifier: Modifier) {
+fun CreateSearchTimeLine(modifier: Modifier, onClickAction: () -> Unit) {
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -50,17 +51,36 @@ fun CreateSearchTimeLine(modifier: Modifier) {
             stickyHeader {
                 SearchBar(
                     modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .fillMaxWidth()
                 )
                 Divider(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                     thickness = 1.dp,
-                    modifier = modifier.shadow(5.dp, RoundedCornerShape(1.dp))
+                    modifier = modifier
+                        .shadow(5.dp, RoundedCornerShape(1.dp))
                 )
             }
             items(20) { index ->
-                EventItem(username = "User $index")
+                EventItem(username = "User $index", onClickAction = onClickAction)
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateParticipatedEventTimeLine(modifier: Modifier, onClickAction: () -> Unit) {
+    Scaffold(modifier = modifier) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            items(4) { index ->
+                EventItem(username = "User $index", onClickAction = onClickAction)
             }
         }
     }
@@ -96,8 +116,9 @@ fun SearchBar(modifier: Modifier = Modifier) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventItem(username: String) {
+fun EventItem(username: String, onClickAction: () -> Unit) {
     ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -110,6 +131,7 @@ fun EventItem(username: String) {
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
+        onClick = { onClickAction() }
     ) {
         Column(Modifier.padding(16.dp)) {
             Row (
