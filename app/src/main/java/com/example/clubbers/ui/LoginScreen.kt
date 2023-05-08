@@ -21,6 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,9 +45,11 @@ import com.example.clubbers.R
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.viewModel.UsersViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,14 +71,15 @@ fun LoginScreen(
     }
     Column(
         modifier = Modifier
-            .padding(20.dp).fillMaxSize(),
+            .padding(20.dp)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         val username = remember { mutableStateOf(TextFieldValue()) }
         val password = remember { mutableStateOf(TextFieldValue()) }
-
+        val usersList = usersViewModel.getAllUsers().collectAsState(initial = listOf()).value
         Text(
             text = "Welcome Clubber!",
             style = TextStyle(
@@ -86,7 +91,9 @@ fun LoginScreen(
         TextField(
             label = { Text(text = "Username") },
             value = username.value,
-            onValueChange = { username.value = it })
+            onValueChange = {
+                username.value = it
+            })
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
             label = { Text(text = "Password") },
@@ -98,7 +105,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = { attemptLogin(username.value.text, password.value.text, usersViewModel, onLogin)},
+                onClick = { attemptLogin(username.value.text, password.value.text, usersList, onLogin) },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -128,8 +135,11 @@ fun LoginScreen(
 }
 
 
-fun attemptLogin(email: String, password: String, usersViewModel: UsersViewModel, navigateToHome: () -> Unit): Boolean{
-    val userToLogIn = usersViewModel.getUserByEmail(email)
-
-    return true
+fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit): Unit{
+    var i = usersList.size
+    for(user in usersList){
+        if(user.userEmail == email && user.userPassword == password){
+            navigateToHome()
+        }
+    }
 }
