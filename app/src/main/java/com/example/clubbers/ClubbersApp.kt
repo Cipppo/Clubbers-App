@@ -293,7 +293,10 @@ private fun NavigationGraph(
 
         composable(route = AppScreen.AdminRegistration.name){
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
-            ClubRegistrationScreen(adminsViewModel)
+            ClubRegistrationScreen(
+                adminsViewModel,
+                onRegister = {navController.navigate(AppScreen.Home.name)}
+            )
         }
 
         // Login Screen
