@@ -96,77 +96,83 @@ fun BottomAppBarFunction (
     onProfileButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BottomAppBar (
-        actions = {
-            Row (
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                IconButton(
-                    onClick = onHomeButtonClicked
+
+    if(currentScreen == AppScreen.Registration.name || currentScreen == AppScreen.Login.name || currentScreen == AppScreen.AdminRegistration.name){
+
+    }else{
+        BottomAppBar (
+            actions = {
+                Row (
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Icon(
-                        Icons.Filled.Home,
-                        contentDescription = "Go to Home Screen",
-                        tint = if (currentScreen == AppScreen.Home.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
+                    IconButton(
+                        onClick = onHomeButtonClicked
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Go to Home Screen",
+                            tint = if (currentScreen == AppScreen.Home.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(
+                        onClick = onTodayButtonClicked
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
+                            contentDescription = "Go to Today's Events",
+                            tint = if (currentScreen == AppScreen.Today.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = onNewPostButtonClicked,
+                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                    ) {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = "Add Post",
+                            tint = if (currentScreen == AppScreen.NewPost.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = onDiscoverButtonClicked) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = "Discover",
+                            tint = if (currentScreen == AppScreen.Discover.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = onProfileButtonClicked) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = "Personal Profile",
+                            tint = if (currentScreen == AppScreen.Profile.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
-                IconButton(
-                    onClick = onTodayButtonClicked
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
-                        contentDescription = "Go to Today's Events",
-                        tint = if (currentScreen == AppScreen.Today.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                FloatingActionButton(
-                    onClick = onNewPostButtonClicked,
-                    containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Add Post",
-                        tint = if (currentScreen == AppScreen.NewPost.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                IconButton(onClick = onDiscoverButtonClicked) {
-                    Icon(
-                        Icons.Filled.Search,
-                        contentDescription = "Discover",
-                        tint = if (currentScreen == AppScreen.Discover.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                IconButton(onClick = onProfileButtonClicked) {
-                    Icon(
-                        Icons.Filled.Person,
-                        contentDescription = "Personal Profile",
-                        tint = if (currentScreen == AppScreen.Profile.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-        },
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp))
-    )
+            },
+            modifier = modifier
+                .shadow(10.dp, RoundedCornerShape(1.dp))
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
