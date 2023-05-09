@@ -221,7 +221,6 @@ fun NewPostScreen(
                 .fillMaxWidth()
                 .height(110.dp),
             maxLines = 2,
-//                .heightIn(min = 80.dp, max = 80.dp),
             supportingText = {
                 Text(
                     text = "${postCaption.length} / $maxChar",
