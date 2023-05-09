@@ -292,8 +292,8 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.AdminRegistration.name){
-
-            ClubRegistrationScreen()
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            ClubRegistrationScreen(adminsViewModel)
         }
 
         // Login Screen

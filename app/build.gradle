@@ -102,12 +102,10 @@ dependencies {
     // Coil (image loading) dependencies
     implementation "io.coil-kt:coil-compose:2.3.0"
 
-<<<<<<< HEAD
-=======
     // Google Maps dependencies
     implementation "com.google.android.gms:play-services-maps:18.1.0"
     implementation "com.google.maps.android:maps-compose:2.2.0"
->>>>>>> develop
+
 }
 
 // RoomSchema: Enable Room schema export
