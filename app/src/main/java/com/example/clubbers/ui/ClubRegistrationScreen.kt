@@ -2,12 +2,16 @@
 
 package com.example.clubbers.ui
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.RestrictionsManager.RESULT_ERROR
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.AdapterView.AdapterContextMenuInfo
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -39,6 +43,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,22 +58,28 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
+import com.example.clubbers.utilities.createImageFile
+import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.Places
 import java.util.Locale
-
-
+import java.util.Objects
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClubRegistrationScreen(
-    adminsViewModel: AdminsViewModel
+    adminsViewModel: AdminsViewModel,
+    onRegister: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -91,6 +102,32 @@ fun ClubRegistrationScreen(
 
         val sharedPreferences = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
 
+        val context = LocalContext.current
+        val file = context.createImageFile()
+        val uri = FileProvider.getUriForFile(
+            Objects.requireNonNull(context),
+            context.packageName + ".provider", file
+        )
+
+        val capturedImageUri = remember{ mutableStateOf<Uri>(Uri.EMPTY) }
+
+        val cameraLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.TakePicture()
+        ){success ->
+            if(success){
+                capturedImageUri.value = uri
+            }
+        }
+
+        val permissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ){isGranted ->
+            if(isGranted){
+                capturedImageUri.value = uri
+            }else{
+                Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT)
+            }
+        }
 
         if (step1.value) {
             Text("A new dimension to Club!")
@@ -111,6 +148,7 @@ fun ClubRegistrationScreen(
             Spacer(modifier = Modifier.height(20.dp))
             TextField(
                 label = { Text(text = "Select a password ") },
+                visualTransformation = PasswordVisualTransformation(),
                 value = password.value,
                 onValueChange = {
                     password.value = it
@@ -118,6 +156,7 @@ fun ClubRegistrationScreen(
             Spacer(modifier = Modifier.height(20.dp))
             TextField(
                 label = { Text(text = "Confirm your password") },
+                visualTransformation = PasswordVisualTransformation(),
                 value = checkPassword.value,
                 onValueChange = {
                     checkPassword.value = it
@@ -213,15 +252,47 @@ fun ClubRegistrationScreen(
                         .wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.default_avatar),
-                        contentDescription = "DefaultAvatar",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .clickable { /* TODO Need to call the upload a logo feature*/ }
-                    )
-                    Text(text = "ScattaUnaFoto")
+                    if(capturedImageUri.value.path?.isNotEmpty() == true){
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri.value)
+                                    .apply(block = fun ImageRequest.Builder.() {
+                                        crossfade(true)
+                                        placeholder(R.drawable.ic_launcher_foreground)
+                                        error(R.drawable.ic_launcher_foreground)
+                                    }).build()
+                            ),
+                            contentDescription = "DefaultAvatar",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .clickable { /* TODO Need to call the upload a logo feature*/ }
+                        )
+                        Text(text = "ScattaUnaFoto")
+                    }else{
+                        Image(
+                            painter = painterResource(R.drawable.default_avatar),
+                            contentDescription = "DefaultAvatar",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    onClick = {
+                                        val permissionCheckResult =
+                                            ContextCompat.checkSelfPermission(
+                                                context,
+                                                Manifest.permission.CAMERA
+                                            )
+                                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                                            cameraLauncher.launch(uri)
+                                        } else {
+                                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                                        }
+                                    }
+                                )
+                        )
+                    }
+
                 }
             }
             OutlinedTextField(
@@ -246,6 +317,20 @@ fun ClubRegistrationScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = ({ registerNewAdmin(username.value.text, email.value.text, password.value.text, capturedImageUri.value.path.orEmpty(),bioText.value.text, "", adminsViewModel, onRegister, sharedPreferences )
+                if (capturedImageUri.value.path?.isNotEmpty() == true){
+                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value, "ProPic")
+                }}),
+                elevation = ButtonDefaults.elevatedButtonElevation(
+                    defaultElevation = 10.dp,
+                    pressedElevation = 15.dp,
+                    disabledElevation = 0.dp
+                ),
+            enabled = userBioCheck(bioText.value.text)
+            ){
+                Text(text = "Register Now!")
+            }
         }
     }
 }
@@ -263,6 +348,10 @@ fun entriesCheckPhase2(city: String, via: String, number: String, cap: String): 
         return true
     }
     return false
+}
+
+fun userBioCheck(userBioText: String): Boolean{
+    return userBioText.isNotBlank()
 }
 
 fun registerNewAdmin(username: String, email: String, password: String, image: String, userBio: String, address: String, adminsViewModel: AdminsViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences): Unit{
