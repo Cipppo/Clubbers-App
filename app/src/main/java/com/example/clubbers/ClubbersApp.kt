@@ -37,6 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.HomeScreen
@@ -51,14 +52,6 @@ import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
-
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.example.clubbers.data.entities.Admin
-import com.example.clubbers.ui.ClubRegistrationScreen
-import com.example.clubbers.ui.LoginScreen
-import com.example.clubbers.ui.RegistrationScreen
-import com.example.clubbers.viewModel.AdminsViewModel
 
 
 sealed class AppScreen(val name: String) {
@@ -99,82 +92,77 @@ fun BottomAppBarFunction (
     onProfileButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    if(currentScreen == AppScreen.Registration.name || currentScreen == AppScreen.Login.name || currentScreen == AppScreen.AdminRegistration.name){
-
-    }else{
-        BottomAppBar (
-            actions = {
-                Row (
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+    BottomAppBar (
+        actions = {
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                IconButton(
+                    onClick = onHomeButtonClicked
                 ) {
-                    IconButton(
-                        onClick = onHomeButtonClicked
-                    ) {
-                        Icon(
-                            Icons.Filled.Home,
-                            contentDescription = "Go to Home Screen",
-                            tint = if (currentScreen == AppScreen.Home.name)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    IconButton(
-                        onClick = onTodayButtonClicked
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
-                            contentDescription = "Go to Today's Events",
-                            tint = if (currentScreen == AppScreen.Today.name)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    FloatingActionButton(
-                        onClick = onNewPostButtonClicked,
-                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                    ) {
-                        Icon(
-                            Icons.Filled.Add,
-                            contentDescription = "Add Post",
-                            tint = if (currentScreen == AppScreen.NewPost.name)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    IconButton(onClick = onDiscoverButtonClicked) {
-                        Icon(
-                            Icons.Filled.Search,
-                            contentDescription = "Discover",
-                            tint = if (currentScreen == AppScreen.Discover.name)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    IconButton(onClick = onProfileButtonClicked) {
-                        Icon(
-                            Icons.Filled.Person,
-                            contentDescription = "Personal Profile",
-                            tint = if (currentScreen == AppScreen.Profile.name)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.secondary
-                        )
-                    }
+                    Icon(
+                        Icons.Filled.Home,
+                        contentDescription = "Go to Home Screen",
+                        tint = if (currentScreen == AppScreen.Home.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
                 }
-            },
-            modifier = modifier
-                .shadow(10.dp, RoundedCornerShape(1.dp))
-        )
-    }
+                IconButton(
+                    onClick = onTodayButtonClicked
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
+                        contentDescription = "Go to Today's Events",
+                        tint = if (currentScreen == AppScreen.Today.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
+                }
+                FloatingActionButton(
+                    onClick = onNewPostButtonClicked,
+                    containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Add Post",
+                        tint = if (currentScreen == AppScreen.NewPost.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
+                }
+                IconButton(onClick = onDiscoverButtonClicked) {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = "Discover",
+                        tint = if (currentScreen == AppScreen.Discover.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
+                }
+                IconButton(onClick = onProfileButtonClicked) {
+                    Icon(
+                        Icons.Filled.Person,
+                        contentDescription = "Personal Profile",
+                        tint = if (currentScreen == AppScreen.Profile.name)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+        },
+        modifier = modifier
+            .shadow(10.dp, RoundedCornerShape(1.dp))
+    )
 
 }
 
@@ -188,7 +176,11 @@ fun NavigationApp (
 
     Scaffold(
         bottomBar = {
-            if (currentScreen != AppScreen.Login.name) {
+            if (
+                currentScreen != AppScreen.Registration.name &&
+                currentScreen != AppScreen.Login.name &&
+                currentScreen != AppScreen.AdminRegistration.name
+            ) {
                 BottomAppBarFunction(
                     currentScreen = currentScreen,
                     onHomeButtonClicked = {
