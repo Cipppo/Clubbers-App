@@ -8,6 +8,9 @@ plugins {
 
     // KSP plugin
     id 'com.google.devtools.ksp'
+
+    // Secrets Gradle Plugin
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
@@ -97,6 +100,10 @@ dependencies {
 
     // Coil (image loading) dependencies
     implementation "io.coil-kt:coil-compose:2.3.0"
+
+    // Google Maps dependencies
+    implementation "com.google.android.gms:play-services-maps:18.1.0"
+    implementation "com.google.maps.android:maps-compose:2.2.0"
 }
 
 // RoomSchema: Enable Room schema export

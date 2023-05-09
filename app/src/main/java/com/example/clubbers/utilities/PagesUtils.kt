@@ -4,17 +4,21 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
@@ -24,11 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +43,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -119,6 +131,8 @@ fun SearchBar(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventItem(username: String, onClickAction: () -> Unit) {
+    var showMapDialog by rememberSaveable { mutableStateOf(false) }
+
     ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -182,8 +196,54 @@ fun EventItem(username: String, onClickAction: () -> Unit) {
             ) {
                 Text(text = "Date", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Place", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = "Place",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .clickable(onClick = { showMapDialog = true })
+                )
             }
+        }
+    }
+
+    if (showMapDialog) {
+        val singapore = LatLng(1.35, 103.81)
+        val initialCameraPosition = CameraPosition.fromLatLngZoom(singapore, 10f)
+        AlertDialog(
+            onDismissRequest = { showMapDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showMapDialog = false }) {
+                    Text(text = "Close")
+                }
+            },
+            text = {
+                MapView(initialCameraPosition = initialCameraPosition, markerPosition = singapore)
+            }
+        )
+    }
+}
+
+@Composable
+fun MapView(
+    initialCameraPosition: CameraPosition,
+    markerPosition: LatLng
+) {
+    val cameraPositionState = rememberCameraPositionState { position = initialCameraPosition }
+    val markerState = MarkerState(markerPosition)
+
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(300.dp)
+        .clip(shape = MaterialTheme.shapes.small)
+    ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            Marker(
+                state = markerState,
+                title = "Title",
+            )
         }
     }
 }
