@@ -6,10 +6,12 @@ import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.entities.UserFollowsAdmin
 import com.example.clubbers.data.repos.UserFollowsAdminsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class UserFollowsAdminsViewModel @Inject constructor(
     private val repository: UserFollowsAdminsRepository
 ) : ViewModel() {

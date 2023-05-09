@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.entities.UserFollowsUser
 import com.example.clubbers.data.repos.UserFollowsUsersRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class UserFollowsUsersViewModel @Inject constructor(
     private val repository: UserFollowsUsersRepository
 ) : ViewModel() {

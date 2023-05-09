@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Tag
 import com.example.clubbers.data.repos.TagsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class TagsViewModel @Inject constructor(
     private val repository: TagsRepository
 ) : ViewModel() {

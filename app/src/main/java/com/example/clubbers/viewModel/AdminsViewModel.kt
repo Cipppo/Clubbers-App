@@ -3,12 +3,13 @@ package com.example.clubbers.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Admin
-import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.repos.AdminsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class AdminsViewModel @Inject constructor(
     private val repository: AdminsRepository
 ) : ViewModel() {

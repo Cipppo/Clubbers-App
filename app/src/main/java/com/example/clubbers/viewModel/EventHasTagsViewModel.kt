@@ -6,10 +6,12 @@ import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.entities.EventHasTag
 import com.example.clubbers.data.entities.Tag
 import com.example.clubbers.data.repos.EventHasTagsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class EventHasTagsViewModel @Inject constructor(
     private val repository: EventHasTagsRepository
 ) : ViewModel() {
