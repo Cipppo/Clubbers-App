@@ -18,6 +18,9 @@ data class User(
     @ColumnInfo(name = "user_surname")
     var userSurname: String,
 
+    @ColumnInfo(name = "user_username")
+    var userUsername: String,
+
     @ColumnInfo(name = "user_email")
     var userEmail: String,
 

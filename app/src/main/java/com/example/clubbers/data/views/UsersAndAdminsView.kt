@@ -16,7 +16,7 @@ import androidx.room.DatabaseView
     UNION
     SELECT
         admins.admin_id as user_id,
-        admins.admin_name as user_name,
+        admins.admin_username as user_name,
         admins.admin_email as user_email,
         admins.admin_password as user_password,
         admins.admin_image as user_image,

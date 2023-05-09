@@ -52,6 +52,15 @@ import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.clubbers.data.entities.Admin
+import com.example.clubbers.ui.ClubRegistrationScreen
+import com.example.clubbers.ui.LoginScreen
+import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.viewModel.AdminsViewModel
+
+
 sealed class AppScreen(val name: String) {
     // Bottom Bar
     object Home : AppScreen("Home")
@@ -70,6 +79,7 @@ sealed class AppScreen(val name: String) {
     object Login : AppScreen("Login")
     object Registration : AppScreen("Registration Page")
 
+    object AdminRegistration : AppScreen("Admin Registration Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -89,77 +99,83 @@ fun BottomAppBarFunction (
     onProfileButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BottomAppBar (
-        actions = {
-            Row (
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                IconButton(
-                    onClick = onHomeButtonClicked
+
+    if(currentScreen == AppScreen.Registration.name || currentScreen == AppScreen.Login.name || currentScreen == AppScreen.AdminRegistration.name){
+
+    }else{
+        BottomAppBar (
+            actions = {
+                Row (
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Icon(
-                        Icons.Filled.Home,
-                        contentDescription = "Go to Home Screen",
-                        tint = if (currentScreen == AppScreen.Home.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
+                    IconButton(
+                        onClick = onHomeButtonClicked
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Go to Home Screen",
+                            tint = if (currentScreen == AppScreen.Home.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(
+                        onClick = onTodayButtonClicked
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
+                            contentDescription = "Go to Today's Events",
+                            tint = if (currentScreen == AppScreen.Today.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = onNewPostButtonClicked,
+                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                    ) {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = "Add Post",
+                            tint = if (currentScreen == AppScreen.NewPost.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = onDiscoverButtonClicked) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = "Discover",
+                            tint = if (currentScreen == AppScreen.Discover.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = onProfileButtonClicked) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = "Personal Profile",
+                            tint = if (currentScreen == AppScreen.Profile.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
-                IconButton(
-                    onClick = onTodayButtonClicked
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
-                        contentDescription = "Go to Today's Events",
-                        tint = if (currentScreen == AppScreen.Today.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                FloatingActionButton(
-                    onClick = onNewPostButtonClicked,
-                    containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Add Post",
-                        tint = if (currentScreen == AppScreen.NewPost.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                IconButton(onClick = onDiscoverButtonClicked) {
-                    Icon(
-                        Icons.Filled.Search,
-                        contentDescription = "Discover",
-                        tint = if (currentScreen == AppScreen.Discover.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                IconButton(onClick = onProfileButtonClicked) {
-                    Icon(
-                        Icons.Filled.Person,
-                        contentDescription = "Personal Profile",
-                        tint = if (currentScreen == AppScreen.Profile.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-        },
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp))
-    )
+            },
+            modifier = modifier
+                .shadow(10.dp, RoundedCornerShape(1.dp))
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -309,11 +325,20 @@ private fun NavigationGraph(
             PersonalProfileScreen()
         }
 
+        composable(route = AppScreen.AdminRegistration.name){
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            ClubRegistrationScreen(
+                adminsViewModel,
+                onRegister = {navController.navigate(AppScreen.Home.name)}
+            )
+        }
+
         // Login Screen
         composable(route = AppScreen.Login.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             LoginScreen(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
+                switchToAdminRegister = {navController.navigate((AppScreen.AdminRegistration.name))},
                 usersViewModel = usersViewModel,
                 onLogin = {navController.navigate(AppScreen.Home.name)},
             )
@@ -330,5 +355,7 @@ private fun NavigationGraph(
                              },
             )
         }
+
+
     }
 }

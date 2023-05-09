@@ -6,14 +6,14 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 // TODO: When other features are implemented, add them to the entity
-@Entity(tableName = "admins", indices = [Index(value = ["admin_name", "admin_email"], unique = true)])
+@Entity(tableName = "admins", indices = [Index(value = ["admin_username", "admin_email"], unique = true)])
 data class Admin(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "admin_id")
     val adminId: Int = 0,
 
-    @ColumnInfo(name = "admin_name")
-    var adminName: String,
+    @ColumnInfo(name = "admin_username")
+    var adminUsername: String,
 
     @ColumnInfo(name = "admin_email")
     var adminEmail: String,
@@ -26,6 +26,9 @@ data class Admin(
 
     @ColumnInfo(name = "admin_bio")
     var adminBio: String?,
+
+    @ColumnInfo(name = "admin_address")
+    var adminAddress: String,
 
     @ColumnInfo(name = "is_admin")
     var isAdmin: Boolean = true
