@@ -1,6 +1,7 @@
 package com.example.clubbers
 
 import android.app.Application
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -227,9 +229,13 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     modifier: Modifier = Modifier
 ) {
+    val isLoggedIn =
+        LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+            .contains("USER_LOGGED")
+
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Login.name,
+        startDestination = if (isLoggedIn) AppScreen.Home.name else AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
         // Home Screen
