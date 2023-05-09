@@ -2,8 +2,14 @@ package com.example.clubbers.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Paint
+import android.media.Image
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -47,10 +54,17 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.User
+import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.viewModel.UsersViewModel
-
+import java.util.Objects
+import android.Manifest
+import com.example.clubbers.utilities.saveImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,6 +98,35 @@ fun RegistrationScreen(
 
         val MAX_BIO = 50
 
+        val context = LocalContext.current
+
+        val file = LocalContext.current.createImageFile()
+        val uri = FileProvider.getUriForFile(
+            Objects.requireNonNull(LocalContext.current),
+            LocalContext.current.packageName + ".provider", file
+        )
+
+        val capturedImageUri = remember {
+            mutableStateOf<Uri>(Uri.EMPTY)
+        }
+
+        val cameraLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.TakePicture()
+        ){success ->
+            if(success){
+                capturedImageUri.value = uri
+            }
+        }
+
+        val permissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ){ isGranted ->
+            if (isGranted) {
+                capturedImageUri.value = uri
+            }else{
+                Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         if (step1.value) {
             Text(
@@ -182,14 +225,45 @@ fun RegistrationScreen(
                         .wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.default_avatar),
-                        contentDescription = "DefaultAvatar",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .clickable { /* TODO Need to call the Photo feature here*/ }
-                    )
+                    if(capturedImageUri.value.path?.isNotEmpty() == true){
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri.value)
+                                    .apply(block = fun ImageRequest.Builder.() {
+                                        crossfade(true)
+                                        placeholder(R.drawable.ic_launcher_foreground)
+                                        error(R.drawable.ic_launcher_foreground)
+                                    }).build()
+                            ),
+                            contentDescription = "Captured Image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(100.dp)
+                                .clip(CircleShape)
+                                .clickable { /*TODO MAYBE RETAKE */ }
+                        )
+                    }else{
+                        Image(
+                            painter = painterResource(R.drawable.default_avatar),
+                            contentDescription = "DefaultAvatar",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .clickable(
+                                    onClick = {
+                                        val permissionCheckResult = ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.CAMERA
+                                        )
+                                        if(permissionCheckResult == PackageManager.PERMISSION_GRANTED){
+                                            cameraLauncher.launch(uri)
+                                        }else{
+                                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                                        }
+                                    }
+                                )
+                        )
+                    }
+
                     Text(text = "ScattaUnaFoto")
                 }
             }
@@ -228,11 +302,15 @@ fun RegistrationScreen(
                     username.value.text,
                     email.value.text,
                     password.value.text,
+                    capturedImageUri.value.path.orEmpty(),
                     bioText.value.text,
                     usersViewModel,
                     onRegister,
                     sharedPreferences
-                ) },
+                )
+                          if (capturedImageUri.value.path?.isNotEmpty() == true){
+                              saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value)
+                          }},
                 elevation = ButtonDefaults.elevatedButtonElevation(
                     defaultElevation = 10.dp,
                     pressedElevation = 15.dp,
@@ -257,7 +335,7 @@ fun secondStageEntriesCheck(bioText: String, usernameText: String): Boolean{
     return bioText.isNotBlank() && usernameText.isNotBlank()
 }
 
-fun registerNewUser(firstname: String, secondName: String, username: String, email: String, password: String, userBio: String, usersViewModel: UsersViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences): Unit{
+fun registerNewUser(firstname: String, secondName: String, username: String, email: String, password: String,userProPicPath: String, userBio: String, usersViewModel: UsersViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences): Unit{
     val newUser = User(
         0,
         firstname,
@@ -265,7 +343,7 @@ fun registerNewUser(firstname: String, secondName: String, username: String, ema
         username,
         email,
         password,
-        "image.jpg",
+        userProPicPath,
         userBio,
         false
     )
