@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.RestrictionsManager.RESULT_ERROR
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.AdapterView.AdapterContextMenuInfo
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -67,6 +68,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClubRegistrationScreen(
+    adminsViewModel: AdminsViewModel
 ) {
     Column(
         modifier = Modifier
