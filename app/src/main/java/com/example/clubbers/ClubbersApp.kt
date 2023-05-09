@@ -23,11 +23,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,6 +47,7 @@ import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.LoginScreen
+import com.example.clubbers.ui.NewEventScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.RegistrationScreen
@@ -50,6 +56,7 @@ import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 
@@ -58,6 +65,7 @@ sealed class AppScreen(val name: String) {
     // Bottom Bar
     object Home : AppScreen("Home")
     object NewPost : AppScreen("Create Post")
+    object NewEvent : AppScreen("Create Event")
     object Discover : AppScreen("Discover")
     object Profile : AppScreen("Personal Profile")
     object Today : AppScreen("Today's Events")
@@ -84,10 +92,12 @@ class ClubbersApp : Application() {
 
 @Composable
 fun BottomAppBarFunction (
+    isAdmin: Boolean,
     currentScreen: String,
     onHomeButtonClicked: () -> Unit,
     onTodayButtonClicked: () -> Unit,
     onNewPostButtonClicked: () -> Unit,
+    onNewEventButtonClicked: () -> Unit,
     onDiscoverButtonClicked: () -> Unit,
     onProfileButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -112,41 +122,58 @@ fun BottomAppBarFunction (
                             MaterialTheme.colorScheme.secondary
                     )
                 }
-                IconButton(
-                    onClick = onTodayButtonClicked
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
-                        contentDescription = "Go to Today's Events",
-                        tint = if (currentScreen == AppScreen.Today.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                FloatingActionButton(
-                    onClick = onNewPostButtonClicked,
-                    containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Add Post",
-                        tint = if (currentScreen == AppScreen.NewPost.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
-                }
-                IconButton(onClick = onDiscoverButtonClicked) {
-                    Icon(
-                        Icons.Filled.Search,
-                        contentDescription = "Discover",
-                        tint = if (currentScreen == AppScreen.Discover.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
+                if (!isAdmin) {
+                    IconButton(
+                        onClick = onTodayButtonClicked
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
+                            contentDescription = "Go to Today's Events",
+                            tint = if (currentScreen == AppScreen.Today.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = onNewPostButtonClicked,
+                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                    ) {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = "Add Post",
+                            tint = if (currentScreen == AppScreen.NewPost.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = onDiscoverButtonClicked) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = "Discover",
+                            tint = if (currentScreen == AppScreen.Discover.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                } else {
+                    FloatingActionButton(
+                        onClick = onNewEventButtonClicked,
+                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_camera_alt_24),
+                            contentDescription = "Add Event",
+                            tint = if (currentScreen == AppScreen.NewPost.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
                 IconButton(onClick = onProfileButtonClicked) {
                     Icon(
@@ -171,8 +198,16 @@ fun BottomAppBarFunction (
 fun NavigationApp (
     navController: NavHostController = rememberNavController()
 ) {
+    val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+        .getString("USER_LOGGED", "None")
+    var isAdmin by rememberSaveable { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
+    if (!userName.isNullOrEmpty()) {
+        val usersAndAdminsViewModel = hiltViewModel<UsersAndAdminsViewsViewModel>()
+        isAdmin = usersAndAdminsViewModel.isAdmin(userName)
+            .collectAsState(initial = false).value
+    }
 
     Scaffold(
         bottomBar = {
@@ -182,6 +217,7 @@ fun NavigationApp (
                 currentScreen != AppScreen.AdminRegistration.name
             ) {
                 BottomAppBarFunction(
+                    isAdmin = isAdmin,
                     currentScreen = currentScreen,
                     onHomeButtonClicked = {
                         navController.backQueue.clear()
@@ -211,6 +247,13 @@ fun NavigationApp (
 
                             else -> navController.navigate(AppScreen.EventSelection.name)
                         }
+                    },
+                    onNewEventButtonClicked = {
+                       if (currentScreen == AppScreen.NewEvent.name) {
+                           navController.popBackStack()
+                           navController.navigate(AppScreen.NewEvent.name)
+                       } else
+                           navController.navigate(AppScreen.NewEvent.name)
                     },
                     onDiscoverButtonClicked = {
                         if (currentScreen == AppScreen.Discover.name) {
@@ -283,6 +326,13 @@ private fun NavigationGraph(
         composable(route = AppScreen.NewPost.name) {
             NewPostScreen(
                 onPost = { navController.navigate(AppScreen.Home.name) }
+            )
+        }
+
+        // New Event Screen
+        composable(route = AppScreen.NewEvent.name) {
+            NewEventScreen(
+                onEvent = { navController.navigate(AppScreen.Home.name) }
             )
         }
 

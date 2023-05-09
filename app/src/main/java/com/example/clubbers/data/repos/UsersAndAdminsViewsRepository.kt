@@ -16,7 +16,11 @@ class UsersAndAdminsViewsRepository(private val usersAndAdminsViewsDAO: UsersAnd
         return usersAndAdminsViewsDAO.getUserByUserName(userName)
     }
 
-    fun getUserByEmail(userEmail: String): Flow<UsersAndAdminsView>{
+    fun getUserByEmail(userEmail: String): Flow<UsersAndAdminsView> {
         return usersAndAdminsViewsDAO.getUserByEmail(userEmail)
+    }
+
+    fun isAdmin(userName: String): Flow<Boolean> {
+        return usersAndAdminsViewsDAO.isAdmin(userName)
     }
 }

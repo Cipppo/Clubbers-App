@@ -17,4 +17,6 @@ class UsersAndAdminsViewsViewModel @Inject constructor(
     fun getUserByUserName(userName: String) = repository.getUserByUserName(userName)
 
     fun getUserByEmail(userEmail: String) = repository.getUserByEmail(userEmail)
+
+    fun isAdmin(userName: String) = repository.isAdmin(userName)
 }

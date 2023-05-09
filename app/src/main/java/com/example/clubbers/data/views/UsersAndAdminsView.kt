@@ -23,7 +23,7 @@ import androidx.room.DatabaseView
         admins.admin_bio as user_bio,
         admins.is_admin
     FROM admins
-""")
+""", viewName = "users_and_admins")
 data class UsersAndAdminsView(
     @ColumnInfo(name = "user_id")
     val userId: Int,
