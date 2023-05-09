@@ -180,7 +180,7 @@ fun EventItem(
     val tags = eventHasTagsViewModel.getTagsByEventId(event.eventId)
         .collectAsState(initial = listOf()).value
 
-    val adminName = admin.adminName
+    val adminName = admin.adminUsername
     val proPicUri = admin.adminImage
     val imageUri = event.eventImage
     val caption = event.eventDescription.orEmpty()
