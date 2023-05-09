@@ -239,7 +239,17 @@ fun RegistrationScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.size(100.dp)
                                 .clip(CircleShape)
-                                .clickable { /*TODO MAYBE RETAKE */ }
+                                .clickable {
+                                    val permissionCheckResult = ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.CAMERA
+                                    )
+                                    if(permissionCheckResult == PackageManager.PERMISSION_GRANTED){
+                                        cameraLauncher.launch(uri)
+                                    }else{
+                                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+                                }
                         )
                     }else{
                         Image(
@@ -309,7 +319,7 @@ fun RegistrationScreen(
                     sharedPreferences
                 )
                           if (capturedImageUri.value.path?.isNotEmpty() == true){
-                              saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value)
+                              saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value, "ProPic")
                           }},
                 elevation = ButtonDefaults.elevatedButtonElevation(
                     defaultElevation = 10.dp,
