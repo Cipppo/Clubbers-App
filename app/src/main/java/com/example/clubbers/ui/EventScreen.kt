@@ -8,12 +8,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.clubbers.utilities.EventItem
+import com.example.clubbers.viewModel.AdminsViewModel
+import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    eventsViewModel: EventsViewModel,
+    adminsViewModel: AdminsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel
 ) {
+    val event = eventsViewModel.eventSelected
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -22,8 +29,11 @@ fun EventScreen(
         ) {
             item {
                 EventItem(
-                    username = "User Template",
-                    onClickAction = {}
+                    eventsViewModel = eventsViewModel,
+                    adminsViewModel = adminsViewModel,
+                    eventHasTagsViewModel = eventHasTagsViewModel,
+                    event = event!!,
+                    onClickAction = { }
                 )
             }
         }

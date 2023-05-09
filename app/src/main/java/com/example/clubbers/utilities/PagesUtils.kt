@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,9 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.Event
+import com.example.clubbers.viewModel.AdminsViewModel
+import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventsViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -53,48 +61,76 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun CreateSearchTimeLine(modifier: Modifier, onClickAction: () -> Unit) {
+fun CreateSearchTimeLine(
+    modifier: Modifier,
+    onClickAction: () -> Unit,
+    eventsViewModel: EventsViewModel,
+    adminsViewModel: AdminsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel
+) {
+    val events = eventsViewModel.events.collectAsState(initial = listOf()).value
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            stickyHeader {
-                SearchBar(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .fillMaxWidth()
-                )
-                Divider(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                    thickness = 1.dp,
-                    modifier = modifier
-                        .shadow(5.dp, RoundedCornerShape(1.dp))
-                )
+                .fillMaxSize(),
+            content = {
+                stickyHeader {
+                    SearchBar(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth()
+                    )
+                    Divider(
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                        thickness = 1.dp,
+                        modifier = modifier
+                            .shadow(5.dp, RoundedCornerShape(1.dp))
+                    )
+                }
+                items(events.size) { index ->
+                    EventItem(
+                        eventsViewModel = eventsViewModel,
+                        adminsViewModel = adminsViewModel,
+                        eventHasTagsViewModel = eventHasTagsViewModel,
+                        event = events[index],
+                        onClickAction = onClickAction
+                    )
+                }
             }
-            items(20) { index ->
-                EventItem(username = "User $index", onClickAction = onClickAction)
-            }
-        }
+        )
     }
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateParticipatedEventTimeLine(modifier: Modifier, onClickAction: () -> Unit) {
+fun CreateParticipatedEventTimeLine(
+    modifier: Modifier,
+    onClickAction: () -> Unit,
+    eventsViewModel: EventsViewModel,
+    adminsViewModel: AdminsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel
+) {
+    val events = eventsViewModel.events.collectAsState(initial = listOf()).value
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            items(4) { index ->
-                EventItem(username = "User $index", onClickAction = onClickAction)
+                .fillMaxSize(),
+            content = {
+                items(events.size) { index ->
+                    EventItem(
+                        eventsViewModel = eventsViewModel,
+                        adminsViewModel = adminsViewModel,
+                        eventHasTagsViewModel = eventHasTagsViewModel,
+                        event = events[index],
+                        onClickAction = onClickAction
+                    )
+                }
             }
-        }
+        )
     }
 }
 
@@ -130,8 +166,29 @@ fun SearchBar(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventItem(username: String, onClickAction: () -> Unit) {
+fun EventItem(
+    eventsViewModel: EventsViewModel,
+    adminsViewModel: AdminsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    event: Event,
+    onClickAction: () -> Unit
+) {
     var showMapDialog by rememberSaveable { mutableStateOf(false) }
+
+    val admin = adminsViewModel.getAdminById(event.eventAdminId)
+        .collectAsState(initial = null).value!!
+    val tags = eventHasTagsViewModel.getTagsByEventId(event.eventId)
+        .collectAsState(initial = listOf()).value
+
+    val adminName = admin.adminName
+    val proPicUri = admin.adminImage
+    val imageUri = event.eventImage
+    val caption = event.eventDescription.orEmpty()
+    val tagsList = tags.map { it.tagName }
+    val timeStart = event.timeStart.toString()
+    val timeEnd = event.timeEnd.toString()
+    val place = event.eventLocation
+
 
     ElevatedCard(
         modifier = Modifier
@@ -145,7 +202,10 @@ fun EventItem(username: String, onClickAction: () -> Unit) {
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        onClick = { onClickAction() }
+        onClick = {
+            eventsViewModel.selectEvent(event = event)
+            onClickAction()
+        }
     ) {
         Column(Modifier.padding(16.dp)) {
             Row (
@@ -154,8 +214,16 @@ fun EventItem(username: String, onClickAction: () -> Unit) {
                     .padding(bottom = 8.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Description",
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(
+                            LocalContext.current
+                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                            crossfade(true)
+                            placeholder(R.drawable.ic_launcher_foreground)
+                            error(R.drawable.ic_launcher_foreground)
+                        }).build()
+                    ),
+                    contentDescription = "Profile picture",
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
@@ -166,11 +234,19 @@ fun EventItem(username: String, onClickAction: () -> Unit) {
                         )
                 )
                 Spacer(modifier = Modifier.padding(end = 8.dp))
-                Text(text = username, style = MaterialTheme.typography.bodySmall)
+                Text(text = adminName, style = MaterialTheme.typography.bodySmall)
             }
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Description",
+                painter = rememberAsyncImagePainter(
+                    ImageRequest.Builder(
+                        LocalContext.current
+                    ).data(data = imageUri).apply(block = fun ImageRequest.Builder.() {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_launcher_foreground)
+                        error(R.drawable.ic_launcher_foreground)
+                    }).build()
+                ),
+                contentDescription = "Post/Event image",
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
@@ -181,23 +257,29 @@ fun EventItem(username: String, onClickAction: () -> Unit) {
                     .heightIn(min = 180.dp)
             )
             Text(
-                text = "Description",
+                text = caption,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
-            Text(text = "Tags: tag1, tag2, tag3", style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = "Tags: ${ tagsList.joinToString(separator = ", ") }",
+                style = MaterialTheme.typography.bodySmall
+            )
             Spacer(modifier = Modifier.padding(top = 8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(bottom = 8.dp)
             ) {
-                Text(text = "Date", style = MaterialTheme.typography.bodySmall)
+                Column {
+                    Text(text = "Starts: $timeStart", style = MaterialTheme.typography.bodySmall)
+                    Text(text = "Ends: $timeEnd", style = MaterialTheme.typography.bodySmall)
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "Place",
+                    text = place,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .clickable(onClick = { showMapDialog = true })

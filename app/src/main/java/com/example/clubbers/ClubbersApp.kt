@@ -46,6 +46,9 @@ import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
+import com.example.clubbers.viewModel.AdminsViewModel
+import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
 
@@ -245,14 +248,27 @@ private fun NavigationGraph(
 
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
+            val eventsViewModel = hiltViewModel<EventsViewModel>()
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             TodayScreen(
-                onEventClicked = { navController.navigate(AppScreen.Event.name) }
+                onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel
             )
         }
 
         // Event Screen
         composable(route = AppScreen.Event.name) {
-            EventScreen()
+            val eventsViewModel = hiltViewModel<EventsViewModel>()
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            EventScreen(
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel
+            )
         }
 
         // New Post Screen
@@ -264,15 +280,27 @@ private fun NavigationGraph(
 
         // Event Selection Screen
         composable(route = AppScreen.EventSelection.name) {
+            val eventsViewModel = hiltViewModel<EventsViewModel>()
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             SelectEventForPostScreen(
-                onEventSelected = { navController.navigate(AppScreen.NewPost.name) }
+                onEventSelected = { navController.navigate(AppScreen.NewPost.name) },
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel
             )
         }
 
         // Discover Screen
         composable(route = AppScreen.Discover.name) {
+            val eventsViewModel = hiltViewModel<EventsViewModel>()
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             DiscoverScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel
             )
         }
 
