@@ -13,23 +13,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -59,14 +62,16 @@ fun NewPostScreen(
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
-        context.packageName + ".provider", file
-    )
+        context.packageName + ".provider", file)
 
-    var capturedImageUri by remember {
+    var showPopup by rememberSaveable { mutableStateOf(false) }
+
+    var capturedImageUri by rememberSaveable {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var postCaption by remember { mutableStateOf("") }
+    var postCaption by rememberSaveable { mutableStateOf("") }
+    val maxChar = 255
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -90,33 +95,93 @@ fun NewPostScreen(
     }
 
     Column(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(
-            Modifier
-                .width(120.dp)
-                .height(120.dp)
-                .background(Color.Gray)
-                .clip(RoundedCornerShape(4.dp))
+            modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .background(Color.Gray, MaterialTheme.shapes.small)
                 .clickable(
                     onClick = {
-                        val permissionCheckResult = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        )
-                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                            cameraLauncher.launch(uri)
+                        if (capturedImageUri.path?.isNotEmpty() == true) {
+                            showPopup = true
                         } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                            val permissionCheckResult = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            )
+                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                                cameraLauncher.launch(uri)
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
                         }
                     }
                 ),
             contentAlignment = Alignment.Center
         ) {
+            if (showPopup) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showPopup = false
+                                       },
+                    title = { Text("Post Preview") },
+                    text = {
+                        Box(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(
+                                    ImageRequest.Builder(
+                                        LocalContext.current
+                                    ).data(data = capturedImageUri).apply(block = fun ImageRequest.Builder.() {
+                                        crossfade(true)
+                                        placeholder(R.drawable.ic_launcher_foreground)
+                                        error(R.drawable.ic_launcher_foreground)
+                                    }).build()
+                                ),
+                                contentDescription = "Captured Image",
+                                contentScale = ContentScale.Crop,
+                                modifier = modifier.fillMaxSize()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            showPopup = false
+                            capturedImageUri = Uri.EMPTY
+                        },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Take new photo")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {
+                            showPopup = false
+                                         },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
             if (capturedImageUri.path?.isNotEmpty() == true) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -129,58 +194,72 @@ fun NewPostScreen(
                     ),
                     contentDescription = "Captured Image",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = modifier
+                        .fillMaxSize()
+                        .clip(MaterialTheme.shapes.small)
                 )
             } else {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_camera_alt_24),
                     contentDescription = "Take Photo",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
         }
-        TextField(
+        OutlinedTextField(
             value = postCaption,
-            onValueChange = { postCaption = it },
+            onValueChange = {
+                if (it.length <= maxChar) postCaption = it
+                            },
             label = { Text(text = "Write a caption") },
             colors = TextFieldDefaults.textFieldColors(
                 textColor = MaterialTheme.colorScheme.onBackground,
                 containerColor = MaterialTheme.colorScheme.background,
             ),
-            modifier = Modifier.fillMaxWidth()
+            shape = MaterialTheme.shapes.small,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(110.dp),
+            maxLines = 2,
+//                .heightIn(min = 80.dp, max = 80.dp),
+            supportingText = {
+                Text(
+                    text = "${postCaption.length} / $maxChar",
+                    modifier = modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.End,
+                )
+            }
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = modifier.weight(1f))
 
         // Debug
-        Text(text = "Debug: Show saved images in app dir")
-        context.getFilesFromAppDir()?.forEach {
-            Text(
-                text = it.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+        Text(text = "Debug: Show last saved image in app dir")
+        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
+            lastFile?.let { Text(text = it) }
         }
 
         // Post button
         Button(
             onClick = {
+                val photoType = "Post"
                 if (capturedImageUri.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri)
+                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
                     onPost()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(4.dp)
+            modifier = modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_send_24),
                 contentDescription = "Post photo",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = modifier.width(8.dp))
             Text(text = "Post Photo")
         }
     }

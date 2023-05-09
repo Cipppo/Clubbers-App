@@ -1,72 +1,81 @@
 package com.example.clubbers.utilities
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
-import com.example.clubbers.viewModel.UsersViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun CreateSearchTimeLine(modifier: Modifier) {
-    Scaffold { innerPadding ->
-        Column(
-            modifier
+fun CreateSearchTimeLine(modifier: Modifier, onClickAction: () -> Unit) {
+    Scaffold(modifier = modifier) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()) {
-            SearchBar(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth()
-                    .background(Color.Transparent)
-                    .clip(RoundedCornerShape(16.dp))
-            )
-            Divider(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                thickness = 1.dp,
-                modifier = modifier.
-                shadow(5.dp, RoundedCornerShape(1.dp))
-            )
-            LazyColumn(
-                modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                items(20) {
-                    PostItem(username = "User $it")
-                }
+                .fillMaxSize()
+        ) {
+            stickyHeader {
+                SearchBar(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .fillMaxWidth()
+                )
+                Divider(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                    thickness = 1.dp,
+                    modifier = modifier
+                        .shadow(5.dp, RoundedCornerShape(1.dp))
+                )
+            }
+            items(20) { index ->
+                EventItem(username = "User $index", onClickAction = onClickAction)
             }
         }
     }
@@ -75,14 +84,39 @@ fun CreateSearchTimeLine(modifier: Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun CreateParticipatedEventTimeLine(modifier: Modifier, onClickAction: () -> Unit) {
+    Scaffold(modifier = modifier) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            items(4) { index ->
+                EventItem(username = "User $index", onClickAction = onClickAction)
+            }
+        }
+    }
+}
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun SearchBar(modifier: Modifier = Modifier) {
     var searchText by remember { mutableStateOf("") }
 
-    TextField (
+    OutlinedTextField (
         value = searchText,
         onValueChange = { searchText = it },
         modifier = modifier,
+        shape = MaterialTheme.shapes.small,
         label = { Text(text = "Search") },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
         singleLine = true,
         leadingIcon = {
             Icon(
@@ -94,17 +128,24 @@ fun SearchBar(modifier: Modifier = Modifier) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostItem(username: String) {
-    Card(
+fun EventItem(username: String, onClickAction: () -> Unit) {
+    var showMapDialog by rememberSaveable { mutableStateOf(false) }
+
+    ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.small
             ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        onClick = { onClickAction() }
     ) {
         Column(Modifier.padding(16.dp)) {
             Row (
@@ -155,26 +196,54 @@ fun PostItem(username: String) {
             ) {
                 Text(text = "Date", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Place", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = "Place",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .clickable(onClick = { showMapDialog = true })
+                )
             }
         }
     }
+
+    if (showMapDialog) {
+        val singapore = LatLng(1.35, 103.81)
+        val initialCameraPosition = CameraPosition.fromLatLngZoom(singapore, 10f)
+        AlertDialog(
+            onDismissRequest = { showMapDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showMapDialog = false }) {
+                    Text(text = "Close")
+                }
+            },
+            text = {
+                MapView(initialCameraPosition = initialCameraPosition, markerPosition = singapore)
+            }
+        )
+    }
 }
 
-
 @Composable
-fun PostList(usersViewModel: UsersViewModel) {
-    for (i in 0..20) {
-//        val user = usersViewModel.getUserById(post.postUserId).collectAsState(initial = null).value
-//        val username = user?.userName ?: ""
-        val username = "username $i"
-        /**
-         * TODO: Get the profile picture from the user
-         * val context = LocalContext.current
-         * val filesDir = context.filesDir
-         * val proPic = user?.userImage ?: ""
-         * */
+fun MapView(
+    initialCameraPosition: CameraPosition,
+    markerPosition: LatLng
+) {
+    val cameraPositionState = rememberCameraPositionState { position = initialCameraPosition }
+    val markerState = MarkerState(markerPosition)
 
-        PostItem(username = username)
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(300.dp)
+        .clip(shape = MaterialTheme.shapes.small)
+    ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            Marker(
+                state = markerState,
+                title = "Title",
+            )
+        }
     }
 }

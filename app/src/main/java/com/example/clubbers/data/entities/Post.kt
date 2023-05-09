@@ -20,9 +20,6 @@ data class Post(
     @ColumnInfo(name = "post_id")
     val postId: Int = 0,
 
-    @ColumnInfo(name = "post_title")
-    var postTitle: String,
-
     @ColumnInfo(name = "post_image")
     var postImage: String,
 

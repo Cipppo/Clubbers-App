@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
@@ -24,9 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,12 +38,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.ui.DiscoverScreen
+import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.HomeScreen
+import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
+import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
+
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.clubbers.data.entities.Admin
@@ -47,6 +56,7 @@ import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.viewModel.AdminsViewModel
+
 
 sealed class AppScreen(val name: String) {
     // Bottom Bar
@@ -58,6 +68,7 @@ sealed class AppScreen(val name: String) {
 
     // Other Screens
     object Event : AppScreen("Event Details")
+    object EventSelection : AppScreen("Select Event")
     object Settings : AppScreen("Settings Screen")
     object User : AppScreen("User Profile")
 
@@ -73,7 +84,6 @@ sealed class AppScreen(val name: String) {
 class ClubbersApp : Application() {
     // lazy --> the database and the repository are only created when they're needed
     val database by lazy { ClubbersDatabase.getDatabase(this) }
-
 }
 
 @Composable
@@ -155,6 +165,7 @@ fun BottomAppBarFunction (
             }
         },
         modifier = modifier
+            .shadow(10.dp, RoundedCornerShape(1.dp))
     )
 }
 
@@ -168,10 +179,7 @@ fun NavigationApp (
 
     Scaffold(
         bottomBar = {
-            /**
-             * TODO: When the login will work surround bottomAppBar with this if statement:
-             * if (currentScreen != AppScreen.Login.name)
-             */
+            if (currentScreen != AppScreen.Login.name) {
                 BottomAppBarFunction(
                     currentScreen = currentScreen,
                     onHomeButtonClicked = {
@@ -186,11 +194,22 @@ fun NavigationApp (
                             navController.navigate(AppScreen.Today.name)
                     },
                     onNewPostButtonClicked = {
-                        if (currentScreen == AppScreen.NewPost.name) {
-                            navController.popBackStack()
-                            navController.navigate(AppScreen.NewPost.name)
-                        } else
-                            navController.navigate(AppScreen.NewPost.name)
+                        when (currentScreen) {
+                            AppScreen.EventSelection.name -> {
+                                navController.popBackStack()
+                                navController.navigate(AppScreen.EventSelection.name)
+                            }
+
+                            AppScreen.NewPost.name -> {
+                                navController.popBackStack(
+                                    route = AppScreen.EventSelection.name,
+                                    inclusive = true
+                                )
+                                navController.navigate(AppScreen.EventSelection.name)
+                            }
+
+                            else -> navController.navigate(AppScreen.EventSelection.name)
+                        }
                     },
                     onDiscoverButtonClicked = {
                         if (currentScreen == AppScreen.Discover.name) {
@@ -207,6 +226,7 @@ fun NavigationApp (
                             navController.navigate(AppScreen.Profile.name)
                     }
                 )
+            }
         }
     ) { innerPadding ->
         NavigationGraph(navController, innerPadding)
@@ -219,9 +239,13 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     modifier: Modifier = Modifier
 ) {
+    val isLoggedIn =
+        LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+            .contains("USER_LOGGED")
+
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Login.name,
+        startDestination = if (isLoggedIn) AppScreen.Home.name else AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
         // Home Screen
@@ -231,7 +255,14 @@ private fun NavigationGraph(
 
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
-            TodayScreen()
+            TodayScreen(
+                onEventClicked = { navController.navigate(AppScreen.Event.name) }
+            )
+        }
+
+        // Event Screen
+        composable(route = AppScreen.Event.name) {
+            EventScreen()
         }
 
         // New Post Screen
@@ -241,11 +272,17 @@ private fun NavigationGraph(
             )
         }
 
+        // Event Selection Screen
+        composable(route = AppScreen.EventSelection.name) {
+            SelectEventForPostScreen(
+                onEventSelected = { navController.navigate(AppScreen.NewPost.name) }
+            )
+        }
+
         // Discover Screen
         composable(route = AppScreen.Discover.name) {
-            val usersViewModel = hiltViewModel<UsersViewModel>()
             DiscoverScreen(
-                usersViewModel = usersViewModel
+                onEventClicked = { navController.navigate(AppScreen.Event.name) },
             )
         }
 
@@ -259,6 +296,7 @@ private fun NavigationGraph(
             ClubRegistrationScreen()
         }
 
+        // Login Screen
         composable(route = AppScreen.Login.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             LoginScreen(
@@ -269,11 +307,15 @@ private fun NavigationGraph(
             )
         }
 
+        // Registration Screen
         composable(route = AppScreen.Registration.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             RegistrationScreen(
                 usersViewModel = usersViewModel,
-                onRegister = {navController.navigate(AppScreen.Home.name)},
+                onRegister = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                             },
             )
         }
 

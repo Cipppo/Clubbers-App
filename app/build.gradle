@@ -8,6 +8,9 @@ plugins {
 
     // KSP plugin
     id 'com.google.devtools.ksp'
+
+    // Secrets Gradle Plugin
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
@@ -55,9 +58,9 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
-    implementation 'androidx.activity:activity-compose:1.5.1'
+    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+    implementation 'androidx.activity:activity-compose:1.7.1'
     implementation platform('androidx.compose:compose-bom:2022.10.00')
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-graphics:$compose_version"
@@ -76,7 +79,7 @@ dependencies {
     implementation "androidx.compose.material3:material3:1.0.1"
 
     // Hilt dependencies
-    implementation "com.google.dagger:hilt-android:2.44"
+    implementation "com.google.dagger:hilt-android:2.44.2"
     kapt "com.google.dagger:hilt-android-compiler:2.44"
 
     // Hilt Navigation Compose dependencies
@@ -99,6 +102,12 @@ dependencies {
     // Coil (image loading) dependencies
     implementation "io.coil-kt:coil-compose:2.3.0"
 
+<<<<<<< HEAD
+=======
+    // Google Maps dependencies
+    implementation "com.google.android.gms:play-services-maps:18.1.0"
+    implementation "com.google.maps.android:maps-compose:2.2.0"
+>>>>>>> develop
 }
 
 // RoomSchema: Enable Room schema export
