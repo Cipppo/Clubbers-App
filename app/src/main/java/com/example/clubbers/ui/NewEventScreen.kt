@@ -53,7 +53,9 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.utilities.NumbersDialog
 import com.example.clubbers.utilities.createImageFile
+import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.EventsViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
@@ -92,6 +94,8 @@ fun NewEventScreen(
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
+    var localImageDir by rememberSaveable { mutableStateOf("") }
+
     var eventCaption by rememberSaveable { mutableStateOf("") }
     var eventTitle by rememberSaveable { mutableStateOf("") }
     var eventLocation by rememberSaveable { mutableStateOf("")}
@@ -99,15 +103,20 @@ fun NewEventScreen(
     val captionMaxChar = 255
     val titleMaxChar = 30
 
-    val selectedStartDate = rememberSaveable { mutableStateOf<LocalDate>(LocalDate.now()) }
-    val selectedStartTime = rememberSaveable { mutableStateOf(LocalTime.of(0,0,0)) }
+    var selectedStartDate by rememberSaveable { mutableStateOf<LocalDate>(LocalDate.now()) }
+    var selectedStartTime by rememberSaveable { mutableStateOf(LocalTime.of(0,0,0)) }
     val startCalendarState = rememberSheetState()
     val startClockState = rememberSheetState()
 
-    val selectedEndDate = rememberSaveable { mutableStateOf<LocalDate>(LocalDate.now().plusDays(1)) }
-    val selectedEndTime = rememberSaveable { mutableStateOf(LocalTime.of(12,0,0)) }
+    var selectedEndDate by rememberSaveable { mutableStateOf<LocalDate>(LocalDate.now().plusDays(1)) }
+    var selectedEndTime by rememberSaveable { mutableStateOf(LocalTime.of(12,0,0)) }
     val endCalendarState = rememberSheetState()
     val endClockState = rememberSheetState()
+
+    var maxParticipants by rememberSaveable { mutableStateOf(0) }
+    var participants by rememberSaveable { mutableStateOf(0) }
+    val maxParticipantsState = rememberSheetState()
+    val participantsState = rememberSheetState()
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -292,18 +301,18 @@ fun NewEventScreen(
                 style = CalendarStyle.MONTH,
             ),
             selection = CalendarSelection.Dates { newDates ->
-                selectedStartDate.value = newDates.first()
-                selectedEndDate.value = newDates.first()
+                selectedStartDate = newDates.first()
+                selectedEndDate = newDates.first()
             }
         )
         ClockDialog(
             state = startClockState,
             selection = ClockSelection.HoursMinutes { hours, minute ->
-                selectedStartTime.value = LocalTime.of(hours, minute, 0)
-                selectedEndTime.value = LocalTime.of(hours, minute, 0)
+                selectedStartTime = LocalTime.of(hours, minute, 0)
+                selectedEndTime = LocalTime.of(hours, minute, 0)
             },
             config = ClockConfig(
-                defaultTime = selectedStartTime.value,
+                defaultTime = selectedStartTime,
                 is24HourFormat = true
             )
         )
@@ -317,19 +326,23 @@ fun NewEventScreen(
                 style = CalendarStyle.MONTH,
             ),
             selection = CalendarSelection.Dates { newDates ->
-                selectedEndDate.value = newDates.first()
+                selectedEndDate = newDates.first()
             }
         )
         ClockDialog(
             state = endClockState,
             selection = ClockSelection.HoursMinutes { hours, minute ->
-                selectedEndTime.value = LocalTime.of(hours, minute, 0)
+                selectedEndTime = LocalTime.of(hours, minute, 0)
             },
             config = ClockConfig(
-                defaultTime = selectedEndTime.value,
+                defaultTime = selectedEndTime,
                 is24HourFormat = true
             )
         )
+
+        // Participants Dialogs
+        NumbersDialog("Max Participants", maxParticipantsState, maxParticipants) { maxParticipants = it }
+        NumbersDialog("Participants", participantsState, participants) { participants = it }
 
         Row(
             modifier = modifier
@@ -338,14 +351,22 @@ fun NewEventScreen(
         ) {
             Text(text = " Start Event:")
             Spacer(modifier = modifier.weight(1f))
-            ExtendedFloatingActionButton(onClick = { startCalendarState.show() }) {
-                Text(text = selectedStartDate.value
+            ExtendedFloatingActionButton(
+                onClick = { startCalendarState.show() },
+                modifier.
+                    height(25.dp)
+            ) {
+                Text(text = selectedStartDate
                     .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                 )
             }
             Spacer(modifier = modifier.width(8.dp))
-            ExtendedFloatingActionButton(onClick = { startClockState.show() }) {
-                Text(text = selectedStartTime.value
+            ExtendedFloatingActionButton(
+                onClick = { startClockState.show() },
+                modifier.
+                    height(25.dp)
+            ) {
+                Text(text = selectedStartTime
                     .format(DateTimeFormatter.ofPattern("HH:mm"))
                 )
             }
@@ -357,14 +378,22 @@ fun NewEventScreen(
         ) {
             Text(text = " End Event:")
             Spacer(modifier = modifier.weight(1f))
-            ExtendedFloatingActionButton(onClick = { endCalendarState.show() }) {
-                Text(text = selectedEndDate.value
+            ExtendedFloatingActionButton(
+                onClick = { endCalendarState.show() },
+                modifier.
+                    height(25.dp)
+            ) {
+                Text(text = selectedEndDate
                     .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                 )
             }
             Spacer(modifier = modifier.width(8.dp))
-            ExtendedFloatingActionButton(onClick = { endClockState.show() }) {
-                Text(text = selectedEndTime.value
+            ExtendedFloatingActionButton(
+                onClick = { endClockState.show() },
+                modifier.
+                    height(25.dp)
+            ){
+                Text(text = selectedEndTime
                     .format(DateTimeFormatter.ofPattern("HH:mm"))
                 )
             }
@@ -372,7 +401,7 @@ fun NewEventScreen(
         Row (
             modifier = modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedTextField(
                 value = eventLocation,
@@ -399,8 +428,44 @@ fun NewEventScreen(
                 }
             )
             Spacer(modifier = modifier.weight(1f))
-            ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
-                Text(text = "Check\nLocation")
+            ExtendedFloatingActionButton(
+                onClick = { /*TODO*/ },
+                modifier = modifier
+                    .height(80.dp)
+            ) {
+                Text(
+                    text = "Check\nLocation",
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+        Row(
+            modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Max Participants:")
+            Spacer(modifier = modifier.weight(1f))
+            ExtendedFloatingActionButton(
+                onClick = { maxParticipantsState.show() },
+                modifier = modifier
+                    .height(25.dp)
+            ) {
+                Text(text = maxParticipants.toString())
+            }
+        }
+        Row (
+            modifier
+                .fillMaxWidth()
+        ){
+            Text(text = "Participants:")
+            Spacer(modifier = modifier.weight(1f))
+            ExtendedFloatingActionButton(
+                onClick = { participantsState.show() },
+                modifier = modifier
+                    .height(25.dp)
+            ) {
+                Text(text = participants.toString())
             }
         }
         OutlinedTextField(
@@ -433,37 +498,59 @@ fun NewEventScreen(
         // Debug
 //        Text(text = "Debug: Show last saved image in app dir")
 //        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-//            lastFile?.let { Text(text = "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)}/$it") }
+//            lastFile?.let { Text(text = it) }
 //        }
 
         // Post button
         Button(
             onClick = {
                 val photoType = "Event"
-                val startEventDate = LocalDateTime.of(selectedStartDate.value, selectedStartTime.value)
+                if (eventTitle.isEmpty()) {
+                    Toast.makeText(context, "Please enter an event title", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                val startEventDate = LocalDateTime.of(selectedStartDate, selectedStartTime)
                 if (startEventDate.isBefore(LocalDateTime.now())) {
                     Toast.makeText(context, "Start date must be in the future", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 
-                val endEventDate = LocalDateTime.of(selectedEndDate.value, selectedEndTime.value)
+                val endEventDate = LocalDateTime.of(selectedEndDate, selectedEndTime)
                 if (startEventDate.isAfter(endEventDate)) {
                     Toast.makeText(context, "End date must be after start date", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 
+                if (eventLocation.isEmpty()) {
+                    Toast.makeText(context, "Please enter an event location", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                if (maxParticipants < participants) {
+                    Toast.makeText(context, "Max participants must be greater than participants", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
                 if (capturedImageUri.path?.isNotEmpty() == true) {
                     saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
+
+                    context.getFilesFromAppDir().lastOrNull().let { lastFile ->
+                        lastFile?.let {
+                            localImageDir = it
+                        }
+                    }
+
                     eventsViewModel.insertNewEvent(
                         Event(
                             eventName = eventTitle,
-                            eventImage = capturedImageUri.path!!,
+                            eventImage = localImageDir,
                             eventLocation = eventLocation,
                             eventDescription = eventCaption,
                             timeStart = Date(startEventDate.toEpochSecond(ZoneOffset.UTC)),
                             timeEnd = Date(endEventDate.toEpochSecond(ZoneOffset.UTC)),
-                            maxParticipants = 10,
-                            participants = 0,
+                            maxParticipants = maxParticipants,
+                            participants = participants,
                             eventAdminId = adminId
                         )
                     )

@@ -23,7 +23,7 @@ fun Context.getFilesFromAppDir(): List<String> {
     val files = mutableListOf<String>()
     storageDir?.walkTopDown()?.forEach { file ->
         if (file.isFile) {
-            files.add("${storageDir.name}/${file.name}")
+            files.add(file.absolutePath)
         }
     }
     return files
