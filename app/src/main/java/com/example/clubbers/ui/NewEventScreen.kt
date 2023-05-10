@@ -68,6 +68,7 @@ import com.maxkeppeler.sheets.clock.models.ClockSelection
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Objects
@@ -403,7 +404,6 @@ fun NewEventScreen(
         Button(
             onClick = {
                 val photoType = "Event"
-
                 val startEventDate = LocalDateTime.of(selectedStartDate.value, selectedStartTime.value)
                 if (startEventDate.isBefore(LocalDateTime.now())) {
                     Toast.makeText(context, "Start date must be in the future", Toast.LENGTH_SHORT).show()
@@ -420,12 +420,12 @@ fun NewEventScreen(
                     saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
                     eventsViewModel.insertNewEvent(
                         Event(
-                            eventName = "Test Event",
+                            eventName = postTitle,
                             eventImage = capturedImageUri.path!!,
                             eventLocation = "Test Location",
-                            eventDescription = "Test Description",
-                            timeStart = Date(System.currentTimeMillis()),
-                            timeEnd = Date(System.currentTimeMillis() + 1000000),
+                            eventDescription = postCaption,
+                            timeStart = Date(startEventDate.toEpochSecond(ZoneOffset.UTC)),
+                            timeEnd = Date(endEventDate.toEpochSecond(ZoneOffset.UTC)),
                             maxParticipants = 10,
                             participants = 0,
                             eventAdminId = 1
