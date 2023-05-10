@@ -54,7 +54,6 @@ import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.utilities.createImageFile
-import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.EventsViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
@@ -432,10 +431,10 @@ fun NewEventScreen(
         Spacer(modifier = modifier.weight(1f))
 
         // Debug
-        Text(text = "Debug: Show last saved image in app dir")
-        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-            lastFile?.let { Text(text = it) }
-        }
+//        Text(text = "Debug: Show last saved image in app dir")
+//        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
+//            lastFile?.let { Text(text = "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)}/$it") }
+//        }
 
         // Post button
         Button(
