@@ -22,6 +22,10 @@ interface AdminsDAO {
     @Query("SELECT * FROM admins WHERE admin_email = :adminMail")
     fun getAdminByMail(adminMail: String): Flow<Admin>
 
+    // Get admin id by Email
+    @Query("SELECT admin_id FROM admins WHERE admin_email = :adminMail")
+    fun getAdminIdByMail(adminMail: String): Flow<Int>
+
     // Insert admin
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(admin: Admin)

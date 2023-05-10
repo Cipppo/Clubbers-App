@@ -6,6 +6,8 @@ import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.repos.AdminsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,6 +40,17 @@ class AdminsViewModel @Inject constructor(
 
     fun getAdminById(adminId: Int): Flow<Admin> = repository.getAdminById(adminId)
 
+    private val _adminId = MutableStateFlow(0)
+    val adminId: StateFlow<Int> get() = _adminId
+
+    fun getAdminIdByEmail(email: String) {
+        viewModelScope.launch {
+            repository.getAdminIdByMail(email)
+                .collect { adminId ->
+                    _adminId.value = adminId
+                }
+        }
+    }
 
     fun getAdminByMail(adminMail: String): Flow<Admin> = repository.getAdminByEmail(adminMail)
 }

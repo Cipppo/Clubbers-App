@@ -78,7 +78,8 @@ import java.util.Objects
 fun NewEventScreen(
     modifier: Modifier = Modifier,
     onEvent: () -> Unit,
-    eventsViewModel: EventsViewModel
+    eventsViewModel: EventsViewModel,
+    adminId: Int
 ) {
     val context = LocalContext.current
     val file = context.createImageFile()
@@ -428,7 +429,7 @@ fun NewEventScreen(
                             timeEnd = Date(endEventDate.toEpochSecond(ZoneOffset.UTC)),
                             maxParticipants = 10,
                             participants = 0,
-                            eventAdminId = 1
+                            eventAdminId = adminId
                         )
                     )
                     onEvent()

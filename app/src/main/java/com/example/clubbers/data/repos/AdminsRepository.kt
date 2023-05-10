@@ -24,6 +24,9 @@ class AdminsRepository(private val adminsDAO: AdminsDAO) {
         return adminsDAO.getAdminById(adminId)
     }
 
+    fun getAdminIdByMail(adminMail: String): Flow<Int> {
+        return adminsDAO.getAdminIdByMail(adminMail)
+    }
 
     fun getAdminByEmail(adminEmail: String): Flow<Admin>{
         return adminsDAO.getAdminByMail(adminEmail)
