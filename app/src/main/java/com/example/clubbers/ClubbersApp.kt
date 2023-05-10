@@ -331,8 +331,10 @@ private fun NavigationGraph(
 
         // New Event Screen
         composable(route = AppScreen.NewEvent.name) {
+            val eventsViewModel = hiltViewModel<EventsViewModel>()
             NewEventScreen(
-                onEvent = { navController.navigate(AppScreen.Home.name) }
+                onEvent = { navController.navigate(AppScreen.Home.name) },
+                eventsViewModel = eventsViewModel
             )
         }
 
