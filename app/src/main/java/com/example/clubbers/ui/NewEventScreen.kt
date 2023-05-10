@@ -93,8 +93,10 @@ fun NewEventScreen(
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var postCaption by rememberSaveable { mutableStateOf("") }
-    var postTitle by rememberSaveable { mutableStateOf("") }
+    var eventCaption by rememberSaveable { mutableStateOf("") }
+    var eventTitle by rememberSaveable { mutableStateOf("") }
+    var eventLocation by rememberSaveable { mutableStateOf("")}
+
     val captionMaxChar = 255
     val titleMaxChar = 30
 
@@ -251,9 +253,9 @@ fun NewEventScreen(
             }
             Spacer(modifier = modifier.width(16.dp))
             OutlinedTextField(
-                value = postTitle,
+                value = eventTitle,
                 onValueChange = {
-                    if (it.length <= titleMaxChar) postTitle = it
+                    if (it.length <= titleMaxChar) eventTitle = it
                                 },
                 label = { Text(text = "Event Title") },
                 colors = TextFieldDefaults.textFieldColors(
@@ -267,7 +269,7 @@ fun NewEventScreen(
                 maxLines = 1,
                 supportingText = {
                     Text(
-                        text = "${postTitle.length} / $titleMaxChar",
+                        text = "${eventTitle.length} / $titleMaxChar",
                         modifier = modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.End,
@@ -368,10 +370,44 @@ fun NewEventScreen(
                 )
             }
         }
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = eventLocation,
+                onValueChange = {
+                    if (it.length <= captionMaxChar) eventLocation = it
+                },
+                label = { Text(text = "Event Location") },
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+                shape = MaterialTheme.shapes.small,
+                modifier = modifier
+                    .width(250.dp)
+                    .height(80.dp),
+                maxLines = 1,
+                supportingText = {
+                    Text(
+                        text = "${eventLocation.length} / $captionMaxChar",
+                        modifier = modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.End,
+                    )
+                }
+            )
+            Spacer(modifier = modifier.weight(1f))
+            ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+                Text(text = "Check\nLocation")
+            }
+        }
         OutlinedTextField(
-            value = postCaption,
+            value = eventCaption,
             onValueChange = {
-                if (it.length <= captionMaxChar) postCaption = it
+                if (it.length <= captionMaxChar) eventCaption = it
                             },
             label = { Text(text = "Write a caption") },
             colors = TextFieldDefaults.textFieldColors(
@@ -385,7 +421,7 @@ fun NewEventScreen(
             maxLines = 2,
             supportingText = {
                 Text(
-                    text = "${postCaption.length} / $captionMaxChar",
+                    text = "${eventCaption.length} / $captionMaxChar",
                     modifier = modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.End,
@@ -421,10 +457,10 @@ fun NewEventScreen(
                     saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
                     eventsViewModel.insertNewEvent(
                         Event(
-                            eventName = postTitle,
+                            eventName = eventTitle,
                             eventImage = capturedImageUri.path!!,
-                            eventLocation = "Test Location",
-                            eventDescription = postCaption,
+                            eventLocation = eventLocation,
+                            eventDescription = eventCaption,
                             timeStart = Date(startEventDate.toEpochSecond(ZoneOffset.UTC)),
                             timeEnd = Date(endEventDate.toEpochSecond(ZoneOffset.UTC)),
                             maxParticipants = 10,
@@ -442,11 +478,11 @@ fun NewEventScreen(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_send_24),
-                contentDescription = "Post photo",
+                contentDescription = "Post event",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = modifier.width(8.dp))
-            Text(text = "Post Photo")
+            Text(text = "Post Event")
         }
     }
 }
