@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.Space
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.clubbers.R
+import com.example.clubbers.utilities.postFeed
+import com.example.clubbers.utilities.userBookedEvents
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +53,10 @@ import com.example.clubbers.R
 @Preview
 fun PersonalProfileScreen(){
 
+
+
+    val selectedMenu = remember{ mutableStateOf("Posts")}
+    val scrollState = remember { ScrollState }
 
     Box(
         modifier = Modifier
@@ -69,7 +80,7 @@ fun PersonalProfileScreen(){
                 painter = painterResource(R.drawable.default_avatar),
                 contentDescription = "DefaultAvatar",
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(80.dp)
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -79,12 +90,12 @@ fun PersonalProfileScreen(){
                 Text(text = "Followed", style = TextStyle(fontWeight = FontWeight.Bold))
                 Text(text = "Events", style = TextStyle(fontWeight = FontWeight.Bold))
             }
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "10", style = TextStyle(fontWeight = FontWeight.Bold))
-                Text(text = "20", style = TextStyle(fontWeight = FontWeight.Bold))
-                Text(text = "30", style = TextStyle(fontWeight = FontWeight.Bold))
-            }
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = "10", style = TextStyle(fontWeight = FontWeight.Bold))
+            Text(text = "20", style = TextStyle(fontWeight = FontWeight.Bold))
+            Text(text = "30", style = TextStyle(fontWeight = FontWeight.Bold))
+        }
             Spacer(modifier = Modifier.height(30.dp))
             Button(onClick = { /*TODO*/ }, shape = CutCornerShape(10), modifier = Modifier.background(MaterialTheme.colorScheme.secondary)) {
                 Text("Follow")
@@ -96,7 +107,7 @@ fun PersonalProfileScreen(){
             Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween){
                 IconButton(
-                    onClick = {/*TODO*/}
+                    onClick = {selectedMenu.value = "Posts"}
                 ){
                     Icon(painter = painterResource(id = R.drawable.posts_icon),
                         contentDescription = "Posts Icon",
@@ -104,7 +115,7 @@ fun PersonalProfileScreen(){
 
                 }
                 IconButton(
-                    onClick = {/*TODO*/}
+                    onClick = {selectedMenu.value = "Booked"}
                 ){
                     Icon(
                         painter = painterResource(id = R.drawable.booked_icon),
@@ -112,7 +123,7 @@ fun PersonalProfileScreen(){
                         tint = MaterialTheme.colorScheme.primary)
                 }
                 IconButton(
-                    onClick = {/*TODO*/}
+                    onClick = {selectedMenu.value = "Been"}
                 ){
                     Icon(
                         painter = painterResource(id = R.drawable.been_icon),
@@ -120,6 +131,15 @@ fun PersonalProfileScreen(){
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+            }
+            if(selectedMenu.value == "Posts"){
+                postFeed()
+            }
+            if(selectedMenu.value == "Booked"){
+                userBookedEvents()
+            }
+            if(selectedMenu.value == "Been"){
+                userBookedEvents()
             }
         }
     }
