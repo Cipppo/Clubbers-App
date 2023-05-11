@@ -7,7 +7,8 @@ import com.example.clubbers.data.entities.EventHasTag
 import com.example.clubbers.data.entities.Tag
 import com.example.clubbers.data.repos.EventHasTagsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,9 +17,25 @@ class EventHasTagsViewModel @Inject constructor(
     private val repository: EventHasTagsRepository
 ) : ViewModel() {
 
-    fun getTagsByEventId(eventId: Int): Flow<List<Tag>> = repository.getTagsByEventId(eventId)
+    private val _events = MutableStateFlow<List<Event>>(emptyList())
+    val events: StateFlow<List<Event>> get() = _events
 
-    fun getEventsByTagId(tagId: Int): Flow<List<Event>> = repository.getEventsByTagId(tagId)
+    private val _tags = MutableStateFlow<List<Tag>>(emptyList())
+    val tags: StateFlow<List<Tag>?> get() = _tags
+
+    fun getTagsByEventId(eventId: Int) = viewModelScope.launch {
+        repository.getTagsByEventId(eventId)
+            .collect { tags ->
+                _tags.value = tags
+            }
+    }
+
+    fun getEventsByTagId(tagId: Int) = viewModelScope.launch {
+        repository.getEventsByTagId(tagId)
+            .collect { events ->
+                _events.value = events
+            }
+    }
 
     fun addNewTagToEvent(eventHasTag: EventHasTag) = viewModelScope.launch {
         repository.insert(eventHasTag)

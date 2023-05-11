@@ -36,11 +36,26 @@ class UsersViewModel @Inject constructor(
         repository.deleteUser(user)
     }
 
-    fun getUserById(userId: Int): Flow<User> = repository.getUserById(userId)
+    fun getUserById(userId: Int) = viewModelScope.launch {
+        repository.getUserById(userId)
+            .collect {user ->
+                _userSelected = user
+            }
+    }
 
-    fun getUserByUserName(userName: String): Flow<User> = repository.getUserByUserName(userName)
+    fun getUserByUserName(userName: String) = viewModelScope.launch {
+        repository.getUserByUserName(userName)
+            .collect {user ->
+                _userSelected = user
+            }
+    }
 
-    fun getUserByEmail(userEmail: String): Flow<User> = repository.getUserByEmail(userEmail)
+    fun getUserByEmail(userEmail: String) = viewModelScope.launch {
+        repository.getUserByEmail(userEmail)
+            .collect {user ->
+                _userSelected = user
+            }
+    }
 
     fun getAllUsers(): Flow<List<User>> = repository.getAllUsers()
 }

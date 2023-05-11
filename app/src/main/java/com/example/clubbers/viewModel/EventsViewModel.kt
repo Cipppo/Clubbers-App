@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.repos.EventsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +31,12 @@ class EventsViewModel @Inject constructor(
         repository.deleteEvent(event)
     }
 
-    fun getEventById(eventId: Int): Flow<Event> = repository.getEventById(eventId)
+    fun getEventById(eventId: Int) = viewModelScope.launch {
+        repository.getEventById(eventId)
+            .collect {
+                _eventSelected = it
+            }
+    }
 
     fun updateEvent(event: Event) = viewModelScope.launch {
         repository.updateEvent(event)

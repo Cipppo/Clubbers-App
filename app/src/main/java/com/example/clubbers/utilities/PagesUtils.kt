@@ -175,16 +175,16 @@ fun EventItem(
 ) {
     var showMapDialog by rememberSaveable { mutableStateOf(false) }
 
-    val admin = adminsViewModel.getAdminById(event.eventAdminId)
-        .collectAsState(initial = null).value!!
-    val tags = eventHasTagsViewModel.getTagsByEventId(event.eventId)
-        .collectAsState(initial = listOf()).value
+    adminsViewModel.getAdminById(event.eventAdminId)
+    val admin by adminsViewModel.admin.collectAsState()
+    eventHasTagsViewModel.getTagsByEventId(event.eventId)
+    val tags by eventHasTagsViewModel.tags.collectAsState()
 
-    val adminName = admin.adminUsername
-    val proPicUri = admin.adminImage
+    val adminName = admin?.adminUsername
+    val proPicUri = admin?.adminImage
     val imageUri = event.eventImage
     val caption = event.eventDescription.orEmpty()
-    val tagsList = tags.map { it.tagName }
+    val tagsList = tags?.map { it.tagName }
     val timeStart = event.timeStart.toString()
     val timeEnd = event.timeEnd.toString()
     val place = event.eventLocation
@@ -234,7 +234,7 @@ fun EventItem(
                         )
                 )
                 Spacer(modifier = Modifier.padding(end = 8.dp))
-                Text(text = adminName, style = MaterialTheme.typography.bodySmall)
+                adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
             }
             Image(
                 painter = rememberAsyncImagePainter(
@@ -264,7 +264,7 @@ fun EventItem(
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
             Text(
-                text = "Tags: ${ tagsList.joinToString(separator = ", ") }",
+                text = "Tags: ${ tagsList?.joinToString(separator = ", ") }",
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))

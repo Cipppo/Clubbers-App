@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Tag
 import com.example.clubbers.data.repos.TagsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,5 +35,10 @@ class TagsViewModel @Inject constructor(
         repository.deleteTag(tag)
     }
 
-    fun getTagById(tagId: Int): Flow<Tag> = repository.getTagById(tagId)
+    fun getTagById(tagId: Int) = viewModelScope.launch {
+        repository.getTagById(tagId)
+            .collect { tag ->
+                _tagSelected = tag
+            }
+    }
 }

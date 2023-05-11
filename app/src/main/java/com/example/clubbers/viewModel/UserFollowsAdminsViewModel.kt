@@ -7,7 +7,8 @@ import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.entities.UserFollowsAdmin
 import com.example.clubbers.data.repos.UserFollowsAdminsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,9 +17,25 @@ class UserFollowsAdminsViewModel @Inject constructor(
     private val repository: UserFollowsAdminsRepository
 ) : ViewModel() {
 
-    fun getUsers(adminId: Int): Flow<List<User>> = repository.getUsers(adminId)
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> get() = _users
 
-    fun getAdmins(userId: Int): Flow<List<Admin>> = repository.getAdmins(userId)
+    private val _admins = MutableStateFlow<List<Admin>>(emptyList())
+    val admins: StateFlow<List<Admin>> get() = _admins
+
+    fun getUsers(adminId: Int) = viewModelScope.launch {
+        repository.getUsers(adminId)
+            .collect { users ->
+                _users.value = users
+            }
+    }
+
+    fun getAdmins(userId: Int) = viewModelScope.launch {
+        repository.getAdmins(userId)
+            .collect { admins ->
+                _admins.value = admins
+            }
+    }
 
     fun insert(userFollowsAdmin: UserFollowsAdmin) = viewModelScope.launch {
         repository.insert(userFollowsAdmin)
