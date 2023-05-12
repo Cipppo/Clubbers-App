@@ -53,22 +53,14 @@ import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
+import com.example.clubbers.ui.notificationsScreen
+import com.example.clubbers.ui.userOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import dagger.hilt.android.HiltAndroidApp
-
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.example.clubbers.data.entities.Admin
-import com.example.clubbers.ui.ClubRegistrationScreen
-import com.example.clubbers.ui.LoginScreen
-import com.example.clubbers.ui.RegistrationScreen
-import com.example.clubbers.ui.notificationsScreen
-import com.example.clubbers.ui.userOptionScreen
-import com.example.clubbers.viewModel.AdminsViewModel
 
 
 sealed class AppScreen(val name: String) {
@@ -298,6 +290,8 @@ private fun NavigationGraph(
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
             .contains("USER_LOGGED")
 
+    val eventsViewModel = hiltViewModel<EventsViewModel>()
+
     NavHost(
         navController = navController,
         startDestination = if (isLoggedIn) AppScreen.Home.name else AppScreen.Login.name,
@@ -310,7 +304,7 @@ private fun NavigationGraph(
 
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
-            val eventsViewModel = hiltViewModel<EventsViewModel>()
+
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             TodayScreen(
@@ -323,7 +317,6 @@ private fun NavigationGraph(
 
         // Event Screen
         composable(route = AppScreen.Event.name) {
-            val eventsViewModel = hiltViewModel<EventsViewModel>()
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             EventScreen(
@@ -342,7 +335,6 @@ private fun NavigationGraph(
 
         // New Event Screen
         composable(route = AppScreen.NewEvent.name) {
-            val eventsViewModel = hiltViewModel<EventsViewModel>()
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
 
             val adminName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -359,7 +351,6 @@ private fun NavigationGraph(
 
         // Event Selection Screen
         composable(route = AppScreen.EventSelection.name) {
-            val eventsViewModel = hiltViewModel<EventsViewModel>()
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             SelectEventForPostScreen(
@@ -372,7 +363,6 @@ private fun NavigationGraph(
 
         // Discover Screen
         composable(route = AppScreen.Discover.name) {
-            val eventsViewModel = hiltViewModel<EventsViewModel>()
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             DiscoverScreen(
