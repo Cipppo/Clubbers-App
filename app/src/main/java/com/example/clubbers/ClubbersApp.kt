@@ -55,6 +55,7 @@ import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.ui.userOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 
 
@@ -77,6 +78,7 @@ sealed class AppScreen(val name: String) {
     object Registration : AppScreen("Registration Page")
 
     object AdminRegistration : AppScreen("Admin Registration Page")
+    object UserOption : AppScreen("User Option Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -294,7 +296,9 @@ private fun NavigationGraph(
 
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
-            PersonalProfileScreen()
+            PersonalProfileScreen(
+                onOption = { navController.navigate(AppScreen.UserOption.name) }
+            )
         }
 
         composable(route = AppScreen.AdminRegistration.name){
@@ -325,6 +329,12 @@ private fun NavigationGraph(
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Home.name)
                              },
+            )
+        }
+
+        composable(route = AppScreen.UserOption.name){
+            userOptionScreen(
+                onLogout = {navController.navigate(AppScreen.Login.name)}
             )
         }
 
