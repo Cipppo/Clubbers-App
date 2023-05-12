@@ -31,4 +31,8 @@ class AdminsRepository(private val adminsDAO: AdminsDAO) {
     fun getAdminByEmail(adminEmail: String): Flow<Admin>{
         return adminsDAO.getAdminByMail(adminEmail)
     }
+
+    fun getAllAdmins(): Flow<List<Admin>>{
+        return adminsDAO.getAllAdmins()
+    }
 }
