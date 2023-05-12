@@ -60,6 +60,7 @@ import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
+import com.example.clubbers.viewModel.WarningViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -87,6 +88,7 @@ fun NewEventScreen(
     startRequestingData: () -> Unit,
     eventsViewModel: EventsViewModel,
     locationsViewModel: LocationsViewModel,
+    warningViewModel: WarningViewModel,
     adminId: Int
 ) {
     val context = LocalContext.current
@@ -446,17 +448,21 @@ fun NewEventScreen(
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
                 onClick = {
-                    isButtonClicked = true
                     context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
                         .edit()
                         .putString("EventLocation", eventLocation)
                         .apply()
                     startRequestingData()
-                    val coroutineScope = CoroutineScope(Dispatchers.Main)
-                    coroutineScope.launch {
-                        locationsViewModel.location.collect {
-                            eventLocation = it
+                    if (!warningViewModel.showConnectivitySnackBar.value) {
+                        isButtonClicked = true
+                        val coroutineScope = CoroutineScope(Dispatchers.Main)
+                        coroutineScope.launch {
+                            locationsViewModel.location.collect {
+                                eventLocation = it
+                            }
                         }
+                    } else {
+                        Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
                     }
                           },
                 modifier = modifier

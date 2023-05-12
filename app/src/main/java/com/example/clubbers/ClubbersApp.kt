@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -222,6 +223,7 @@ fun NavigationApp (
     val snackBarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         bottomBar = {
             if (
                 currentScreen != AppScreen.Registration.name &&
@@ -285,7 +287,12 @@ fun NavigationApp (
             }
         }
     ) { innerPadding ->
-        NavigationGraph(startRequestingData, navController, innerPadding)
+        NavigationGraph(
+            startRequestingData,
+            navController,
+            innerPadding,
+            warningViewModel
+        )
         val context = LocalContext.current
         if (warningViewModel.showConnectivitySnackBar.value) {
             ConnectivitySnackBarComposable(
@@ -302,6 +309,7 @@ private fun NavigationGraph(
     startRequestingData: () -> Unit,
     navController: NavHostController,
     innerPadding: PaddingValues,
+    warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier
 ) {
     val isLoggedIn =
@@ -366,7 +374,8 @@ private fun NavigationGraph(
                 eventsViewModel = eventsViewModel,
                 locationsViewModel = locationsViewModel,
                 adminId = adminId,
-                startRequestingData = startRequestingData
+                startRequestingData = startRequestingData,
+                warningViewModel = warningViewModel
             )
         }
 

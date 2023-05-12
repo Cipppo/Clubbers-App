@@ -52,6 +52,12 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        if (isOnline(connectivityManager)) {
+            warningViewModel.setConnectivitySnackBarVisibility(false)
+        } else {
+            warningViewModel.setConnectivitySnackBarVisibility(true)
+        }
+
         setContent {
             ClubbersTheme {
                 // A surface container using the 'background' color from the theme
@@ -89,6 +95,7 @@ class MainActivity : ComponentActivity() {
         requestingData.value = true
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
         if (isOnline(connectivityManager)) {
+            warningViewModel.setConnectivitySnackBarVisibility(false)
             sendRequest(connectivityManager)
         } else {
             warningViewModel.setConnectivitySnackBarVisibility(true)
