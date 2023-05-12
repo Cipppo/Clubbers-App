@@ -1,6 +1,7 @@
 package com.example.clubbers.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -66,6 +67,9 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -79,6 +83,7 @@ import java.util.Objects
 fun NewEventScreen(
     modifier: Modifier = Modifier,
     onEvent: () -> Unit,
+    startRequestingData: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminId: Int
 ) {
@@ -117,6 +122,8 @@ fun NewEventScreen(
     var participants by rememberSaveable { mutableStateOf(0) }
     val maxParticipantsState = rememberSheetState()
     val participantsState = rememberSheetState()
+
+    var isButtonClicked by rememberSaveable { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -398,7 +405,12 @@ fun NewEventScreen(
                 )
             }
         }
-        OutlinedTextField(
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
                 value = eventLocation,
                 onValueChange = {
                     if (it.length <= captionMaxChar) eventLocation = it
@@ -410,10 +422,17 @@ fun NewEventScreen(
                 ),
                 shape = MaterialTheme.shapes.small,
                 modifier = modifier
-                    .fillMaxWidth()
-                    .height(80.dp),
-                maxLines = 1,
+                    .width(250.dp)
+                    .height(150.dp),
+                maxLines = 4,
                 supportingText = {
+                    if (isButtonClicked && eventLocation.isEmpty()) {
+                        Text(
+                            text = "Location not found, Retry",
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Start,
+                        )
+                    }
                     Text(
                         text = "${eventLocation.length} / $captionMaxChar",
                         modifier = modifier.fillMaxWidth(),
@@ -422,6 +441,31 @@ fun NewEventScreen(
                     )
                 }
             )
+            Spacer(modifier = modifier.weight(1f))
+            ExtendedFloatingActionButton(
+                onClick = {
+                    isButtonClicked = true
+                    context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
+                        .edit()
+                        .putString("EventLocation", eventLocation)
+                        .apply()
+                    startRequestingData()
+                    val coroutineScope = CoroutineScope(Dispatchers.Main)
+                    coroutineScope.launch {
+                        eventsViewModel.eventLocation.collect {
+                            eventLocation = it
+                        }
+                    }
+                          },
+                modifier = modifier
+                    .height(80.dp)
+            ) {
+                Text(
+                    text = "Check\nLocation",
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
         Row(
             modifier
                 .fillMaxWidth(),

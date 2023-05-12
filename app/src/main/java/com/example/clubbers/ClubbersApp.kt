@@ -22,10 +22,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -58,8 +60,10 @@ import com.example.clubbers.ui.userOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.PermissionSnackBarComposable
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
+import com.example.clubbers.viewModel.WarningViewModel
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -199,6 +203,8 @@ fun BottomAppBarFunction (
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp (
+    startRequestingData: () -> Unit,
+    warningViewModel: WarningViewModel,
     navController: NavHostController = rememberNavController()
 ) {
     val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -211,6 +217,8 @@ fun NavigationApp (
         isAdmin = usersAndAdminsViewModel.isAdmin(userName)
             .collectAsState(initial = false).value
     }
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         bottomBar = {
@@ -276,12 +284,21 @@ fun NavigationApp (
             }
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding)
+        NavigationGraph(startRequestingData, navController, innerPadding)
+        val context = LocalContext.current
+        if (warningViewModel.showConnectivitySnackBar.value) {
+            PermissionSnackBarComposable(
+                snackBarHostState = snackBarHostState,
+                applicationContext = context,
+                warningViewModel = warningViewModel
+            )
+        }
     }
 }
 
 @Composable
 private fun NavigationGraph(
+    startRequestingData: () -> Unit,
     navController: NavHostController,
     innerPadding: PaddingValues,
     modifier: Modifier = Modifier
@@ -345,7 +362,8 @@ private fun NavigationGraph(
             NewEventScreen(
                 onEvent = { navController.navigate(AppScreen.Home.name) },
                 eventsViewModel = eventsViewModel,
-                adminId = adminId
+                adminId = adminId,
+                startRequestingData = startRequestingData
             )
         }
 

@@ -113,7 +113,11 @@ dependencies {
     implementation "com.maxkeppeler.sheets-compose-dialogs:calendar:$sheets_version"
     implementation "com.maxkeppeler.sheets-compose-dialogs:clock:$sheets_version"
 
+    // Activity Compose dependencies
     implementation 'androidx.activity:activity-compose:1.4.0-alpha01'
+
+    // Volley dependencies
+    implementation 'com.android.volley:volley:1.2.1'
 }
 
 // RoomSchema: Enable Room schema export
