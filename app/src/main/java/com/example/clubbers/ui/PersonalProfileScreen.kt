@@ -1,6 +1,7 @@
 package com.example.clubbers.ui
 
 import android.Manifest
+import android.app.AppOpsManager.OnOpNotedCallback
 import android.content.pm.PackageManager
 import android.widget.Space
 import androidx.compose.foundation.Image
@@ -53,7 +54,8 @@ import com.example.clubbers.utilities.userBookedEvents
 @Composable
 
 fun PersonalProfileScreen(
-    onOption: () -> Unit
+    onOption: () -> Unit,
+    onNotify: () -> Unit
 ){
 
 
@@ -81,6 +83,13 @@ fun PersonalProfileScreen(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Left
                 )
+                IconButton(onClick = {onNotify()}){
+                    Icon(
+                        painter = painterResource(id = R.drawable.notifications_icon),
+                        contentDescription = "Notifications",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
                 IconButton(onClick = { onOption() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.setting_icon),
@@ -125,7 +134,13 @@ fun PersonalProfileScreen(
                 ){
                     Icon(painter = painterResource(id = R.drawable.posts_icon),
                         contentDescription = "Posts Icon",
-                        tint = MaterialTheme.colorScheme.primary)
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(
+                            if(selectedMenu.value == "Posts"){
+                                45.dp
+                            }else{
+                                25.dp
+                            }))
 
                 }
                 IconButton(
@@ -134,7 +149,13 @@ fun PersonalProfileScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.booked_icon),
                         contentDescription = "Next Events Icon",
-                        tint = MaterialTheme.colorScheme.primary)
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(
+                            if(selectedMenu.value == "Booked"){
+                                45.dp
+                            }else{
+                                25.dp
+                            }))
                 }
                 IconButton(
                     onClick = {selectedMenu.value = "Been"}
@@ -142,7 +163,14 @@ fun PersonalProfileScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.been_icon),
                         contentDescription = "Been icon",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(
+                            if(selectedMenu.value == "Been"){
+                                45.dp
+                            }else{
+                                25.dp
+                            }
+                        )
                     )
                 }
             }
