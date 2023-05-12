@@ -47,7 +47,9 @@ import androidx.compose.ui.unit.sp
 import androidx.room.Room
 import com.example.clubbers.R
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
+import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -63,6 +65,7 @@ fun LoginScreen(
     switchToAdminRegister: () -> Unit,
     onLogin: () -> Unit,
     usersViewModel: UsersViewModel,
+    adminsViewModel: AdminsViewModel
 ){
     Box(
         modifier = Modifier.fillMaxSize()
@@ -85,6 +88,7 @@ fun LoginScreen(
         val username = remember { mutableStateOf(TextFieldValue()) }
         val password = remember { mutableStateOf(TextFieldValue()) }
         val usersList = usersViewModel.getAllUsers().collectAsState(initial = listOf()).value
+        val adminList = adminsViewModel.getAllAdmins().collectAsState(initial = listOf()).value
         val sharedPreferences = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
 
 
@@ -114,7 +118,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = { attemptLogin(username.value.text, password.value.text, usersList, onLogin, sharedPreferences) },
+                onClick = { attemptLogin(username.value.text, password.value.text, usersList, onLogin, sharedPreferences, adminList) },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -145,12 +149,23 @@ fun LoginScreen(
 }
 
 
-fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences): Unit{
+fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences, adminList: List<Admin>): Unit{
     var i = usersList.size
     for(user in usersList){
         if(user.userEmail == email && user.userPassword == password){
             with(sharedPreferences.edit()){
                 putString("USER_LOGGED", email)
+                putString("USER_TYPE", "USER")
+                apply()
+            }
+            navigateToHome()
+        }
+    }
+    for(admin in adminList){
+        if(admin.adminEmail == email && admin.adminPassword == password){
+            with(sharedPreferences.edit()){
+                putString("USER_LOGGED", email)
+                putString("USER_TYPE", "CLUB")
                 apply()
             }
             navigateToHome()
