@@ -55,6 +55,7 @@ import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.ui.notificationsScreen
 import com.example.clubbers.ui.userOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 
@@ -76,9 +77,9 @@ sealed class AppScreen(val name: String) {
     //user registration Screens
     object Login : AppScreen("Login")
     object Registration : AppScreen("Registration Page")
-
     object AdminRegistration : AppScreen("Admin Registration Page")
     object UserOption : AppScreen("User Option Page")
+    object Notifications : AppScreen("User Notifications Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -297,7 +298,8 @@ private fun NavigationGraph(
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
             PersonalProfileScreen(
-                onOption = { navController.navigate(AppScreen.UserOption.name) }
+                onOption = { navController.navigate(AppScreen.UserOption.name)},
+                onNotify = {navController.navigate(AppScreen.Notifications.name)}
             )
         }
 
@@ -338,6 +340,9 @@ private fun NavigationGraph(
             )
         }
 
+        composable(route = AppScreen.Notifications.name){
+            notificationsScreen()
+        }
 
     }
 }
