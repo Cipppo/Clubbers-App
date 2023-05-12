@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,8 +51,10 @@ import com.example.clubbers.utilities.userBookedEvents
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun PersonalProfileScreen(){
+
+fun PersonalProfileScreen(
+    onOption: () -> Unit
+){
 
 
 
@@ -70,11 +73,22 @@ fun PersonalProfileScreen(){
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-
-            Text(
-                text = "username",
-                style = TextStyle(textAlign = TextAlign.Center, fontSize = 25.sp)
-            )
+            Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "username",
+                    style = TextStyle(textAlign = TextAlign.Center, fontSize = 25.sp),
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Left
+                )
+                IconButton(onClick = { onOption() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.setting_icon),
+                        contentDescription = "Settings",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(20.dp))
             Image(
                 painter = painterResource(R.drawable.default_avatar),
