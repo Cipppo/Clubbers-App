@@ -398,12 +398,7 @@ fun NewEventScreen(
                 )
             }
         }
-        Row (
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
+        OutlinedTextField(
                 value = eventLocation,
                 onValueChange = {
                     if (it.length <= captionMaxChar) eventLocation = it
@@ -415,7 +410,7 @@ fun NewEventScreen(
                 ),
                 shape = MaterialTheme.shapes.small,
                 modifier = modifier
-                    .width(250.dp)
+                    .fillMaxWidth()
                     .height(80.dp),
                 maxLines = 1,
                 supportingText = {
@@ -427,18 +422,6 @@ fun NewEventScreen(
                     )
                 }
             )
-            Spacer(modifier = modifier.weight(1f))
-            ExtendedFloatingActionButton(
-                onClick = { /*TODO*/ },
-                modifier = modifier
-                    .height(80.dp)
-            ) {
-                Text(
-                    text = "Check\nLocation",
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
         Row(
             modifier
                 .fillMaxWidth(),
