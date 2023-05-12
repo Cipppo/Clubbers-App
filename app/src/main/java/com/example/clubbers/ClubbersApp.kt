@@ -45,6 +45,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.ui.ClubRegistrationScreen
+import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.HomeScreen
@@ -61,7 +62,6 @@ import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
-import com.example.clubbers.viewModel.PermissionSnackBarComposable
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -288,7 +288,7 @@ fun NavigationApp (
         NavigationGraph(startRequestingData, navController, innerPadding)
         val context = LocalContext.current
         if (warningViewModel.showConnectivitySnackBar.value) {
-            PermissionSnackBarComposable(
+            ConnectivitySnackBarComposable(
                 snackBarHostState = snackBarHostState,
                 applicationContext = context,
                 warningViewModel = warningViewModel
