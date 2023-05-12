@@ -3,6 +3,7 @@
 package com.example.clubbers.ui
 
 import android.Manifest
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.RestrictionsManager.RESULT_ERROR
@@ -128,6 +129,9 @@ fun ClubRegistrationScreen(
                 Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT)
             }
         }
+
+
+
 
         if (step1.value) {
             Text("A new dimension to Club!")
