@@ -59,6 +59,7 @@ import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.LocationsViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -85,6 +86,7 @@ fun NewEventScreen(
     onEvent: () -> Unit,
     startRequestingData: () -> Unit,
     eventsViewModel: EventsViewModel,
+    locationsViewModel: LocationsViewModel,
     adminId: Int
 ) {
     val context = LocalContext.current
@@ -452,7 +454,7 @@ fun NewEventScreen(
                     startRequestingData()
                     val coroutineScope = CoroutineScope(Dispatchers.Main)
                     coroutineScope.launch {
-                        eventsViewModel.eventLocation.collect {
+                        locationsViewModel.location.collect {
                             eventLocation = it
                         }
                     }

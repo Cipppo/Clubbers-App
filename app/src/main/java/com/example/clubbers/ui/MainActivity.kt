@@ -19,7 +19,7 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.example.clubbers.NavigationApp
 import com.example.clubbers.ui.theme.ClubbersTheme
-import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import org.json.JSONObject
@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun sendRequest(connectivityManager: ConnectivityManager) {
-        val eventsViewModel by viewModels<EventsViewModel>()
+        val locationsViewModel by viewModels<LocationsViewModel>()
         val location = getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
             .getString("EventLocation", "No Location")
             .toString()
@@ -112,9 +112,9 @@ class MainActivity : ComponentActivity() {
                 if (response.length() > 0) {
                     val first = response.get(0) as JSONObject
                     val locationN = first.get("display_name").toString()
-                    eventsViewModel.setEventLocation(locationN)
+                    locationsViewModel.setEventLocation(locationN)
                 } else {
-                    eventsViewModel.setEventLocation("")
+                    locationsViewModel.setEventLocation("")
                 }
                 connectivityManager.unregisterNetworkCallback(networkCallback)
                 requestingData.value = false

@@ -60,6 +60,7 @@ import com.example.clubbers.ui.userOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.PermissionSnackBarComposable
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
@@ -308,6 +309,7 @@ private fun NavigationGraph(
             .contains("USER_LOGGED")
 
     val eventsViewModel = hiltViewModel<EventsViewModel>()
+    val locationsViewModel = hiltViewModel<LocationsViewModel>()
 
     NavHost(
         navController = navController,
@@ -362,6 +364,7 @@ private fun NavigationGraph(
             NewEventScreen(
                 onEvent = { navController.navigate(AppScreen.Home.name) },
                 eventsViewModel = eventsViewModel,
+                locationsViewModel = locationsViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData
             )

@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.repos.EventsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,15 +14,6 @@ class EventsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val events = repository.events
-
-    private val _eventLocation = MutableStateFlow("")
-
-
-    val eventLocation: StateFlow<String> get() = _eventLocation
-
-    fun setEventLocation(location: String) {
-        _eventLocation.value = location
-    }
 
     fun insertNewEvent(event: Event) = viewModelScope.launch {
         repository.insertNewEvent(event)
