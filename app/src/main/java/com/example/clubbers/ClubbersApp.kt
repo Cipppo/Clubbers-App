@@ -314,11 +314,13 @@ private fun NavigationGraph(
         // Login Screen
         composable(route = AppScreen.Login.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
             LoginScreen(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
                 switchToAdminRegister = {navController.navigate((AppScreen.AdminRegistration.name))},
                 usersViewModel = usersViewModel,
                 onLogin = {navController.navigate(AppScreen.Home.name)},
+                adminsViewModel = adminsViewModel
             )
         }
 
