@@ -33,4 +33,7 @@ interface AdminsDAO {
     // Delete admin
     @Query("DELETE FROM admins WHERE admin_id = :adminId")
     suspend fun delete(adminId: Int)
+
+    @Query("SELECT * FROM admins")
+    fun getAllAdmins(): Flow<List<Admin>>
 }

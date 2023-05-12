@@ -41,4 +41,6 @@ class AdminsViewModel @Inject constructor(
 
 
     fun getAdminByMail(adminMail: String): Flow<Admin> = repository.getAdminByEmail(adminMail)
+
+    fun getAllAdmins(): Flow<List<Admin>> = repository.getAllAdmins()
 }
