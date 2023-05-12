@@ -47,21 +47,6 @@ fun userOptionScreen(
             )
             Text("Logout", modifier = Modifier.padding(16.dp), fontSize = 25.sp)
         }
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 4.dp)) {
-            Text("Opzione2", modifier = Modifier.padding(16.dp), fontSize = 25.sp)
-        }
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 4.dp)) {
-            Text("Opzione3", modifier = Modifier.padding(16.dp), fontSize = 25.sp)
-        }
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 4.dp)) {
-            Text("Opzione4", modifier = Modifier.padding(16.dp), fontSize = 25.sp)
-        }
     }
 }
 
