@@ -87,7 +87,6 @@ sealed class AppScreen(val name: String) {
     // Other Screens
     object Event : AppScreen("Event Details")
     object EventSelection : AppScreen("Select Event")
-    object Settings : AppScreen("Settings Screen")
     object User : AppScreen("User Profile")
 
     //user registration Screens
@@ -110,6 +109,7 @@ class ClubbersApp : Application() {
 fun TopAppBarFunction (
     currentScreen: String,
     canNavigateBack: Boolean,
+    onSettingsPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -134,7 +134,7 @@ fun TopAppBarFunction (
         },
         actions = {
             if (currentScreen == AppScreen.Profile.name) {
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = onSettingsPressed) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings Button")
@@ -281,7 +281,8 @@ fun NavigationApp (
                      TopAppBarFunction(
                          currentScreen = currentScreen,
                          canNavigateBack = navController.previousBackStackEntry != null,
-                         navigateUp = { navController.navigateUp() }
+                         navigateUp = { navController.navigateUp() },
+                         onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) }
                      )
                  }
         },
