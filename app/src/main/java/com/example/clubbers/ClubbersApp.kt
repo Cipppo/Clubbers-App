@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -24,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +42,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -99,6 +105,48 @@ class ClubbersApp : Application() {
     val database by lazy { ClubbersDatabase.getDatabase(this) }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopAppBarFunction (
+    currentScreen: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar (
+        title = {
+            Text (
+                text = currentScreen,
+                fontWeight = FontWeight.Medium
+            )
+        },
+        modifier = modifier
+            .shadow(10.dp, RoundedCornerShape(1.dp)),
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back Button"
+                    )
+                }
+            }
+        },
+        actions = {
+            if (currentScreen == AppScreen.Profile.name) {
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings Button")
+                }
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
+    )
+}
+
 @Composable
 fun BottomAppBarFunction (
     isAdmin: Boolean,
@@ -146,7 +194,7 @@ fun BottomAppBarFunction (
                     }
                     FloatingActionButton(
                         onClick = onNewPostButtonClicked,
-                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                        containerColor = FloatingActionButtonDefaults.containerColor,
                         elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
                     ) {
                         Icon(
@@ -197,7 +245,8 @@ fun BottomAppBarFunction (
             }
         },
         modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp))
+            .shadow(10.dp, RoundedCornerShape(1.dp)),
+        containerColor = BottomAppBarDefaults.containerColor
     )
 
 }
@@ -223,6 +272,19 @@ fun NavigationApp (
     val snackBarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        topBar = {
+                 if (
+                    currentScreen != AppScreen.Registration.name &&
+                    currentScreen != AppScreen.Login.name &&
+                    currentScreen != AppScreen.AdminRegistration.name
+                 ){
+                     TopAppBarFunction(
+                         currentScreen = currentScreen,
+                         canNavigateBack = navController.previousBackStackEntry != null,
+                         navigateUp = { navController.navigateUp() }
+                     )
+                 }
+        },
         snackbarHost = { SnackbarHost(snackBarHostState) },
         bottomBar = {
             if (
