@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,6 +58,8 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -175,6 +178,8 @@ fun EventItem(
 ) {
     var showMapDialog by rememberSaveable { mutableStateOf(false) }
 
+    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
     adminsViewModel.getAdminById(event.eventAdminId)
     val admin by adminsViewModel.admin.collectAsState()
     eventHasTagsViewModel.getTagsByEventId(event.eventId)
@@ -185,8 +190,8 @@ fun EventItem(
     val imageUri = event.eventImage
     val caption = event.eventDescription.orEmpty()
     val tagsList = tags?.map { it.tagName }
-    val timeStart = event.timeStart.toString()
-    val timeEnd = event.timeEnd.toString()
+    val timeStart = format.format(event.timeStart)
+    val timeEnd = format.format(event.timeEnd)
     val place = event.eventLocation
 
 
@@ -279,10 +284,11 @@ fun EventItem(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = place,
+                    text = place.take(10) + if (place.length > 10) "..." else "" + "",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .clickable(onClick = { showMapDialog = true })
+                        .width(50.dp)
                 )
             }
         }

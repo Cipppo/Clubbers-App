@@ -75,7 +75,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Objects
@@ -427,8 +427,8 @@ fun NewEventScreen(
                 shape = MaterialTheme.shapes.small,
                 modifier = modifier
                     .width(250.dp)
-                    .height(150.dp),
-                maxLines = 4,
+                    .height(100.dp),
+                maxLines = 3,
                 supportingText = {
                     if (isButtonClicked && eventLocation.isEmpty()) {
                         Text(
@@ -582,8 +582,8 @@ fun NewEventScreen(
                             eventImage = localImageDir,
                             eventLocation = eventLocation,
                             eventDescription = eventCaption,
-                            timeStart = Date(startEventDate.toEpochSecond(ZoneOffset.UTC)),
-                            timeEnd = Date(endEventDate.toEpochSecond(ZoneOffset.UTC)),
+                            timeStart = Date.from(startEventDate.atZone(ZoneId.systemDefault()).toInstant()),
+                            timeEnd = Date.from(endEventDate.atZone(ZoneId.systemDefault()).toInstant()),
                             maxParticipants = maxParticipants,
                             participants = participants,
                             eventAdminId = adminId
