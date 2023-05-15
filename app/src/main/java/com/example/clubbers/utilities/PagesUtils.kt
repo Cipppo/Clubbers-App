@@ -1,8 +1,8 @@
 package com.example.clubbers.utilities
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -13,15 +13,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,10 +44,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
@@ -73,12 +87,17 @@ fun CreateSearchTimeLine(
                 .fillMaxSize(),
             content = {
                 stickyHeader {
-                    SearchBar(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .fillMaxWidth()
+                    AutoCompleteSearchBar(
+                        eventNames = events.map {
+                            it.eventName
+                        }
                     )
+//                    SearchBar(
+//                        modifier = Modifier
+//                            .background(MaterialTheme.colorScheme.surface)
+//                            .padding(horizontal = 16.dp, vertical = 8.dp)
+//                            .fillMaxWidth()
+//                    )
                     Divider(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                         thickness = 1.dp,
@@ -132,32 +151,115 @@ fun CreateParticipatedEventTimeLine(
 }
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(modifier: Modifier = Modifier) {
+fun AutoCompleteSearchBar(
+    eventNames: List<String>
+) {
     var searchText by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
-    OutlinedTextField (
+    OutlinedTextField(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                textFieldSize = coordinates.size.toSize()
+            },
         value = searchText,
-        onValueChange = { searchText = it },
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        label = { Text(text = "Search") },
+        onValueChange = {
+            searchText = it
+            expanded = true
+                        },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary,
             containerColor = MaterialTheme.colorScheme.surface,
         ),
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontSize = MaterialTheme.typography.bodySmall.fontSize
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
         singleLine = true,
-        leadingIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_search_24),
-                contentDescription = "Search icon"
-            )
+        trailingIcon = {
+            Row() {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowDropDown,
+                        contentDescription = "Dropdown menu")
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_check_24),
+                        contentDescription = "Search")
+                }
+            }
         }
     )
+    
+    AnimatedVisibility(visible = expanded) {
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 5.dp)
+                .width(textFieldSize.width.dp),
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .heightIn(max = 150.dp)
+            ) {
+                if (searchText.isNotEmpty()) {
+                    items(
+                        eventNames.filter {
+                            it.lowercase()
+                                .contains(searchText.lowercase())
+                        }
+                            .sorted()
+                    ) {
+                        EventNames(title = it) { title ->
+                            searchText = title
+                            expanded = false
+                        }
+                    }
+                } else {
+                    items(
+                        eventNames.sorted()
+                    ) {
+                        EventNames(title = it) { title ->
+                            searchText = title
+                            expanded = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun EventNames(
+    title: String,
+    onSelect: (String) -> Unit
+) {
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = { onSelect(title) }
+            )
+            .padding(10.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = MaterialTheme.typography.bodySmall.fontSize
+        )
+    }
 }
 
 
