@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clubbers.R
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.maxkeppeker.sheets.core.CoreDialog
 import com.maxkeppeker.sheets.core.models.CoreSelection
 import com.maxkeppeker.sheets.core.models.base.Header
@@ -156,4 +163,66 @@ fun NumbersDialog(
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MapDialog(
+    title: String,
+    sheetState: SheetState,
+    placeName: String,
+    initialCameraPosition: CameraPosition,
+    locationLatLng: LatLng
+) {
+    CoreDialog(
+        state = sheetState,
+        selection = CoreSelection(
+            withButtonView = false
+        ),
+        header = Header.Default(
+            title = title
+        ),
+        body = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                MapView(
+                    placeName = placeName,
+                    initialCameraPosition = initialCameraPosition,
+                    markerPosition = locationLatLng
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun MapView(
+    placeName: String,
+    initialCameraPosition: CameraPosition,
+    markerPosition: LatLng
+) {
+    val cameraPositionState = rememberCameraPositionState { position = initialCameraPosition }
+    val markerState = MarkerState(markerPosition)
+
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(500.dp)
+        .fillMaxWidth()
+        .clip(shape = MaterialTheme.shapes.small)
+    ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            Marker(
+                state = markerState,
+                title = placeName,
+            )
+        }
+    }
 }

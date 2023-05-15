@@ -5,13 +5,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
@@ -29,14 +26,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -55,10 +51,7 @@ import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -177,14 +170,14 @@ fun EventItem(
     event: Event,
     onClickAction: () -> Unit
 ) {
-    var showMapDialog by rememberSaveable { mutableStateOf(false) }
-
     val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     adminsViewModel.getAdminById(event.eventAdminId)
     val admin by adminsViewModel.admin.collectAsState()
     eventHasTagsViewModel.getTagsByEventId(event.eventId)
     val tags by eventHasTagsViewModel.tags.collectAsState()
+
+    val mapSheetState = rememberSheetState()
 
     val eventTitle = event.eventName
     val adminName = admin?.adminUsername
@@ -296,58 +289,23 @@ fun EventItem(
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = place.name.take(10) + if (place.name.length > 10) "..." else "" + "",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall
+                        .copy(textDecoration = TextDecoration.Underline),
                     modifier = Modifier
-                        .clickable(onClick = { showMapDialog = true })
+                        .clickable(onClick = { mapSheetState.show() })
                         .widthIn(max = 100.dp)
                 )
             }
         }
     }
 
-    if (showMapDialog) {
-        val locationLatLng = LatLng(place.latitude, place.longitude)
-        val initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
-        AlertDialog(
-            onDismissRequest = { showMapDialog = false },
-            confirmButton = {
-                TextButton(onClick = { showMapDialog = false }) {
-                    Text(text = "Close")
-                }
-            },
-            text = {
-                MapView(
-                    placeName = place.name,
-                    initialCameraPosition = initialCameraPosition,
-                    markerPosition = locationLatLng
-                )
-            }
-        )
-    }
-}
-
-@Composable
-fun MapView(
-    placeName: String,
-    initialCameraPosition: CameraPosition,
-    markerPosition: LatLng
-) {
-    val cameraPositionState = rememberCameraPositionState { position = initialCameraPosition }
-    val markerState = MarkerState(markerPosition)
-
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(300.dp)
-        .clip(shape = MaterialTheme.shapes.small)
-    ) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
-        ) {
-            Marker(
-                state = markerState,
-                title = placeName,
-            )
-        }
-    }
+    val locationLatLng = LatLng(place.latitude, place.longitude)
+    val initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
+    MapDialog(
+        title = "Location Map",
+        sheetState = mapSheetState,
+        placeName = place.name,
+        initialCameraPosition = initialCameraPosition,
+        locationLatLng = locationLatLng
+    )
 }
