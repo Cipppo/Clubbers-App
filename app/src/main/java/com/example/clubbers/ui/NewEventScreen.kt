@@ -108,6 +108,8 @@ fun NewEventScreen(
     var eventCaption by rememberSaveable { mutableStateOf("") }
     var eventTitle by rememberSaveable { mutableStateOf("") }
     var eventLocation by rememberSaveable { mutableStateOf("")}
+    var eventLocationLat by rememberSaveable { mutableStateOf(0.0)}
+    var eventLocationLon by rememberSaveable { mutableStateOf(0.0)}
 
     val captionMaxChar = 255
     val titleMaxChar = 30
@@ -458,7 +460,9 @@ fun NewEventScreen(
                         val coroutineScope = CoroutineScope(Dispatchers.Main)
                         coroutineScope.launch {
                             locationsViewModel.location.collect {
-                                eventLocation = it
+                                eventLocation = it.name
+                                eventLocationLat = it.latitude
+                                eventLocationLon = it.longitude
                             }
                         }
                     } else {
@@ -581,6 +585,8 @@ fun NewEventScreen(
                             eventName = eventTitle,
                             eventImage = localImageDir,
                             eventLocation = eventLocation,
+                            eventLocationLat = eventLocationLat,
+                            eventLocationLon = eventLocationLon,
                             eventDescription = eventCaption,
                             timeStart = Date.from(startEventDate.atZone(ZoneId.systemDefault()).toInstant()),
                             timeEnd = Date.from(endEventDate.atZone(ZoneId.systemDefault()).toInstant()),

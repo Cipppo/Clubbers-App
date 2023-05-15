@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
@@ -185,6 +186,7 @@ fun EventItem(
     eventHasTagsViewModel.getTagsByEventId(event.eventId)
     val tags by eventHasTagsViewModel.tags.collectAsState()
 
+    val eventTitle = event.eventName
     val adminName = admin?.adminUsername
     val proPicUri = admin?.adminImage
     val imageUri = event.eventImage
@@ -192,7 +194,11 @@ fun EventItem(
     val tagsList = tags?.map { it.tagName }
     val timeStart = format.format(event.timeStart)
     val timeEnd = format.format(event.timeEnd)
-    val place = event.eventLocation
+    val place = LocationDetails(
+        name = event.eventLocation,
+        latitude = event.eventLocationLat,
+        longitude = event.eventLocationLon
+    )
 
 
     ElevatedCard(
@@ -240,6 +246,11 @@ fun EventItem(
                 )
                 Spacer(modifier = Modifier.padding(end = 8.dp))
                 adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = eventTitle,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Image(
                 painter = rememberAsyncImagePainter(
@@ -284,19 +295,19 @@ fun EventItem(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = place.take(10) + if (place.length > 10) "..." else "" + "",
+                    text = place.name.take(10) + if (place.name.length > 10) "..." else "" + "",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .clickable(onClick = { showMapDialog = true })
-                        .width(50.dp)
+                        .widthIn(max = 100.dp)
                 )
             }
         }
     }
 
     if (showMapDialog) {
-        val singapore = LatLng(1.35, 103.81)
-        val initialCameraPosition = CameraPosition.fromLatLngZoom(singapore, 10f)
+        val locationLatLng = LatLng(place.latitude, place.longitude)
+        val initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
         AlertDialog(
             onDismissRequest = { showMapDialog = false },
             confirmButton = {
@@ -305,7 +316,11 @@ fun EventItem(
                 }
             },
             text = {
-                MapView(initialCameraPosition = initialCameraPosition, markerPosition = singapore)
+                MapView(
+                    placeName = place.name,
+                    initialCameraPosition = initialCameraPosition,
+                    markerPosition = locationLatLng
+                )
             }
         )
     }
@@ -313,6 +328,7 @@ fun EventItem(
 
 @Composable
 fun MapView(
+    placeName: String,
     initialCameraPosition: CameraPosition,
     markerPosition: LatLng
 ) {
@@ -330,7 +346,7 @@ fun MapView(
         ) {
             Marker(
                 state = markerState,
-                title = "Title",
+                title = placeName,
             )
         }
     }

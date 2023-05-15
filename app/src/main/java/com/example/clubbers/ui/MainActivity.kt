@@ -18,6 +18,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.example.clubbers.NavigationApp
+import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.ui.theme.ClubbersTheme
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -118,10 +119,24 @@ class MainActivity : ComponentActivity() {
             { response ->
                 if (response.length() > 0) {
                     val first = response.get(0) as JSONObject
-                    val locationN = first.get("display_name").toString()
-                    locationsViewModel.setEventLocation(locationN)
+                    val locationName = first.get("display_name").toString()
+                    val locationLat = first.get("lat").toString().toDouble()
+                    val locationLon = first.get("lon").toString().toDouble()
+                    locationsViewModel.setEventLocation(
+                        LocationDetails(
+                            locationName,
+                            locationLat,
+                            locationLon
+                        )
+                    )
                 } else {
-                    locationsViewModel.setEventLocation("")
+                    locationsViewModel.setEventLocation(
+                        LocationDetails(
+                            "",
+                            0.0,
+                            0.0
+                        )
+                    )
                 }
                 connectivityManager.unregisterNetworkCallback(networkCallback)
                 requestingData.value = false
