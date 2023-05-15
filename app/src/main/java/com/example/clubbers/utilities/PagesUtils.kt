@@ -92,12 +92,6 @@ fun CreateSearchTimeLine(
                             it.eventName
                         }
                     )
-//                    SearchBar(
-//                        modifier = Modifier
-//                            .background(MaterialTheme.colorScheme.surface)
-//                            .padding(horizontal = 16.dp, vertical = 8.dp)
-//                            .fillMaxWidth()
-//                    )
                     Divider(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                         thickness = 1.dp,
