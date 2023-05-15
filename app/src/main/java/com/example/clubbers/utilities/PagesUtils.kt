@@ -1,10 +1,12 @@
 package com.example.clubbers.utilities
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +42,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,9 +64,12 @@ import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.data.entities.Participates
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.UsersViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
@@ -77,9 +84,12 @@ fun CreateSearchTimeLine(
     onClickAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel,
 ) {
-    val events = eventsViewModel.events.collectAsState(initial = listOf()).value
+    eventsViewModel.getAllEvents()
+    val events by eventsViewModel.events.collectAsState()
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -105,6 +115,9 @@ fun CreateSearchTimeLine(
                         adminsViewModel = adminsViewModel,
                         eventHasTagsViewModel = eventHasTagsViewModel,
                         event = events[index],
+                        participatesViewModel = participatesViewModel,
+                        usersViewModel = usersViewModel,
+                        isSingleEvent = false,
                         onClickAction = onClickAction
                     )
                 }
@@ -121,7 +134,9 @@ fun CreateParticipatedEventTimeLine(
     onClickAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel,
 ) {
     val events = eventsViewModel.events.collectAsState(initial = listOf()).value
     Scaffold(modifier = modifier) { innerPadding ->
@@ -136,6 +151,9 @@ fun CreateParticipatedEventTimeLine(
                         adminsViewModel = adminsViewModel,
                         eventHasTagsViewModel = eventHasTagsViewModel,
                         event = events[index],
+                        participatesViewModel = participatesViewModel,
+                        usersViewModel = usersViewModel,
+                        isSingleEvent = false,
                         onClickAction = onClickAction
                     )
                 }
@@ -182,7 +200,7 @@ fun AutoCompleteSearchBar(
         ),
         singleLine = true,
         trailingIcon = {
-            Row() {
+            Row {
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         imageVector = Icons.Rounded.ArrowDropDown,
@@ -263,6 +281,9 @@ fun EventItem(
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel,
+    isSingleEvent: Boolean,
     event: Event,
     onClickAction: () -> Unit
 ) {
@@ -289,7 +310,6 @@ fun EventItem(
         longitude = event.eventLocationLon
     )
 
-
     ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -308,7 +328,7 @@ fun EventItem(
         }
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(bottom = 8.dp)
@@ -369,7 +389,7 @@ fun EventItem(
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
             Text(
-                text = "Tags: ${ tagsList?.joinToString(separator = ", ") }",
+                text = "Tags: ${tagsList?.joinToString(separator = ", ")}",
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
@@ -391,6 +411,50 @@ fun EventItem(
                         .clickable(onClick = { mapSheetState.show() })
                         .widthIn(max = 100.dp)
                 )
+            }
+            if (isSingleEvent) {
+
+                participatesViewModel.getParticipants(event.eventId)
+                val participants by participatesViewModel.participants.collectAsState()
+
+                val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                    .getString("USER_LOGGED", "None")
+                usersViewModel.getUserByEmail(userName.orEmpty())
+                val user by usersViewModel.userSelected.collectAsState()
+
+                var isUserParticipating by rememberSaveable { mutableStateOf(false) }
+                isUserParticipating = participants.contains(user)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    ElevatedButton(
+                        onClick = {
+                            val participant = user?.let {
+                                Participates(
+                                    eventId = event.eventId,
+                                    userId = it.userId
+                                )
+                            }
+                            if (isUserParticipating) participant?.let {
+                                participatesViewModel.deleteParticipant(it)
+                            } else participant?.let {
+                                participatesViewModel.addNewParticipant(it)
+                            }
+                        }
+                    ) {
+                        if (isUserParticipating) {
+                            Text(
+                                text = "Leave",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else {
+                            Text(text = "Join")
+                        }
+                    }
+                }
             }
         }
     }

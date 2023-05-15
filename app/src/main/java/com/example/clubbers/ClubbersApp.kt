@@ -69,6 +69,7 @@ import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -394,14 +395,18 @@ private fun NavigationGraph(
 
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
-
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+
             TodayScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -409,10 +414,15 @@ private fun NavigationGraph(
         composable(route = AppScreen.Event.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+
             EventScreen(
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -446,11 +456,15 @@ private fun NavigationGraph(
         composable(route = AppScreen.EventSelection.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             SelectEventForPostScreen(
                 onEventSelected = { navController.navigate(AppScreen.NewPost.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -458,11 +472,15 @@ private fun NavigationGraph(
         composable(route = AppScreen.Discover.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             DiscoverScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 

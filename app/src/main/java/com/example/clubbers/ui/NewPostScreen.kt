@@ -48,7 +48,6 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.utilities.createImageFile
-import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import java.util.Objects
 
@@ -234,10 +233,10 @@ fun NewPostScreen(
         Spacer(modifier = modifier.weight(1f))
 
         // Debug
-        Text(text = "Debug: Show last saved image in app dir")
-        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-            lastFile?.let { Text(text = it) }
-        }
+//        Text(text = "Debug: Show last saved image in app dir")
+//        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
+//            lastFile?.let { Text(text = it) }
+//        }
 
         // Post button
         Button(

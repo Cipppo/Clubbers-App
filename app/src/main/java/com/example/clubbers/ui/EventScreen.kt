@@ -11,6 +11,8 @@ import com.example.clubbers.utilities.EventItem
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.UsersViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -18,7 +20,9 @@ fun EventScreen(
     modifier: Modifier = Modifier,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel
 ) {
     val event = eventsViewModel.eventSelected
     Scaffold(modifier = modifier) { innerPadding ->
@@ -33,6 +37,9 @@ fun EventScreen(
                     adminsViewModel = adminsViewModel,
                     eventHasTagsViewModel = eventHasTagsViewModel,
                     event = event!!,
+                    participatesViewModel = participatesViewModel,
+                    usersViewModel = usersViewModel,
+                    isSingleEvent = true,
                     onClickAction = { }
                 )
             }

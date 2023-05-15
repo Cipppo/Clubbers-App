@@ -6,6 +6,8 @@ import com.example.clubbers.utilities.CreateParticipatedEventTimeLine
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.UsersViewModel
 
 @Composable
 fun SelectEventForPostScreen(
@@ -13,13 +15,17 @@ fun SelectEventForPostScreen(
     onEventSelected: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel
 ) {
     CreateParticipatedEventTimeLine(
         modifier = modifier,
         onClickAction = onEventSelected,
         eventsViewModel = eventsViewModel,
         adminsViewModel = adminsViewModel,
-        eventHasTagsViewModel = eventHasTagsViewModel
+        eventHasTagsViewModel = eventHasTagsViewModel,
+        participatesViewModel = participatesViewModel,
+        usersViewModel = usersViewModel
     )
 }

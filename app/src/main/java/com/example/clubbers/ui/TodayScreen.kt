@@ -6,6 +6,8 @@ import com.example.clubbers.utilities.CreateSearchTimeLine
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.UsersViewModel
 
 @Composable
 fun TodayScreen(
@@ -13,7 +15,9 @@ fun TodayScreen(
     onEventClicked: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel
 ) {
     /**
      * TODO: The screen should display the events for today
@@ -24,6 +28,8 @@ fun TodayScreen(
         onClickAction = onEventClicked,
         eventsViewModel = eventsViewModel,
         adminsViewModel = adminsViewModel,
-        eventHasTagsViewModel = eventHasTagsViewModel
+        eventHasTagsViewModel = eventHasTagsViewModel,
+        participatesViewModel = participatesViewModel,
+        usersViewModel = usersViewModel
     )
 }
