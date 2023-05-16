@@ -30,6 +30,7 @@ fun TodayScreen(
         adminsViewModel = adminsViewModel,
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
-        usersViewModel = usersViewModel
+        usersViewModel = usersViewModel,
+        isTodayEvents = true
     )
 }

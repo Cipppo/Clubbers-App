@@ -55,6 +55,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -89,9 +91,21 @@ fun CreateSearchTimeLine(
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel,
+    isTodayEvents: Boolean
 ) {
     eventsViewModel.getAllEvents()
     val events by eventsViewModel.events.collectAsState()
+    val todayEvents = if (isTodayEvents) {
+        events.filter { event ->
+            val timeStart = event.timeStart
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val eventDate = sdf.format(timeStart)
+            val currentDate = sdf.format(System.currentTimeMillis())
+            eventDate == currentDate
+        }
+    } else {
+        emptyList()
+    }
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -111,12 +125,12 @@ fun CreateSearchTimeLine(
                             .shadow(5.dp, RoundedCornerShape(1.dp))
                     )
                 }
-                items(events.size) { index ->
+                items(if(isTodayEvents) todayEvents.size else events.size) { index ->
                     EventItem(
                         eventsViewModel = eventsViewModel,
                         adminsViewModel = adminsViewModel,
                         eventHasTagsViewModel = eventHasTagsViewModel,
-                        event = events[index],
+                        event = if (isTodayEvents) todayEvents[index] else events[index],
                         participatesViewModel = participatesViewModel,
                         usersViewModel = usersViewModel,
                         isSingleEvent = false,
@@ -413,14 +427,31 @@ fun EventItem(
                     Text(text = "Ends: $timeEnd", style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = place.name.take(10) + if (place.name.length > 10) "..." else "" + "",
-                    style = MaterialTheme.typography.bodySmall
-                        .copy(textDecoration = TextDecoration.Underline),
-                    modifier = Modifier
-                        .clickable(onClick = { mapSheetState.show() })
-                        .widthIn(max = 100.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    val textColor = if (event.participants == event.maxParticipants) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    Text(
+                        text = AnnotatedString(
+                            text = "Participants: "
+                        ) + AnnotatedString(
+                            text = "${event.participants}",
+                            spanStyle = SpanStyle(color = textColor)
+                        ) + AnnotatedString(
+                            text = " / ${event.maxParticipants}"
+                        ),
+
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = place.name.take(15) + if (place.name.length > 15) "..." else "",
+                        style = MaterialTheme.typography.bodySmall
+                            .copy(textDecoration = TextDecoration.Underline),
+                        modifier = Modifier
+                            .clickable(onClick = { mapSheetState.show() })
+                            .widthIn(max = 100.dp)
+                    )
+                }
             }
             if (isSingleEvent) {
 

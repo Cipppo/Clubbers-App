@@ -26,6 +26,7 @@ fun DiscoverScreen(
         adminsViewModel = adminsViewModel,
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
-        usersViewModel = usersViewModel
+        usersViewModel = usersViewModel,
+        isTodayEvents = false
     )
 }
