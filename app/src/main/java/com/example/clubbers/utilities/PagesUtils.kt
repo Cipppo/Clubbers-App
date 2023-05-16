@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -50,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -373,13 +375,21 @@ fun EventItem(
                 ),
                 contentDescription = "Post/Event image",
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.medium)
+                    .fillMaxSize()
                     .border(
                         1.dp,
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                         shape = MaterialTheme.shapes.medium
                     )
-                    .heightIn(min = 180.dp)
+                    .run {
+                        if (isSingleEvent) {
+                            heightIn(180.dp)
+                        } else {
+                            height(180.dp)
+                        }
+                    },
+                contentScale = if (isSingleEvent) ContentScale.Crop else ContentScale.Fit
             )
             Text(
                 text = caption,
@@ -442,8 +452,11 @@ fun EventItem(
                                 participatesViewModel.deleteParticipant(it)
                             } else participant?.let {
                                 participatesViewModel.addNewParticipant(it)
+                                event.participants++
+                                eventsViewModel.updateEvent(event)
                             }
-                        }
+                        },
+                        enabled = event.participants < event.maxParticipants!!
                     ) {
                         if (isUserParticipating) {
                             Text(

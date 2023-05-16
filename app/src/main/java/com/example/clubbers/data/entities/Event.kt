@@ -45,7 +45,7 @@ data class Event(
     val maxParticipants: Int?,
 
     @ColumnInfo(name = "participants")
-    val participants: Int = 0,
+    var participants: Int = 0,
 
     @ColumnInfo(name = "event_admin_id")
     val eventAdminId: Int
