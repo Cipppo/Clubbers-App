@@ -508,16 +508,20 @@ private fun NavigationGraph(
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
             PersonalProfileScreen(
-                onOption = { navController.navigate(AppScreen.UserOption.name)},
+                onOption = {navController.navigate(AppScreen.UserOption.name)},
                 onNotify = {navController.navigate(AppScreen.Notifications.name)}
             )
         }
 
+        // Admin Registration Screen
         composable(route = AppScreen.AdminRegistration.name){
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             ClubRegistrationScreen(
                 adminsViewModel,
-                onRegister = {navController.navigate(AppScreen.Home.name)}
+                onRegister = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                }
             )
         }
 
@@ -529,12 +533,15 @@ private fun NavigationGraph(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
                 switchToAdminRegister = {navController.navigate((AppScreen.AdminRegistration.name))},
                 usersViewModel = usersViewModel,
-                onLogin = {navController.navigate(AppScreen.Home.name)},
+                onLogin = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                          },
                 adminsViewModel = adminsViewModel
             )
         }
 
-        // Registration Screen
+        // User Registration Screen
         composable(route = AppScreen.Registration.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             RegistrationScreen(
@@ -546,12 +553,17 @@ private fun NavigationGraph(
             )
         }
 
+        // User Option Screen
         composable(route = AppScreen.UserOption.name){
             userOptionScreen(
-                onLogout = {navController.navigate(AppScreen.Login.name)}
+                onLogout = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Login.name)
+                }
             )
         }
 
+        // Notifications Screen
         composable(route = AppScreen.Notifications.name){
             notificationsScreen()
         }
