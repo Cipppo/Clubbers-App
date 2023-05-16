@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface EventsDAO {
     // Get all events
-    @Query("SELECT * FROM events ORDER BY event_name ASC")
+    @Query("SELECT * FROM events ORDER BY time_start ASC")
     fun getEvents(): Flow<List<Event>>
 
     // Get event by id
