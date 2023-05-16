@@ -18,6 +18,10 @@ interface EventsDAO {
     @Query("SELECT * FROM events WHERE event_id = :eventId")
     fun getEventById(eventId: Int): Flow<Event>
 
+    // Get events by event name
+    @Query("SELECT * FROM events WHERE event_name LIKE '%' || :eventName || '%' ORDER BY time_start ASC")
+    fun getEventsByName(eventName: String): Flow<List<Event>>
+
     // Insert event
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(event: Event)

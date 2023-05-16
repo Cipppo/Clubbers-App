@@ -55,6 +55,7 @@ import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.EventScreen
+import com.example.clubbers.ui.FoundEventsScreen
 import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewEventScreen
@@ -88,6 +89,7 @@ sealed class AppScreen(val name: String) {
     // Other Screens
     object Event : AppScreen("Event Details")
     object EventSelection : AppScreen("Select Event")
+    object FoundEvents : AppScreen("Found Events")
     object User : AppScreen("User Profile")
 
     //user registration Screens
@@ -402,6 +404,7 @@ private fun NavigationGraph(
 
             TodayScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                onSearchAction = { navController.navigate(AppScreen.FoundEvents.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
@@ -418,6 +421,23 @@ private fun NavigationGraph(
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
 
             EventScreen(
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
+            )
+        }
+
+        // Found Events Screen
+        composable(route = AppScreen.FoundEvents.name) {
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+
+            FoundEventsScreen(
+                onEventSelected = { navController.navigate(AppScreen.Event.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
@@ -476,6 +496,7 @@ private fun NavigationGraph(
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             DiscoverScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                onSearchAction = { navController.navigate(AppScreen.FoundEvents.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,

@@ -1,6 +1,7 @@
 package com.example.clubbers.utilities
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -86,6 +87,7 @@ import java.util.Locale
 fun CreateSearchTimeLine(
     modifier: Modifier,
     onClickAction: () -> Unit,
+    onSearchAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
@@ -114,9 +116,9 @@ fun CreateSearchTimeLine(
             content = {
                 stickyHeader {
                     AutoCompleteSearchBar(
-                        eventNames = events.map {
-                            it.eventName
-                        }
+                        events = events,
+                        eventsViewModel = eventsViewModel,
+                        onSearchAction = onSearchAction
                     )
                     Divider(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
@@ -152,9 +154,10 @@ fun CreateParticipatedEventTimeLine(
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
+    passedEvents: List<Event> = emptyList(),
     usersViewModel: UsersViewModel,
 ) {
-    val events = eventsViewModel.events.collectAsState(initial = listOf()).value
+    val events = passedEvents.ifEmpty { eventsViewModel.events.collectAsState(initial = listOf()).value }
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -182,11 +185,15 @@ fun CreateParticipatedEventTimeLine(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutoCompleteSearchBar(
-    eventNames: List<String>
+    events: List<Event>,
+    eventsViewModel: EventsViewModel,
+    onSearchAction: () -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
+    val eventNames = events.map { it.eventName }.distinct()
+    val context = LocalContext.current
 
     OutlinedTextField(
         modifier = Modifier
@@ -222,7 +229,14 @@ fun AutoCompleteSearchBar(
                         imageVector = Icons.Rounded.ArrowDropDown,
                         contentDescription = "Dropdown menu")
                 }
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = {
+                    if (searchText.isNotEmpty() && searchText == eventNames.find { it == searchText }) {
+                        eventsViewModel.getEventsByName(searchText)
+                        onSearchAction()
+                    } else {
+                        Toast.makeText(context, "Event not found", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_check_24),
                         contentDescription = "Search")

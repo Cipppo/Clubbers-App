@@ -11,7 +11,7 @@ import java.util.Date
         parentColumns = arrayOf("admin_id"),
         childColumns = arrayOf("event_admin_id"),
         onDelete = ForeignKey.CASCADE)
-])
+                                            ])
 data class Event(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "event_id")

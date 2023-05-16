@@ -46,6 +46,13 @@ class EventsViewModel @Inject constructor(
             }
     }
 
+    fun getEventsByName(eventName: String) = viewModelScope.launch {
+        repository.getEventsByName(eventName)
+            .collect {
+                _events.value = it
+            }
+    }
+
     fun updateEvent(event: Event) = viewModelScope.launch {
         repository.updateEvent(event)
     }

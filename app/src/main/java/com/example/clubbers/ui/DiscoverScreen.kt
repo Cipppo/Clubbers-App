@@ -13,6 +13,7 @@ import com.example.clubbers.viewModel.UsersViewModel
 fun DiscoverScreen(
     modifier: Modifier = Modifier,
     onEventClicked: () -> Unit,
+    onSearchAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
@@ -22,6 +23,7 @@ fun DiscoverScreen(
     CreateSearchTimeLine(
         modifier = modifier,
         onClickAction = onEventClicked,
+        onSearchAction = onSearchAction,
         eventsViewModel = eventsViewModel,
         adminsViewModel = adminsViewModel,
         eventHasTagsViewModel = eventHasTagsViewModel,
