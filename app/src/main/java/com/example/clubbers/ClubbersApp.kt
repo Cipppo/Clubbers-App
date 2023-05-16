@@ -65,7 +65,7 @@ import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.notificationsScreen
-import com.example.clubbers.ui.userOptionScreen
+import com.example.clubbers.ui.UserOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
@@ -264,8 +264,10 @@ fun NavigationApp (
     val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
         .getString("USER_LOGGED", "None")
     var isAdmin by rememberSaveable { mutableStateOf(false) }
+
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
+
     if (!userName.isNullOrEmpty()) {
         val usersAndAdminsViewModel = hiltViewModel<UsersAndAdminsViewsViewModel>()
         isAdmin = usersAndAdminsViewModel.isAdmin(userName)
@@ -555,7 +557,7 @@ private fun NavigationGraph(
 
         // User Option Screen
         composable(route = AppScreen.UserOption.name){
-            userOptionScreen(
+            UserOptionScreen(
                 onLogout = {
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Login.name)
