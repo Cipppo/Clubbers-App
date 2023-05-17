@@ -447,6 +447,7 @@ private fun NavigationGraph(
         // Event Screen
         composable(route = AppScreen.Event.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val postsViewModel = hiltViewModel<PostsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             val usersViewModel = hiltViewModel<UsersViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
@@ -456,7 +457,8 @@ private fun NavigationGraph(
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
-                usersViewModel = usersViewModel
+                usersViewModel = usersViewModel,
+                postsViewModel = postsViewModel
             )
         }
 

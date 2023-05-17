@@ -71,6 +71,7 @@ import com.example.clubbers.R
 import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.entities.Participates
+import com.example.clubbers.data.entities.Post
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
@@ -542,4 +543,100 @@ fun EventItem(
         initialCameraPosition = initialCameraPosition,
         locationLatLng = locationLatLng
     )
+}
+
+@Composable
+fun PostItem(
+    usersViewModel: UsersViewModel,
+    isSinglePost: Boolean,
+    post: Post
+) {
+    usersViewModel.getUserById(post.postUserId)
+    val user by usersViewModel.userSelected.collectAsState()
+
+    val proPicUri = user?.userImage
+    val userName = user?.userName
+    val imageUri = post.postImage
+
+    ElevatedCard(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                shape = MaterialTheme.shapes.small
+            ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(
+                            LocalContext.current
+                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                            crossfade(true)
+                            placeholder(R.drawable.ic_launcher_foreground)
+                            error(R.drawable.ic_launcher_foreground)
+                        }).build()
+                    ),
+                    contentDescription = "Profile picture",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            shape = CircleShape
+                        )
+                )
+                Spacer(modifier = Modifier.padding(end = 8.dp))
+                userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+            }
+            Image(
+                painter = rememberAsyncImagePainter(
+                    ImageRequest.Builder(
+                        LocalContext.current
+                    ).data(data = imageUri).apply(block = fun ImageRequest.Builder.() {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_launcher_foreground)
+                        error(R.drawable.ic_launcher_foreground)
+                    }).build()
+                ),
+                contentDescription = "Post/Event image",
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .fillMaxSize()
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    .run {
+                        if (isSinglePost) {
+                            heightIn(180.dp)
+                        } else {
+                            height(180.dp)
+                        }
+                    },
+                contentScale = if (isSinglePost) ContentScale.Crop else ContentScale.Fit
+            )
+            Text(
+                text = post.postCaption,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            Spacer(modifier = Modifier.padding(top = 8.dp))
+        }
+    }
 }
