@@ -590,14 +590,14 @@ fun FadeInContent(
     val fadeInAnimationProgress = animateFloatAsState(
         targetValue = 1f,
         animationSpec = tween(
-            durationMillis = 500,
+            durationMillis = 1000,
             delayMillis = fadeInAnimationDelay.toInt(),
         )
     ).value
 
     AnimatedVisibility(
-        visible = fadeInAnimationProgress > 0.5f,
-        enter = fadeIn(animationSpec = tween(durationMillis = 500))
+        visible = fadeInAnimationProgress > 0.2f,
+        enter = fadeIn(animationSpec = tween(durationMillis = 1000))
     ) {
         content()
     }
