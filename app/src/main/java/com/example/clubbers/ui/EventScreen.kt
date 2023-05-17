@@ -28,7 +28,8 @@ fun EventScreen(
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    onClickAction: () -> Unit
 ) {
     val event = eventsViewModel.eventSelected
     postsViewModel.getPostsByEventId(event!!.eventId)
@@ -55,8 +56,10 @@ fun EventScreen(
             items(posts) { post ->
                 PostItem(
                     usersViewModel = usersViewModel,
+                    postsViewModel = postsViewModel,
                     post = post,
-                    isSinglePost = false
+                    isSinglePost = false,
+                    onClickAction = onClickAction
                 )
             }
         }

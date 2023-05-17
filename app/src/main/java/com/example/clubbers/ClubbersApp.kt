@@ -66,6 +66,7 @@ import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewEventScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
+import com.example.clubbers.ui.PostScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
@@ -94,6 +95,7 @@ sealed class AppScreen(val name: String) {
 
     // Other Screens
     object Event : AppScreen("Event Details")
+    object Post : AppScreen("Post Details")
     object EventSelection : AppScreen("Select Event")
     object FoundEvents : AppScreen("Found Events")
     object User : AppScreen("User Profile")
@@ -415,6 +417,7 @@ private fun NavigationGraph(
 
     val eventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
+    val postsViewModel = hiltViewModel<PostsViewModel>()
 
     NavHost(
         navController = navController,
@@ -447,7 +450,6 @@ private fun NavigationGraph(
         // Event Screen
         composable(route = AppScreen.Event.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
-            val postsViewModel = hiltViewModel<PostsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             val usersViewModel = hiltViewModel<UsersViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
@@ -458,7 +460,18 @@ private fun NavigationGraph(
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
                 usersViewModel = usersViewModel,
-                postsViewModel = postsViewModel
+                postsViewModel = postsViewModel,
+                onClickAction = { navController.navigate(AppScreen.Post.name) }
+            )
+        }
+
+        // Post Screen
+        composable(route = AppScreen.Post.name) {
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+
+            PostScreen(
+                postsViewModel = postsViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -481,7 +494,6 @@ private fun NavigationGraph(
 
         // New Post Screen
         composable(route = AppScreen.NewPost.name) {
-            val postsViewModel = hiltViewModel<PostsViewModel>()
             val usersViewModel = hiltViewModel<UsersViewModel>()
             val userMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
                 .getString("USER_LOGGED", "None")!!

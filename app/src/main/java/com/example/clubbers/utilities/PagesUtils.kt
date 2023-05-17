@@ -76,6 +76,7 @@ import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -545,11 +546,14 @@ fun EventItem(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostItem(
     usersViewModel: UsersViewModel,
+    postsViewModel: PostsViewModel,
     isSinglePost: Boolean,
-    post: Post
+    post: Post,
+    onClickAction: () -> Unit
 ) {
     usersViewModel.getUserById(post.postUserId)
     val user by usersViewModel.userSelected.collectAsState()
@@ -569,7 +573,11 @@ fun PostItem(
             ),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
-        )
+        ),
+        onClick = {
+            postsViewModel.selectPost(post)
+            onClickAction()
+        }
     ) {
         Column(
             modifier = Modifier
