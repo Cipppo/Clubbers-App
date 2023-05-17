@@ -46,10 +46,14 @@ class EventsViewModel @Inject constructor(
             }
     }
 
+    private val _foundEvents = MutableStateFlow<List<Event>>(emptyList())
+    val foundEvents: StateFlow<List<Event>> get() = _foundEvents
+
     fun getEventsByName(eventName: String) = viewModelScope.launch {
+        _events.value = emptyList()
         repository.getEventsByName(eventName)
             .collect {
-                _events.value = it
+                _foundEvents.value = it
             }
     }
 

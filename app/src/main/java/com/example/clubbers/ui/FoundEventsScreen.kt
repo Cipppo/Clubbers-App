@@ -21,7 +21,7 @@ fun FoundEventsScreen(
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel
 ) {
-    val events by eventsViewModel.events.collectAsState()
+    val events by eventsViewModel.foundEvents.collectAsState()
     CreateParticipatedEventTimeLine(
         modifier = modifier,
         onClickAction = onEventSelected,
