@@ -58,5 +58,16 @@ class UsersViewModel @Inject constructor(
             }
     }
 
+    private val _userId = MutableStateFlow(0)
+    val userId: StateFlow<Int> get() = _userId
+    fun getUserIdByEmail(email: String) {
+        viewModelScope.launch {
+            repository.getUserIdByEmail(email)
+                .collect { userId ->
+                    _userId.value = userId
+                }
+        }
+    }
+
     fun getAllUsers(): Flow<List<User>> = repository.getAllUsers()
 }
