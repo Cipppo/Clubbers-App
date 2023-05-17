@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -116,7 +117,7 @@ fun CreateSearchTimeLine(
             content = {
                 stickyHeader {
                     AutoCompleteSearchBar(
-                        events = events,
+                        events = if (isTodayEvents) todayEvents else events,
                         eventsViewModel = eventsViewModel,
                         onSearchAction = onSearchAction
                     )
@@ -127,17 +128,34 @@ fun CreateSearchTimeLine(
                             .shadow(5.dp, RoundedCornerShape(1.dp))
                     )
                 }
-                items(if(isTodayEvents) todayEvents.size else events.size) { index ->
-                    EventItem(
-                        eventsViewModel = eventsViewModel,
-                        adminsViewModel = adminsViewModel,
-                        eventHasTagsViewModel = eventHasTagsViewModel,
-                        event = if (isTodayEvents) todayEvents[index] else events[index],
-                        participatesViewModel = participatesViewModel,
-                        usersViewModel = usersViewModel,
-                        isSingleEvent = false,
-                        onClickAction = onClickAction
-                    )
+                if (isTodayEvents && todayEvents.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                            content = {
+                                Text(
+                                    text = "No events today",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(16.dp),
+                                )
+                            }
+                        )
+                    }
+                } else {
+                    items(if(isTodayEvents) todayEvents.size else events.size) { index ->
+                        EventItem(
+                            eventsViewModel = eventsViewModel,
+                            adminsViewModel = adminsViewModel,
+                            eventHasTagsViewModel = eventHasTagsViewModel,
+                            event = if (isTodayEvents) todayEvents[index] else events[index],
+                            participatesViewModel = participatesViewModel,
+                            usersViewModel = usersViewModel,
+                            isSingleEvent = false,
+                            onClickAction = onClickAction
+                        )
+                    }
                 }
             }
         )
