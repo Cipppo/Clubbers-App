@@ -152,7 +152,6 @@ fun CreateSearchTimeLine(
                             event = if (isTodayEvents) todayEvents[index] else events[index],
                             participatesViewModel = participatesViewModel,
                             usersViewModel = usersViewModel,
-                            isSingleEvent = false,
                             onClickAction = onClickAction
                         )
                     }
@@ -190,7 +189,6 @@ fun CreateParticipatedEventTimeLine(
                         event = events[index],
                         participatesViewModel = participatesViewModel,
                         usersViewModel = usersViewModel,
-                        isSingleEvent = false,
                         onClickAction = onClickAction
                     )
                 }
@@ -331,7 +329,7 @@ fun EventItem(
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel,
-    isSingleEvent: Boolean,
+    isSingleEvent: Boolean = false,
     event: Event,
     onClickAction: () -> Unit
 ) {

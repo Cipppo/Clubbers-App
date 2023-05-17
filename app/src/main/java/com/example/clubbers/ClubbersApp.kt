@@ -76,6 +76,7 @@ import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -478,7 +479,17 @@ private fun NavigationGraph(
 
         // New Post Screen
         composable(route = AppScreen.NewPost.name) {
+            val postsViewModel = hiltViewModel<PostsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val userMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                .getString("USER_LOGGED", "None")!!
+            usersViewModel.getUserIdByEmail(userMail)
+            val userId by usersViewModel.userId.collectAsState()
+
             NewPostScreen(
+                postsViewModel = postsViewModel,
+                eventsViewModel = eventsViewModel,
+                userId = userId,
                 onPost = { navController.navigate(AppScreen.Home.name) }
             )
         }

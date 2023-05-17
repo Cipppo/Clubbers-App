@@ -47,14 +47,21 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.Post
 import com.example.clubbers.utilities.createImageFile
+import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
+import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.PostsViewModel
 import java.util.Objects
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewPostScreen(
     modifier: Modifier = Modifier,
+    postsViewModel: PostsViewModel,
+    eventsViewModel: EventsViewModel,
+    userId: Int,
     onPost: () -> Unit
 ) {
     val context = LocalContext.current
@@ -69,6 +76,7 @@ fun NewPostScreen(
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
+    var localImageDir by rememberSaveable { mutableStateOf("") }
     var postCaption by rememberSaveable { mutableStateOf("") }
     val maxChar = 255
 
@@ -242,8 +250,26 @@ fun NewPostScreen(
         Button(
             onClick = {
                 val photoType = "Post"
+                val eventId = eventsViewModel.eventSelected!!.eventId
+
                 if (capturedImageUri.path?.isNotEmpty() == true) {
                     saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
+
+                    context.getFilesFromAppDir().lastOrNull().let { lastFile ->
+                        lastFile?.let {
+                            localImageDir = it
+                        }
+                    }
+
+                    postsViewModel.addNewPost(
+                        Post(
+                            postImage = localImageDir,
+                            postCaption = postCaption,
+                            postUserId = userId,
+                            postEventId = eventId
+                        )
+                    )
+
                     onPost()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
