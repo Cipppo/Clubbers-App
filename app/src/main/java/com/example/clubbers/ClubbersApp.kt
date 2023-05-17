@@ -2,6 +2,10 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -274,100 +278,105 @@ fun NavigationApp (
 
     val snackBarHostState = remember { SnackbarHostState() }
 
-    Scaffold(
-        topBar = {
-                 if (
-                    currentScreen != AppScreen.Registration.name &&
-                    currentScreen != AppScreen.Login.name &&
-                    currentScreen != AppScreen.AdminRegistration.name
-                 ){
-                     TopAppBarFunction(
-                         currentScreen = currentScreen,
-                         canNavigateBack = navController.previousBackStackEntry != null,
-                         navigateUp = { navController.navigateUp() },
-                         onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) }
-                     )
-                 }
-        },
-        snackbarHost = { SnackbarHost(snackBarHostState) },
-        bottomBar = {
-            if (
-                currentScreen != AppScreen.Registration.name &&
-                currentScreen != AppScreen.Login.name &&
-                currentScreen != AppScreen.AdminRegistration.name
-            ) {
-                BottomAppBarFunction(
-                    isAdmin = isAdmin,
-                    currentScreen = currentScreen,
-                    onHomeButtonClicked = {
-                        navController.backQueue.clear()
-                        navController.navigate(AppScreen.Home.name)
-                    },
-                    onTodayButtonClicked = {
-                        if (currentScreen == AppScreen.Today.name) {
-                            navController.popBackStack()
-                            navController.navigate(AppScreen.Today.name)
-                        } else
-                            navController.navigate(AppScreen.Today.name)
-                    },
-                    onNewPostButtonClicked = {
-                        when (currentScreen) {
-                            AppScreen.EventSelection.name -> {
-                                navController.popBackStack()
-                                navController.navigate(AppScreen.EventSelection.name)
-                            }
-
-                            AppScreen.NewPost.name -> {
-                                navController.popBackStack(
-                                    route = AppScreen.EventSelection.name,
-                                    inclusive = true
-                                )
-                                navController.navigate(AppScreen.EventSelection.name)
-                            }
-
-                            else -> navController.navigate(AppScreen.EventSelection.name)
-                        }
-                    },
-                    onNewEventButtonClicked = {
-                       if (currentScreen == AppScreen.NewEvent.name) {
-                           navController.popBackStack()
-                           navController.navigate(AppScreen.NewEvent.name)
-                       } else
-                           navController.navigate(AppScreen.NewEvent.name)
-                    },
-                    onDiscoverButtonClicked = {
-                        if (currentScreen == AppScreen.Discover.name) {
-                            navController.popBackStack()
-                            navController.navigate(AppScreen.Discover.name)
-                        } else
-                            navController.navigate(AppScreen.Discover.name)
-                    },
-                    onProfileButtonClicked = {
-                        if (currentScreen == AppScreen.Profile.name) {
-                            navController.popBackStack()
-                            navController.navigate(AppScreen.Profile.name)
-                        } else
-                            navController.navigate(AppScreen.Profile.name)
+    FadeInContent(
+        fadeInAnimationDelay = 200L,
+        content = {
+            Scaffold(
+                topBar = {
+                    if (
+                        currentScreen != AppScreen.Registration.name &&
+                        currentScreen != AppScreen.Login.name &&
+                        currentScreen != AppScreen.AdminRegistration.name
+                    ) {
+                        TopAppBarFunction(
+                            currentScreen = currentScreen,
+                            canNavigateBack = navController.previousBackStackEntry != null,
+                            navigateUp = { navController.navigateUp() },
+                            onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) }
+                        )
                     }
+                },
+                snackbarHost = { SnackbarHost(snackBarHostState) },
+                bottomBar = {
+                    if (
+                        currentScreen != AppScreen.Registration.name &&
+                        currentScreen != AppScreen.Login.name &&
+                        currentScreen != AppScreen.AdminRegistration.name
+                    ) {
+                        BottomAppBarFunction(
+                            isAdmin = isAdmin,
+                            currentScreen = currentScreen,
+                            onHomeButtonClicked = {
+                                navController.backQueue.clear()
+                                navController.navigate(AppScreen.Home.name)
+                            },
+                            onTodayButtonClicked = {
+                                if (currentScreen == AppScreen.Today.name) {
+                                    navController.popBackStack()
+                                    navController.navigate(AppScreen.Today.name)
+                                } else
+                                    navController.navigate(AppScreen.Today.name)
+                            },
+                            onNewPostButtonClicked = {
+                                when (currentScreen) {
+                                    AppScreen.EventSelection.name -> {
+                                        navController.popBackStack()
+                                        navController.navigate(AppScreen.EventSelection.name)
+                                    }
+
+                                    AppScreen.NewPost.name -> {
+                                        navController.popBackStack(
+                                            route = AppScreen.EventSelection.name,
+                                            inclusive = true
+                                        )
+                                        navController.navigate(AppScreen.EventSelection.name)
+                                    }
+
+                                    else -> navController.navigate(AppScreen.EventSelection.name)
+                                }
+                            },
+                            onNewEventButtonClicked = {
+                                if (currentScreen == AppScreen.NewEvent.name) {
+                                    navController.popBackStack()
+                                    navController.navigate(AppScreen.NewEvent.name)
+                                } else
+                                    navController.navigate(AppScreen.NewEvent.name)
+                            },
+                            onDiscoverButtonClicked = {
+                                if (currentScreen == AppScreen.Discover.name) {
+                                    navController.popBackStack()
+                                    navController.navigate(AppScreen.Discover.name)
+                                } else
+                                    navController.navigate(AppScreen.Discover.name)
+                            },
+                            onProfileButtonClicked = {
+                                if (currentScreen == AppScreen.Profile.name) {
+                                    navController.popBackStack()
+                                    navController.navigate(AppScreen.Profile.name)
+                                } else
+                                    navController.navigate(AppScreen.Profile.name)
+                            }
+                        )
+                    }
+                }
+            ) { innerPadding ->
+                NavigationGraph(
+                    startRequestingData,
+                    navController,
+                    innerPadding,
+                    warningViewModel
                 )
+                val context = LocalContext.current
+                if (warningViewModel.showConnectivitySnackBar.value) {
+                    ConnectivitySnackBarComposable(
+                        snackBarHostState = snackBarHostState,
+                        applicationContext = context,
+                        warningViewModel = warningViewModel
+                    )
+                }
             }
         }
-    ) { innerPadding ->
-        NavigationGraph(
-            startRequestingData,
-            navController,
-            innerPadding,
-            warningViewModel
-        )
-        val context = LocalContext.current
-        if (warningViewModel.showConnectivitySnackBar.value) {
-            ConnectivitySnackBarComposable(
-                snackBarHostState = snackBarHostState,
-                applicationContext = context,
-                warningViewModel = warningViewModel
-            )
-        }
-    }
+    )
 }
 
 @Composable
@@ -556,5 +565,26 @@ private fun NavigationGraph(
             notificationsScreen()
         }
 
+    }
+}
+
+@Composable
+fun FadeInContent(
+    fadeInAnimationDelay: Long,
+    content: @Composable () -> Unit
+) {
+    val fadeInAnimationProgress = animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(
+            durationMillis = 500,
+            delayMillis = fadeInAnimationDelay.toInt(),
+        )
+    ).value
+
+    AnimatedVisibility(
+        visible = fadeInAnimationProgress > 0.5f,
+        enter = fadeIn(animationSpec = tween(durationMillis = 500))
+    ) {
+        content()
     }
 }
