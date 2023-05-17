@@ -2,6 +2,7 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -259,11 +261,22 @@ fun NavigationApp (
     navController: NavHostController = rememberNavController()
 ) {
     val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
-        .getString("USER_LOGGED", "None")
+        .getString("USER_LOGGED", "None").orEmpty()
+
+    var logged = false
+
+
+
+    if(userName != "null"){
+        logged = true
+    }else{
+        logged = false
+    }
+
     var isAdmin by rememberSaveable { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
-    if (!userName.isNullOrEmpty()) {
+    if (logged) {
         val usersAndAdminsViewModel = hiltViewModel<UsersAndAdminsViewsViewModel>()
         isAdmin = usersAndAdminsViewModel.isAdmin(userName)
             .collectAsState(initial = false).value
@@ -375,9 +388,13 @@ private fun NavigationGraph(
     warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier
 ) {
-    val isLoggedIn =
+    val userName =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
-            .contains("USER_LOGGED")
+            .getString("USER_LOGGED", "None").orEmpty()
+
+    var isLoggedIn = false
+
+    isLoggedIn = !(userName == "null" || userName == "None")
 
     val eventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
