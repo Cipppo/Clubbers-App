@@ -2,11 +2,10 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -68,8 +69,8 @@ import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
-import com.example.clubbers.ui.notificationsScreen
 import com.example.clubbers.ui.UserOptionScreen
+import com.example.clubbers.ui.notificationsScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
@@ -127,8 +128,7 @@ fun TopAppBarFunction (
                 fontWeight = FontWeight.Medium
             )
         },
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp)),
+        modifier = modifier,
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = navigateUp) {
@@ -251,8 +251,7 @@ fun BottomAppBarFunction (
                 }
             }
         },
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp)),
+        modifier = modifier,
         containerColor = BottomAppBarDefaults.containerColor
     )
 
@@ -280,105 +279,125 @@ fun NavigationApp (
 
     val snackBarHostState = remember { SnackbarHostState() }
 
-    FadeInContent(
-        fadeInAnimationDelay = 200L,
-        content = {
-            Scaffold(
-                topBar = {
-                    if (
-                        currentScreen != AppScreen.Registration.name &&
-                        currentScreen != AppScreen.Login.name &&
-                        currentScreen != AppScreen.AdminRegistration.name
-                    ) {
-                        TopAppBarFunction(
-                            currentScreen = currentScreen,
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) }
-                        )
-                    }
-                },
-                snackbarHost = { SnackbarHost(snackBarHostState) },
-                bottomBar = {
-                    if (
-                        currentScreen != AppScreen.Registration.name &&
-                        currentScreen != AppScreen.Login.name &&
-                        currentScreen != AppScreen.AdminRegistration.name
-                    ) {
-                        BottomAppBarFunction(
-                            isAdmin = isAdmin,
-                            currentScreen = currentScreen,
-                            onHomeButtonClicked = {
-                                navController.backQueue.clear()
-                                navController.navigate(AppScreen.Home.name)
-                            },
-                            onTodayButtonClicked = {
-                                if (currentScreen == AppScreen.Today.name) {
-                                    navController.popBackStack()
-                                    navController.navigate(AppScreen.Today.name)
-                                } else
-                                    navController.navigate(AppScreen.Today.name)
-                            },
-                            onNewPostButtonClicked = {
-                                when (currentScreen) {
-                                    AppScreen.EventSelection.name -> {
-                                        navController.popBackStack()
-                                        navController.navigate(AppScreen.EventSelection.name)
-                                    }
+    val alpha = remember { Animatable(0f) }
+    val shadowAlpha = remember { Animatable(0f) }
 
-                                    AppScreen.NewPost.name -> {
-                                        navController.popBackStack(
-                                            route = AppScreen.EventSelection.name,
-                                            inclusive = true
-                                        )
-                                        navController.navigate(AppScreen.EventSelection.name)
-                                    }
+    LaunchedEffect(Unit) {
+        alpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 3000)
+        )
+        shadowAlpha.animateTo(
+            targetValue = 10f,
+            animationSpec = tween(durationMillis = 1000)
+        )
+    }
 
-                                    else -> navController.navigate(AppScreen.EventSelection.name)
-                                }
-                            },
-                            onNewEventButtonClicked = {
-                                if (currentScreen == AppScreen.NewEvent.name) {
-                                    navController.popBackStack()
-                                    navController.navigate(AppScreen.NewEvent.name)
-                                } else
-                                    navController.navigate(AppScreen.NewEvent.name)
-                            },
-                            onDiscoverButtonClicked = {
-                                if (currentScreen == AppScreen.Discover.name) {
-                                    navController.popBackStack()
-                                    navController.navigate(AppScreen.Discover.name)
-                                } else
-                                    navController.navigate(AppScreen.Discover.name)
-                            },
-                            onProfileButtonClicked = {
-                                if (currentScreen == AppScreen.Profile.name) {
-                                    navController.popBackStack()
-                                    navController.navigate(AppScreen.Profile.name)
-                                } else
-                                    navController.navigate(AppScreen.Profile.name)
-                            }
-                        )
-                    }
-                }
-            ) { innerPadding ->
-                NavigationGraph(
-                    startRequestingData,
-                    navController,
-                    innerPadding,
-                    warningViewModel
+    Scaffold(
+        topBar = {
+            if (
+                currentScreen != AppScreen.Registration.name &&
+                currentScreen != AppScreen.Login.name &&
+                currentScreen != AppScreen.AdminRegistration.name
+            ) {
+                TopAppBarFunction(
+                    currentScreen = currentScreen,
+                    canNavigateBack = navController.previousBackStackEntry != null,
+                    navigateUp = { navController.navigateUp() },
+                    onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
+                    modifier = Modifier
+                        .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
+                        .alpha(alpha.value)
                 )
-                val context = LocalContext.current
-                if (warningViewModel.showConnectivitySnackBar.value) {
-                    ConnectivitySnackBarComposable(
-                        snackBarHostState = snackBarHostState,
-                        applicationContext = context,
-                        warningViewModel = warningViewModel
-                    )
-                }
+            }
+        },
+        snackbarHost = { SnackbarHost(snackBarHostState) },
+        bottomBar = {
+            if (
+                currentScreen != AppScreen.Registration.name &&
+                currentScreen != AppScreen.Login.name &&
+                currentScreen != AppScreen.AdminRegistration.name
+            ) {
+                BottomAppBarFunction(
+                    isAdmin = isAdmin,
+                    modifier = Modifier
+                        .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
+                        .alpha(alpha.value),
+                    currentScreen = currentScreen,
+                    onHomeButtonClicked = {
+                        navController.backQueue.clear()
+                        navController.navigate(AppScreen.Home.name)
+                    },
+                    onTodayButtonClicked = {
+                        if (currentScreen == AppScreen.Today.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.Today.name)
+                        } else
+                            navController.navigate(AppScreen.Today.name)
+                    },
+                    onNewPostButtonClicked = {
+                        when (currentScreen) {
+                            AppScreen.EventSelection.name -> {
+                                navController.popBackStack()
+                                navController.navigate(AppScreen.EventSelection.name)
+                            }
+
+                            AppScreen.NewPost.name -> {
+                                navController.popBackStack(
+                                    route = AppScreen.EventSelection.name,
+                                    inclusive = true
+                                )
+                                navController.navigate(AppScreen.EventSelection.name)
+                            }
+
+                            else -> navController.navigate(AppScreen.EventSelection.name)
+                        }
+                    },
+                    onNewEventButtonClicked = {
+                        if (currentScreen == AppScreen.NewEvent.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.NewEvent.name)
+                        } else
+                            navController.navigate(AppScreen.NewEvent.name)
+                    },
+                    onDiscoverButtonClicked = {
+                        if (currentScreen == AppScreen.Discover.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.Discover.name)
+                        } else
+                            navController.navigate(AppScreen.Discover.name)
+                    },
+                    onProfileButtonClicked = {
+                        if (currentScreen == AppScreen.Profile.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.Profile.name)
+                        } else
+                            navController.navigate(AppScreen.Profile.name)
+                    }
+                )
             }
         }
-    )
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .alpha(alpha.value)
+        ) {
+            NavigationGraph(
+                startRequestingData,
+                navController,
+                innerPadding,
+                warningViewModel
+            )
+            val context = LocalContext.current
+            if (warningViewModel.showConnectivitySnackBar.value) {
+                ConnectivitySnackBarComposable(
+                    snackBarHostState = snackBarHostState,
+                    applicationContext = context,
+                    warningViewModel = warningViewModel
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -579,26 +598,5 @@ private fun NavigationGraph(
             notificationsScreen()
         }
 
-    }
-}
-
-@Composable
-fun FadeInContent(
-    fadeInAnimationDelay: Long,
-    content: @Composable () -> Unit
-) {
-    val fadeInAnimationProgress = animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(
-            durationMillis = 1000,
-            delayMillis = fadeInAnimationDelay.toInt(),
-        )
-    ).value
-
-    AnimatedVisibility(
-        visible = fadeInAnimationProgress > 0.2f,
-        enter = fadeIn(animationSpec = tween(durationMillis = 1000))
-    ) {
-        content()
     }
 }
