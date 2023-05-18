@@ -1,11 +1,13 @@
 package com.example.clubbers.utilities
 
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,28 +18,41 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
+import androidx.compose.ui.util.lerp
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.size.Scale
 import com.example.clubbers.R
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.calculateCurrentOffsetForPage
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -49,6 +64,8 @@ import com.maxkeppeker.sheets.core.models.CoreSelection
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.SheetState
+import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -250,7 +267,11 @@ fun TakenPhotoDialog(
             title = title
         ),
         body = {
-            Box(
+            Column() {
+                CarouselCard()
+            }
+
+            /*Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(450.dp),
@@ -270,7 +291,7 @@ fun TakenPhotoDialog(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-            }
+            }*/
         }
     )
 }
@@ -298,6 +319,111 @@ fun MapView(
                 state = markerState,
                 title = placeName,
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun CarouselCard() {
+    val pagerState = rememberPagerState(initialPage = 0)
+    val slider = listOf(
+        "https://picsum.photos/id/237/500/800",
+        "https://picsum.photos/id/238/500/800",
+        "https://picsum.photos/id/239/500/800",
+        "https://picsum.photos/id/240/500/800",
+        "https://picsum.photos/id/241/500/800"
+    )
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp)
+    ) {
+        HorizontalPager(
+            count = slider.size,
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 60.dp),
+            modifier = Modifier
+                .height(350.dp)
+        ) { page ->
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .graphicsLayer {
+                        val pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
+                        lerp(
+                            start = 0.50f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                            .also { scale ->
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                        alpha = lerp(
+                            start = 0.50f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                    }
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(slider[page])
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .crossfade(true)
+                        .scale(Scale.FILL)
+                        .build(),
+                    contentDescription = "Image"
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            IconButton(
+                enabled = pagerState.currentPage > 0,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                }
+            ) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            repeat(slider.size) {
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .size(5.dp)
+                        .background(
+                            color = if (pagerState.currentPage == it) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                            }
+                        )
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                enabled = pagerState.currentPage < slider.size - 1,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+            ) {
+                Icon(Icons.Filled.ArrowForward, contentDescription = "Forward")
+            }
         }
     }
 }
