@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -112,6 +113,7 @@ fun TopAppBarFunction (
     currentScreen: String,
     canNavigateBack: Boolean,
     onSettingsPressed: () -> Unit,
+    onNotifyPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -136,6 +138,12 @@ fun TopAppBarFunction (
         },
         actions = {
             if (currentScreen == AppScreen.Profile.name) {
+                IconButton(onNotifyPressed){
+                    Icon(
+                        imageVector = Icons.Filled.Notifications,
+                        contentDescription = "Notifications Button"
+                    )
+                }
                 IconButton(onClick = onSettingsPressed) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
@@ -267,11 +275,7 @@ fun NavigationApp (
 
 
 
-    if(userName != "null"){
-        logged = true
-    }else{
-        logged = false
-    }
+    logged = userName != "null"
 
     var isAdmin by rememberSaveable { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -295,7 +299,8 @@ fun NavigationApp (
                          currentScreen = currentScreen,
                          canNavigateBack = navController.previousBackStackEntry != null,
                          navigateUp = { navController.navigateUp() },
-                         onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) }
+                         onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
+                         onNotifyPressed = { navController.navigate(AppScreen.Notifications.name)}
                      )
                  }
         },
@@ -485,9 +490,11 @@ private fun NavigationGraph(
 
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
+            val usersViewModel = hiltViewModel<UsersViewModel>()
             PersonalProfileScreen(
                 onOption = { navController.navigate(AppScreen.UserOption.name)},
-                onNotify = {navController.navigate(AppScreen.Notifications.name)}
+                onNotify = {navController.navigate(AppScreen.Notifications.name)},
+                usersViewModel = usersViewModel
             )
         }
 
