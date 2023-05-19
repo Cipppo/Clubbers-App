@@ -50,12 +50,7 @@ class UsersViewModel @Inject constructor(
             }
     }
 
-    fun getUserByEmail(userEmail: String) = viewModelScope.launch {
-        repository.getUserByEmail(userEmail)
-            .collect {user ->
-                _userSelected = user
-            }
-    }
+    fun getUserByEmail(userEmail: String): Flow<User> = repository.getUserByEmail(userEmail = userEmail)
 
     fun getAllUsers(): Flow<List<User>> = repository.getAllUsers()
 }
