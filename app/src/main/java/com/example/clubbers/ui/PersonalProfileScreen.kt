@@ -2,7 +2,9 @@ package com.example.clubbers.ui
 
 import android.Manifest
 import android.app.AppOpsManager.OnOpNotedCallback
+import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -29,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,8 +50,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.User
 import com.example.clubbers.utilities.postFeed
 import com.example.clubbers.utilities.userBookedEvents
+import com.example.clubbers.viewModel.UsersViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,13 +61,17 @@ import com.example.clubbers.utilities.userBookedEvents
 
 fun PersonalProfileScreen(
     onOption: () -> Unit,
-    onNotify: () -> Unit
+    onNotify: () -> Unit,
+    usersViewModel: UsersViewModel
 ){
 
 
 
     val selectedMenu = remember{ mutableStateOf("Posts")}
-    val scrollState = remember { ScrollState }
+
+    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+    val user = usersViewModel.getUserByEmail(userEmail = userEmail).collectAsState(initial = listOf<User>())
+
 
     Box(
         modifier = Modifier
@@ -75,57 +85,51 @@ fun PersonalProfileScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "username",
-                    style = TextStyle(textAlign = TextAlign.Center, fontSize = 25.sp),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Left
-                )
-                IconButton(onClick = {onNotify()}){
-                    Icon(
-                        painter = painterResource(id = R.drawable.notifications_icon),
-                        contentDescription = "Notifications",
-                        modifier = Modifier.size(30.dp)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)) {
+                    Image(
+                        painter = painterResource(id = R.drawable.default_avatar),
+                        contentDescription = "Profile Avatar",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
                     )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Text(text = "", fontWeight = FontWeight.Bold)
                 }
-                IconButton(onClick = { onOption() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.setting_icon),
-                        contentDescription = "Settings",
-                        modifier = Modifier.size(30.dp)
-                    )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "Followers", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "8", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "Followed", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "8", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "Events", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "8", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            Image(
-                painter = painterResource(R.drawable.default_avatar),
-                contentDescription = "DefaultAvatar",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Followers", style = TextStyle(fontWeight = FontWeight.Bold))
-                Text(text = "Followed", style = TextStyle(fontWeight = FontWeight.Bold))
-                Text(text = "Events", style = TextStyle(fontWeight = FontWeight.Bold))
+            Spacer(modifier = Modifier.height(15.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text("UserBio")
             }
-        Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "10", style = TextStyle(fontWeight = FontWeight.Bold))
-            Text(text = "20", style = TextStyle(fontWeight = FontWeight.Bold))
-            Text(text = "30", style = TextStyle(fontWeight = FontWeight.Bold))
-        }
-            Spacer(modifier = Modifier.height(30.dp))
-            Button(onClick = { /*TODO*/ }, shape = CutCornerShape(10), modifier = Modifier.background(MaterialTheme.colorScheme.secondary)) {
-                Text("Follow")
-            }
-            Spacer(modifier = Modifier.height(30.dp))
-            Text("UserBio")
             Spacer(modifier = Modifier.height(10.dp))
+            Row(modifier = Modifier.fillMaxWidth()){
+                Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Follow")
+                }
+            }
             Divider()
             Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween){
