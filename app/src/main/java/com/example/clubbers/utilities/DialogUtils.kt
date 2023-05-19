@@ -1,6 +1,12 @@
 package com.example.clubbers.utilities
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -38,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,9 +54,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
-import coil.compose.AsyncImage
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.size.Scale
 import com.example.clubbers.R
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -65,6 +75,8 @@ import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import kotlinx.coroutines.launch
+import java.io.File
+import java.util.Objects
 import kotlin.math.absoluteValue
 
 @Composable
@@ -230,15 +242,35 @@ fun MapDialog(
 fun TakenPhotoDialog(
     title: String,
     sheetState: SheetState,
-    capturedImageUri: Uri,
+    passedCapturedImageUri: Uri,
 ) {
-    /**
-     * TODO: Create a list of images and display them in a carousel
-     *  example: <- image ->
-     *      then implement scroll to change image
-     */
-    // split capturedImageUri on commas and store in a list
-    val imageUriList = capturedImageUri.toString().split(",")
+    val imageUriList: MutableList<Uri> = remember { mutableStateListOf() }
+    if (passedCapturedImageUri.toString().isNotEmpty()) imageUriList.add(passedCapturedImageUri)
+    val context = LocalContext.current
+
+    var file by remember { mutableStateOf<File?>(null) }
+    var uri by remember { mutableStateOf<Uri?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            if ((file != null) && (uri != null)) imageUriList.add(uri!!)
+        } else {
+            // Handle cancellation event
+            Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     CoreDialog(
         state = sheetState,
@@ -248,8 +280,25 @@ fun TakenPhotoDialog(
                 text = "Add a photo",
             ),
             onPositiveClick = {
-                /* TODO */
-            },
+                file = context.createImageFile()
+                uri = file?.let {
+                    FileProvider.getUriForFile(
+                        Objects.requireNonNull(context),
+                        "${context.packageName}.provider",
+                        it
+                    )
+                }
+
+                val permissionCheckResult = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                )
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    cameraLauncher.launch(uri)
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                              },
             negativeButton = SelectionButton(
                 text = "Delete",
             ),
@@ -268,30 +317,10 @@ fun TakenPhotoDialog(
         ),
         body = {
             Column() {
-                CarouselCard()
-            }
-
-            /*Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(450.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(
-                            LocalContext.current
-                        ).data(data = capturedImageUri).apply(block = fun ImageRequest.Builder.() {
-                            crossfade(true)
-                            placeholder(R.drawable.ic_launcher_foreground)
-                            error(R.drawable.ic_launcher_foreground)
-                        }).build()
-                    ),
-                    contentDescription = "Captured Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                CarouselCard(
+                    imageUriList
                 )
-            }*/
+            }
         }
     )
 }
@@ -325,15 +354,10 @@ fun MapView(
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun CarouselCard() {
+fun CarouselCard(
+    capturedImageUris: List<Uri>
+) {
     val pagerState = rememberPagerState(initialPage = 0)
-    val slider = listOf(
-        "https://picsum.photos/id/237/500/800",
-        "https://picsum.photos/id/238/500/800",
-        "https://picsum.photos/id/239/500/800",
-        "https://picsum.photos/id/240/500/800",
-        "https://picsum.photos/id/241/500/800"
-    )
     val scope = rememberCoroutineScope()
 
     Column(
@@ -342,9 +366,9 @@ fun CarouselCard() {
             .height(400.dp)
     ) {
         HorizontalPager(
-            count = slider.size,
+            count = capturedImageUris.size,
             state = pagerState,
-            contentPadding = PaddingValues(horizontal = 60.dp),
+            contentPadding = PaddingValues(horizontal = 40.dp),
             modifier = Modifier
                 .height(350.dp)
         ) { page ->
@@ -369,15 +393,22 @@ fun CarouselCard() {
                         )
                     }
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(slider[page])
-                        .placeholder(R.drawable.ic_launcher_foreground)
-                        .error(R.drawable.ic_launcher_foreground)
-                        .crossfade(true)
-                        .scale(Scale.FILL)
-                        .build(),
-                    contentDescription = "Image"
+                val currentImageUri = capturedImageUris[page]
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current).data(data = currentImageUri)
+                            .apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                    ),
+                    contentDescription = "Captured Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(300.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.small)
                 )
             }
         }
@@ -398,7 +429,7 @@ fun CarouselCard() {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Spacer(modifier = Modifier.weight(1f))
-            repeat(slider.size) {
+            repeat(capturedImageUris.size) {
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
@@ -415,7 +446,7 @@ fun CarouselCard() {
             }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(
-                enabled = pagerState.currentPage < slider.size - 1,
+                enabled = pagerState.currentPage < capturedImageUris.size - 1,
                 onClick = {
                     scope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)

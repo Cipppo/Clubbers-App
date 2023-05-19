@@ -228,6 +228,6 @@ fun NewPostScreen(
     TakenPhotoDialog(
         title = "Taken Photo",
         sheetState = takenPhotoSheetState,
-        capturedImageUri = capturedImageUri
+        passedCapturedImageUri = capturedImageUri
     )
 }
