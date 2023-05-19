@@ -36,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -242,10 +241,8 @@ fun MapDialog(
 fun TakenPhotoDialog(
     title: String,
     sheetState: SheetState,
-    passedCapturedImageUri: Uri,
+    imageUriList: MutableList<Uri>,
 ) {
-    val imageUriList: MutableList<Uri> = remember { mutableStateListOf() }
-    if (passedCapturedImageUri.toString().isNotEmpty()) imageUriList.add(passedCapturedImageUri)
     val context = LocalContext.current
 
     var file by remember { mutableStateOf<File?>(null) }
@@ -368,7 +365,7 @@ fun CarouselCard(
         HorizontalPager(
             count = capturedImageUris.size,
             state = pagerState,
-            contentPadding = PaddingValues(horizontal = 40.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp),
             modifier = Modifier
                 .height(350.dp)
         ) { page ->

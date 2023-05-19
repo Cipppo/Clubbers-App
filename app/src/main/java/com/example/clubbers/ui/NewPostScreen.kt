@@ -28,7 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,12 +73,10 @@ fun NewPostScreen(
         context.packageName + ".provider", file)
 
     val takenPhotoSheetState = rememberSheetState()
+    
+    val imageUriList = remember { mutableStateListOf<Uri>() }
 
-    var capturedImageUri by rememberSaveable {
-        mutableStateOf<Uri>(Uri.EMPTY)
-    }
-
-    var localImageDir by rememberSaveable { mutableStateOf("") }
+    var localImageDirList by rememberSaveable { mutableStateOf("") }
     var postCaption by rememberSaveable { mutableStateOf("") }
     val maxChar = 255
 
@@ -84,7 +84,7 @@ fun NewPostScreen(
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            capturedImageUri = uri
+            imageUriList.add(uri)
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
@@ -115,7 +115,7 @@ fun NewPostScreen(
                 .background(Color.Gray, MaterialTheme.shapes.small)
                 .clickable(
                     onClick = {
-                        if (capturedImageUri.path?.isNotEmpty() == true) {
+                        if (imageUriList.isNotEmpty()) {
                             takenPhotoSheetState.show()
                         } else {
                             val permissionCheckResult = ContextCompat.checkSelfPermission(
@@ -132,10 +132,10 @@ fun NewPostScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (capturedImageUri.path?.isNotEmpty() == true) {
+            if (imageUriList.isNotEmpty()) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri)
+                        ImageRequest.Builder(LocalContext.current).data(data = imageUriList.first())
                             .apply(block = fun ImageRequest.Builder.() {
                                 crossfade(true)
                                 placeholder(R.drawable.ic_launcher_foreground)
@@ -189,18 +189,17 @@ fun NewPostScreen(
                 val photoType = "Post"
                 val eventId = eventsViewModel.eventSelected!!.eventId
 
-                if (capturedImageUri.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
-
-                    context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-                        lastFile?.let {
-                            localImageDir = it
-                        }
+                if (imageUriList.isNotEmpty()) {
+                    imageUriList.forEach {
+                        saveImage(context, context.applicationContext.contentResolver, it, photoType)
                     }
+
+                    val lastNFiles = context.getFilesFromAppDir().takeLast(imageUriList.size)
+                    localImageDirList = lastNFiles.joinToString(separator = ",") { it }
 
                     postsViewModel.addNewPost(
                         Post(
-                            postImage = localImageDir,
+                            postImage = localImageDirList,
                             postCaption = postCaption,
                             postUserId = userId,
                             postEventId = eventId
@@ -228,6 +227,6 @@ fun NewPostScreen(
     TakenPhotoDialog(
         title = "Taken Photo",
         sheetState = takenPhotoSheetState,
-        passedCapturedImageUri = capturedImageUri
+        imageUriList = imageUriList
     )
 }
