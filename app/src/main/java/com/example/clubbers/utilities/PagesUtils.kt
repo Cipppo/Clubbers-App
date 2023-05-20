@@ -6,11 +6,13 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +29,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +72,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.util.lerp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
@@ -79,11 +86,17 @@ import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.calculateCurrentOffsetForPage
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.math.absoluteValue
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -620,6 +633,113 @@ fun PostItem(
                     .padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun CarouselCard(
+    capturedImageUris: List<Uri>
+) {
+    val pagerState = rememberPagerState(initialPage = 0)
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp)
+    ) {
+        HorizontalPager(
+            count = capturedImageUris.size,
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            modifier = Modifier
+                .height(350.dp)
+        ) { page ->
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .graphicsLayer {
+                        val pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
+                        lerp(
+                            start = 0.50f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                            .also { scale ->
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                        alpha = lerp(
+                            start = 0.50f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                    }
+            ) {
+                val currentImageUri = capturedImageUris[page]
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current).data(data = currentImageUri)
+                            .apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                    ),
+                    contentDescription = "Captured Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(300.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.small)
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            IconButton(
+                enabled = pagerState.currentPage > 0,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                }
+            ) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            repeat(capturedImageUris.size) {
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .size(5.dp)
+                        .background(
+                            color = if (pagerState.currentPage == it) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                            }
+                        )
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                enabled = pagerState.currentPage < capturedImageUris.size - 1,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+            ) {
+                Icon(Icons.Filled.ArrowForward, contentDescription = "Forward")
+            }
         }
     }
 }
