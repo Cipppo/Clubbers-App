@@ -46,6 +46,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -640,7 +641,8 @@ fun PostItem(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun CarouselCard(
-    capturedImageUris: List<Uri>
+    capturedImageUris: List<Uri>,
+    currentImageIndex: MutableState<Int> = remember { mutableStateOf(0) }
 ) {
     val pagerState = rememberPagerState(initialPage = 0)
     val scope = rememberCoroutineScope()
@@ -722,6 +724,7 @@ fun CarouselCard(
                         .size(5.dp)
                         .background(
                             color = if (pagerState.currentPage == it) {
+                                currentImageIndex.value = it
                                 MaterialTheme.colorScheme.onPrimaryContainer
                             } else {
                                 MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)

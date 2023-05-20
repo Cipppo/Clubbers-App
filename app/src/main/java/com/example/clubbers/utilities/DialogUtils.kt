@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -223,6 +224,8 @@ fun TakenPhotoDialog(
 ) {
     val context = LocalContext.current
 
+    val currentImageIndex: MutableState<Int> = remember { mutableStateOf(0) }
+
     var file by remember { mutableStateOf<File?>(null) }
     var uri by remember { mutableStateOf<Uri?>(null) }
 
@@ -278,7 +281,16 @@ fun TakenPhotoDialog(
                 text = "Delete",
             ),
             onNegativeClick = {
-                /* TODO */
+                val currentImageUri = imageUriList.getOrNull(currentImageIndex.value)
+                currentImageUri?.let { deletedUri ->
+                    val index = imageUriList.indexOf(deletedUri)
+                    if (index != -1) {
+                        imageUriList.removeAt(index)
+                        if (currentImageIndex.value >= index) {
+                            currentImageIndex.value = if (index == 0) 0 else index - 1
+                        }
+                    }
+                }
             },
             extraButton = SelectionButton(
                 text = "Done",
@@ -293,7 +305,8 @@ fun TakenPhotoDialog(
         body = {
             Column() {
                 CarouselCard(
-                    imageUriList
+                    capturedImageUris = imageUriList,
+                    currentImageIndex = currentImageIndex,
                 )
             }
         }
