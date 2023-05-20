@@ -1,6 +1,7 @@
 package com.example.clubbers.utilities
 
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -551,7 +552,6 @@ fun EventItem(
 fun PostItem(
     usersViewModel: UsersViewModel,
     postsViewModel: PostsViewModel,
-    isSinglePost: Boolean,
     post: Post,
     onClickAction: () -> Unit
 ) {
@@ -560,7 +560,7 @@ fun PostItem(
 
     val proPicUri = user?.userImage
     val userName = user?.userName
-    val imageUri = post.postImage
+    val imageUriList: List<Uri> = post.postImage.split(",").map { Uri.parse(it) }
 
     ElevatedCard(
         modifier = Modifier
@@ -610,33 +610,8 @@ fun PostItem(
                 Spacer(modifier = Modifier.padding(end = 8.dp))
                 userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
             }
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(
-                        LocalContext.current
-                    ).data(data = imageUri).apply(block = fun ImageRequest.Builder.() {
-                        crossfade(true)
-                        placeholder(R.drawable.ic_launcher_foreground)
-                        error(R.drawable.ic_launcher_foreground)
-                    }).build()
-                ),
-                contentDescription = "Post/Event image",
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .fillMaxSize()
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                        shape = MaterialTheme.shapes.medium
-                    )
-                    .run {
-                        if (isSinglePost) {
-                            heightIn(180.dp)
-                        } else {
-                            height(180.dp)
-                        }
-                    },
-                contentScale = if (isSinglePost) ContentScale.Crop else ContentScale.Fit
+            CarouselCard(
+                capturedImageUris = imageUriList
             )
             Text(
                 text = post.postCaption,

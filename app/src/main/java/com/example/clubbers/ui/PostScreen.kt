@@ -30,7 +30,6 @@ fun PostScreen(
                 PostItem(
                     usersViewModel = usersViewModel,
                     postsViewModel = postsViewModel,
-                    isSinglePost = true,
                     post = post!!,
                     onClickAction = { }
                 )

@@ -58,7 +58,6 @@ fun EventScreen(
                     usersViewModel = usersViewModel,
                     postsViewModel = postsViewModel,
                     post = post,
-                    isSinglePost = false,
                     onClickAction = onClickAction
                 )
             }
