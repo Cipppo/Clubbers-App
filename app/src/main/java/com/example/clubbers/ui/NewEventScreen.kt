@@ -58,11 +58,13 @@ import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.data.entities.EventHasTag
 import com.example.clubbers.utilities.NumbersDialog
 import com.example.clubbers.utilities.TagsListDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
+import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.TagsViewModel
@@ -93,6 +95,7 @@ fun NewEventScreen(
     onEvent: () -> Unit,
     startRequestingData: () -> Unit,
     eventsViewModel: EventsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel,
     locationsViewModel: LocationsViewModel,
     warningViewModel: WarningViewModel,
     tagsViewModel: TagsViewModel,
@@ -103,7 +106,7 @@ fun NewEventScreen(
     tagsViewModel.getAllTags()
     val tags by tagsViewModel.tags.collectAsState()
     val tagItems = remember { mutableStateListOf<TagsListItem>() }
-    if (tagItems.isEmpty()) tagItems.addAll(tags.map { TagsListItem(it.tagName, false) })
+    if (tagItems.isEmpty()) tagItems.addAll(tags.map { TagsListItem(it.tagId, it.tagName, false) })
 
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
@@ -141,6 +144,10 @@ fun NewEventScreen(
     val participants = 0
     val maxParticipantsState = rememberSheetState()
     val tagsState = rememberSheetState()
+
+    eventsViewModel.getAllEvents()
+    val eventsTemp = eventsViewModel.events.collectAsState()
+    val eventId = 2 + eventsTemp.value.size.plus(1)
 
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
 
@@ -608,6 +615,16 @@ fun NewEventScreen(
                             eventAdminId = adminId
                         )
                     )
+                    for (tag in tagItems) {
+                        if (tag.isSelected) {
+                            eventHasTagsViewModel.addNewTagToEvent(
+                                eventHasTag = EventHasTag(
+                                    eventId = eventId,
+                                    tagId = tag.id
+                                )
+                            )
+                        }
+                    }
                     onEvent()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()

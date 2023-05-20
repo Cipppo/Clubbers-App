@@ -514,7 +514,8 @@ private fun NavigationGraph(
         composable(route = AppScreen.NewEvent.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val tagsViewModel = hiltViewModel<TagsViewModel>()
-//            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val eventsViewModelForNES = hiltViewModel<EventsViewModel>()
 
             val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
                 .getString("USER_LOGGED", "None")!!
@@ -523,12 +524,13 @@ private fun NavigationGraph(
 
             NewEventScreen(
                 onEvent = { navController.navigate(AppScreen.Home.name) },
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = eventsViewModelForNES,
                 locationsViewModel = locationsViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData,
                 warningViewModel = warningViewModel,
-                tagsViewModel = tagsViewModel
+                tagsViewModel = tagsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel
             )
         }
 
