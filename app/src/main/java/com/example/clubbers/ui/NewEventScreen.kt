@@ -34,8 +34,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,13 +56,16 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.utilities.NumbersDialog
+import com.example.clubbers.utilities.TagsListDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -89,9 +95,16 @@ fun NewEventScreen(
     eventsViewModel: EventsViewModel,
     locationsViewModel: LocationsViewModel,
     warningViewModel: WarningViewModel,
+    tagsViewModel: TagsViewModel,
     adminId: Int
 ) {
     val context = LocalContext.current
+
+    tagsViewModel.getAllTags()
+    val tags by tagsViewModel.tags.collectAsState()
+    val tagItems = remember { mutableStateListOf<TagsListItem>() }
+    if (tagItems.isEmpty()) tagItems.addAll(tags.map { TagsListItem(it.tagName, false) })
+
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
@@ -125,9 +138,9 @@ fun NewEventScreen(
     val endClockState = rememberSheetState()
 
     var maxParticipants by rememberSaveable { mutableStateOf(0) }
-    var participants by rememberSaveable { mutableStateOf(0) }
+    val participants = 0
     val maxParticipantsState = rememberSheetState()
-    val participantsState = rememberSheetState()
+    val tagsState = rememberSheetState()
 
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
 
@@ -353,9 +366,14 @@ fun NewEventScreen(
             )
         )
 
-        // Participants Dialogs
+        // Participants Dialog
         NumbersDialog("Max Participants", maxParticipantsState, maxParticipants) { maxParticipants = it }
-        NumbersDialog("Participants", participantsState, participants) { participants = it }
+        // Tags Dialog
+        TagsListDialog(
+            title = "Tags",
+            sheetState = tagsState,
+            tagsList = tagItems
+        )
 
         Row(
             modifier = modifier
@@ -497,14 +515,15 @@ fun NewEventScreen(
             modifier
                 .fillMaxWidth()
         ){
-            Text(text = "Participants:")
+            val tagSelected = tagItems.count { it.isSelected }
+            Text(text = "Tags:")
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
-                onClick = { participantsState.show() },
+                onClick = { tagsState.show() },
                 modifier = modifier
                     .height(25.dp)
             ) {
-                Text(text = participants.toString())
+                Text(text = if (tagSelected == 0) "Select" else "$tagSelected selected")
             }
         }
         OutlinedTextField(
@@ -533,12 +552,6 @@ fun NewEventScreen(
         )
 
         Spacer(modifier = modifier.weight(1f))
-
-        // Debug
-//        Text(text = "Debug: Show last saved image in app dir")
-//        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-//            lastFile?.let { Text(text = it) }
-//        }
 
         // Post button
         Button(

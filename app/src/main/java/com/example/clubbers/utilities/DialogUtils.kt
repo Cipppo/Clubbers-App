@@ -8,8 +8,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,9 +19,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.clubbers.R
+import com.example.clubbers.data.details.TagsListItem
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -309,6 +316,76 @@ fun TakenPhotoDialog(
                     currentImageIndex = currentImageIndex,
                 )
             }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TagsListDialog(
+    title: String,
+    sheetState: SheetState,
+    tagsList: MutableList<TagsListItem>
+) {
+    CoreDialog(
+        state = sheetState,
+        selection = CoreSelection(
+            withButtonView = true,
+            positiveButton = SelectionButton(
+                text = "Done",
+            ),
+            onPositiveClick = {
+                sheetState.hide()
+            },
+            negativeButton = SelectionButton(
+                text = "Reset",
+            ),
+            onNegativeClick = {
+                for (i in tagsList.indices) {
+                    tagsList[i] = tagsList[i].copy(isSelected = false)
+                }
+            },
+        ),
+        header = Header.Default(
+            title = title
+        ),
+        body = {
+            LazyColumn(
+                modifier = Modifier
+                    .height(350.dp)
+                    .fillMaxWidth(),
+                content = {
+                    items(tagsList.size) { index ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    tagsList[index] = tagsList.mapIndexed { i, item ->
+                                        if (i == index) {
+                                            item.copy(isSelected = !item.isSelected)
+                                        } else {
+                                            item
+                                        }
+                                    }[index]
+                                }
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(text = tagsList[index].name)
+                            if(tagsList[index].isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Divider()
+                    }
+                }
+            )
         }
     )
 }

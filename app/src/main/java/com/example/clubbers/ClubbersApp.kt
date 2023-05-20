@@ -78,6 +78,7 @@ import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -400,6 +401,7 @@ fun NavigationApp (
                 )
             }
         }
+
     }
 }
 
@@ -511,6 +513,8 @@ private fun NavigationGraph(
         // New Event Screen
         composable(route = AppScreen.NewEvent.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val tagsViewModel = hiltViewModel<TagsViewModel>()
+//            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
 
             val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
                 .getString("USER_LOGGED", "None")!!
@@ -523,7 +527,8 @@ private fun NavigationGraph(
                 locationsViewModel = locationsViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData,
-                warningViewModel = warningViewModel
+                warningViewModel = warningViewModel,
+                tagsViewModel = tagsViewModel
             )
         }
 
