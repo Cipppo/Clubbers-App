@@ -265,23 +265,28 @@ fun TakenPhotoDialog(
                 text = "Add a photo",
             ),
             onPositiveClick = {
-                file = context.createImageFile()
-                uri = file?.let {
-                    FileProvider.getUriForFile(
-                        Objects.requireNonNull(context),
-                        "${context.packageName}.provider",
-                        it
-                    )
-                }
-
-                val permissionCheckResult = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CAMERA
-                )
-                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                    cameraLauncher.launch(uri)
+                if (imageUriList.size == 10) {
+                    Toast.makeText(context, "You can't add more than 10 photos", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
-                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                    file = context.createImageFile()
+                    uri = file?.let {
+                        FileProvider.getUriForFile(
+                            Objects.requireNonNull(context),
+                            "${context.packageName}.provider",
+                            it
+                        )
+                    }
+
+                    val permissionCheckResult = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    )
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        cameraLauncher.launch(uri)
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
                 }
                               },
             negativeButton = SelectionButton(
