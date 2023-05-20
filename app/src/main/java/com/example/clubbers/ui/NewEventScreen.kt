@@ -147,7 +147,7 @@ fun NewEventScreen(
 
     eventsViewModel.getAllEvents()
     val eventsTemp = eventsViewModel.events.collectAsState()
-    val eventId = 2 + eventsTemp.value.size.plus(1)
+    val eventId = eventsTemp.value.size.plus(1)
 
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
 

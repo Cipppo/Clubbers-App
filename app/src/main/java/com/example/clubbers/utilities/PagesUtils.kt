@@ -459,11 +459,13 @@ fun EventItem(
                     .padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
-            Text(
-                text = "Tags: ${tagsList?.joinToString(separator = ", ")}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            if(isSingleEvent) {
+                Text(
+                    text = "Tags: ${tagsList?.joinToString(separator = ", ")}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(modifier = Modifier.padding(top = 16.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
