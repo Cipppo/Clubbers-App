@@ -24,6 +24,7 @@ fun SelectEventForPostScreen(
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel
 ) {
+    eventsViewModel.getAllEvents()
     participatesViewModel.getEvents(userId)
     val events by participatesViewModel.events.collectAsState()
 
