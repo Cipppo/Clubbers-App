@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TagsDAO {
     // Get all tags
-    @Query("SELECT * FROM tags ORDER BY tag_id ASC")
+    @Query("SELECT * FROM tags ORDER BY tag_name ASC")
     fun getTags(): Flow<List<Tag>>
 
     // Get tag by id
