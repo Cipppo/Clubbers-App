@@ -191,23 +191,39 @@ fun CreateParticipatedEventTimeLine(
     passedEvents: List<Event> = emptyList(),
     usersViewModel: UsersViewModel,
 ) {
-    val events = passedEvents.ifEmpty { eventsViewModel.events.collectAsState(initial = listOf()).value }
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             content = {
-                items(events.size) { index ->
-                    EventItem(
-                        eventsViewModel = eventsViewModel,
-                        adminsViewModel = adminsViewModel,
-                        eventHasTagsViewModel = eventHasTagsViewModel,
-                        event = events[index],
-                        participatesViewModel = participatesViewModel,
-                        usersViewModel = usersViewModel,
-                        onClickAction = onClickAction
-                    )
+                if (passedEvents.isNotEmpty()) {
+                    items(passedEvents.size) { index ->
+                        EventItem(
+                            eventsViewModel = eventsViewModel,
+                            adminsViewModel = adminsViewModel,
+                            eventHasTagsViewModel = eventHasTagsViewModel,
+                            event = passedEvents[index],
+                            participatesViewModel = participatesViewModel,
+                            usersViewModel = usersViewModel,
+                            onClickAction = onClickAction
+                        )
+                    }
+                } else {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                            content = {
+                                Text(
+                                    text = "No events participated right now",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(16.dp),
+                                )
+                            }
+                        )
+                    }
                 }
             }
         )
@@ -530,6 +546,8 @@ fun EventItem(
                             }
                             if (isUserParticipating) participant?.let {
                                 participatesViewModel.deleteParticipant(it)
+                                event.participants--
+                                eventsViewModel.updateEvent(event)
                             } else participant?.let {
                                 participatesViewModel.addNewParticipant(it)
                                 event.participants++
