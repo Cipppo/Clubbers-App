@@ -265,6 +265,7 @@ fun BottomAppBarFunction (
 @Composable
 fun NavigationApp (
     startRequestingData: () -> Unit,
+    startLocationUpdates: () -> Unit,
     warningViewModel: WarningViewModel,
     navController: NavHostController = rememberNavController()
 ) {
@@ -388,6 +389,7 @@ fun NavigationApp (
         ) {
             NavigationGraph(
                 startRequestingData,
+                startLocationUpdates,
                 navController,
                 innerPadding,
                 warningViewModel
@@ -408,6 +410,7 @@ fun NavigationApp (
 @Composable
 private fun NavigationGraph(
     startRequestingData: () -> Unit,
+    startLocationUpdates: () -> Unit,
     navController: NavHostController,
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
@@ -527,6 +530,7 @@ private fun NavigationGraph(
                 locationsViewModel = locationsViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData,
+                startLocationUpdates = startLocationUpdates,
                 warningViewModel = warningViewModel,
                 tagsViewModel = tagsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel

@@ -94,6 +94,7 @@ fun NewEventScreen(
     modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     startRequestingData: () -> Unit,
+    startLocationUpdates: () -> Unit,
     eventsViewModel: EventsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     locationsViewModel: LocationsViewModel,
@@ -473,34 +474,62 @@ fun NewEventScreen(
                 }
             )
             Spacer(modifier = modifier.weight(1f))
-            ExtendedFloatingActionButton(
-                onClick = {
-                    context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                        .edit()
-                        .putString("EventLocation", eventLocation)
-                        .apply()
-                    startRequestingData()
-                    if (!warningViewModel.showConnectivitySnackBar.value) {
-                        isButtonClicked = true
-                        val coroutineScope = CoroutineScope(Dispatchers.Main)
-                        coroutineScope.launch {
-                            locationsViewModel.location.collect {
-                                eventLocation = it.name
-                                eventLocationLat = it.latitude
-                                eventLocationLon = it.longitude
+            Column() {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
+                            .edit()
+                            .putString("EventLocation", eventLocation)
+                            .apply()
+                        startRequestingData()
+                        if (!warningViewModel.showConnectivitySnackBar.value) {
+                            isButtonClicked = true
+                            val coroutineScope = CoroutineScope(Dispatchers.Main)
+                            coroutineScope.launch {
+                                locationsViewModel.location.collect {
+                                    eventLocation = it.name
+                                    eventLocationLat = it.latitude
+                                    eventLocationLon = it.longitude
+                                }
                             }
+                        } else {
+                            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
-                    }
-                          },
-                modifier = modifier
-                    .height(80.dp)
-            ) {
-                Text(
-                    text = "Check\nLocation",
-                    textAlign = TextAlign.Center,
-                )
+                    },
+                    modifier = modifier
+                        .height(25.dp)
+                ) {
+                    Text(
+                        text = "Check",
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                Spacer(modifier = modifier.height(16.dp))
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        startLocationUpdates()
+                        if (!warningViewModel.showGPSAlertDialog.value) {
+                            isButtonClicked = true
+                            val coroutineScope = CoroutineScope(Dispatchers.Main)
+                            coroutineScope.launch {
+                                locationsViewModel.location.collect {
+                                    eventLocation = it.name
+                                    eventLocationLat = it.latitude
+                                    eventLocationLon = it.longitude
+                                }
+                            }
+                        } else {
+                            Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = modifier
+                        .height(25.dp)
+                ) {
+                    Text(
+                        text = "GPS",
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
         Row(
