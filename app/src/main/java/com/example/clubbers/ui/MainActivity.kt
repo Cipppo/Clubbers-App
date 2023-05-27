@@ -190,7 +190,7 @@ class MainActivity : ComponentActivity() {
         val location: LocationDetails = passedLocation
             ?: LocationDetails(
                 getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                    .getString("EventLocation", "No Location")
+                    .getString("EventLocation", "")
                     .toString(), 0.0, 0.0)
         val encodedInput = URLEncoder.encode(location.name, "utf-8")
 
@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
             jsonObjectRequest.tag = TAG
             queue?.add(jsonObjectRequest)
 
-        } else {
+        } else if (location.name != "") {
             url = "https://nominatim.openstreetmap.org/?addressdetails=1&q=" +
                     "${encodedInput}&format=jsonv2&limit=1"
 

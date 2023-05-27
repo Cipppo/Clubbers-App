@@ -507,6 +507,7 @@ fun NewEventScreen(
                 Spacer(modifier = modifier.height(16.dp))
                 ExtendedFloatingActionButton(
                     onClick = {
+                        context.deleteSharedPreferences("EventLocation")
                         startLocationUpdates()
                         if (!warningViewModel.showGPSAlertDialog.value) {
                             isButtonClicked = true
