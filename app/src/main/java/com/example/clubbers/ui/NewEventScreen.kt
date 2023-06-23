@@ -56,6 +56,7 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.entities.EventHasTag
@@ -151,6 +152,7 @@ fun NewEventScreen(
     val eventId = eventsTemp.value.size.plus(1)
 
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
+    var isRequestDone by rememberSaveable { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -455,10 +457,10 @@ fun NewEventScreen(
                 shape = MaterialTheme.shapes.small,
                 modifier = modifier
                     .width(250.dp)
-                    .height(100.dp),
+                    .height(120.dp),
                 maxLines = 3,
                 supportingText = {
-                    if (isButtonClicked && eventLocation.isEmpty()) {
+                    if (isButtonClicked && eventLocation.isEmpty() && isRequestDone) {
                         Text(
                             text = "Location not found, Retry",
                             color = MaterialTheme.colorScheme.error,
@@ -477,23 +479,31 @@ fun NewEventScreen(
             Column() {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                            .edit()
-                            .putString("EventLocation", eventLocation)
-                            .apply()
-                        startRequestingData()
-                        if (!warningViewModel.showConnectivitySnackBar.value) {
-                            isButtonClicked = true
-                            val coroutineScope = CoroutineScope(Dispatchers.Main)
-                            coroutineScope.launch {
-                                locationsViewModel.location.collect {
-                                    eventLocation = it.name
-                                    eventLocationLat = it.latitude
-                                    eventLocationLon = it.longitude
+                        if (eventLocation.isNotEmpty()) {
+                            isRequestDone = false
+                            context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
+                                .edit()
+                                .putString("EventLocation", eventLocation)
+                                .apply()
+                            locationsViewModel.setEventLocation(LocationDetails("", 0.0, 0.0))
+                            startRequestingData()
+                            if (!warningViewModel.showConnectivitySnackBar.value) {
+                                isButtonClicked = true
+                                val coroutineScope = CoroutineScope(Dispatchers.Main)
+                                coroutineScope.launch {
+                                    locationsViewModel.location.collect {
+                                        eventLocation = it.name
+                                        isRequestDone = true
+                                        eventLocationLat = it.latitude
+                                        eventLocationLon = it.longitude
+                                    }
                                 }
+                                Toast.makeText(context, "Checking location", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
                             }
                         } else {
-                            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Location is empty", Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = modifier
@@ -507,6 +517,7 @@ fun NewEventScreen(
                 Spacer(modifier = modifier.height(16.dp))
                 ExtendedFloatingActionButton(
                     onClick = {
+                        isRequestDone = false
                         context.deleteSharedPreferences("EventLocation")
                         startLocationUpdates()
                         if (!warningViewModel.showGPSAlertDialog.value) {
@@ -519,6 +530,7 @@ fun NewEventScreen(
                                     eventLocationLon = it.longitude
                                 }
                             }
+                            Toast.makeText(context, "Getting position", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
                         }
