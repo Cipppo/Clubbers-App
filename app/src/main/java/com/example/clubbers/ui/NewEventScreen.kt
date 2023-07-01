@@ -34,8 +34,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,13 +56,19 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.details.LocationDetails
+import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.data.entities.EventHasTag
 import com.example.clubbers.utilities.NumbersDialog
+import com.example.clubbers.utilities.TagsListDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
+import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -75,7 +84,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Objects
@@ -86,12 +95,21 @@ fun NewEventScreen(
     modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     startRequestingData: () -> Unit,
+    startLocationUpdates: () -> Unit,
     eventsViewModel: EventsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel,
     locationsViewModel: LocationsViewModel,
     warningViewModel: WarningViewModel,
+    tagsViewModel: TagsViewModel,
     adminId: Int
 ) {
     val context = LocalContext.current
+
+    tagsViewModel.getAllTags()
+    val tags by tagsViewModel.tags.collectAsState()
+    val tagItems = remember { mutableStateListOf<TagsListItem>() }
+    if (tagItems.isEmpty()) tagItems.addAll(tags.map { TagsListItem(it.tagId, it.tagName, false) })
+
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
@@ -108,6 +126,8 @@ fun NewEventScreen(
     var eventCaption by rememberSaveable { mutableStateOf("") }
     var eventTitle by rememberSaveable { mutableStateOf("") }
     var eventLocation by rememberSaveable { mutableStateOf("")}
+    var eventLocationLat by rememberSaveable { mutableStateOf(0.0)}
+    var eventLocationLon by rememberSaveable { mutableStateOf(0.0)}
 
     val captionMaxChar = 255
     val titleMaxChar = 30
@@ -123,11 +143,16 @@ fun NewEventScreen(
     val endClockState = rememberSheetState()
 
     var maxParticipants by rememberSaveable { mutableStateOf(0) }
-    var participants by rememberSaveable { mutableStateOf(0) }
+    val participants = 0
     val maxParticipantsState = rememberSheetState()
-    val participantsState = rememberSheetState()
+    val tagsState = rememberSheetState()
+
+    eventsViewModel.getAllEvents()
+    val eventsTemp = eventsViewModel.events.collectAsState()
+    val eventId = eventsTemp.value.size.plus(1)
 
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
+    var isRequestDone by rememberSaveable { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -351,9 +376,14 @@ fun NewEventScreen(
             )
         )
 
-        // Participants Dialogs
+        // Participants Dialog
         NumbersDialog("Max Participants", maxParticipantsState, maxParticipants) { maxParticipants = it }
-        NumbersDialog("Participants", participantsState, participants) { participants = it }
+        // Tags Dialog
+        TagsListDialog(
+            title = "Tags",
+            sheetState = tagsState,
+            tagsList = tagItems
+        )
 
         Row(
             modifier = modifier
@@ -427,10 +457,10 @@ fun NewEventScreen(
                 shape = MaterialTheme.shapes.small,
                 modifier = modifier
                     .width(250.dp)
-                    .height(150.dp),
-                maxLines = 4,
+                    .height(120.dp),
+                maxLines = 3,
                 supportingText = {
-                    if (isButtonClicked && eventLocation.isEmpty()) {
+                    if (isButtonClicked && eventLocation.isEmpty() && isRequestDone) {
                         Text(
                             text = "Location not found, Retry",
                             color = MaterialTheme.colorScheme.error,
@@ -446,32 +476,73 @@ fun NewEventScreen(
                 }
             )
             Spacer(modifier = modifier.weight(1f))
-            ExtendedFloatingActionButton(
-                onClick = {
-                    context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                        .edit()
-                        .putString("EventLocation", eventLocation)
-                        .apply()
-                    startRequestingData()
-                    if (!warningViewModel.showConnectivitySnackBar.value) {
-                        isButtonClicked = true
-                        val coroutineScope = CoroutineScope(Dispatchers.Main)
-                        coroutineScope.launch {
-                            locationsViewModel.location.collect {
-                                eventLocation = it
+            Column() {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        if (eventLocation.isNotEmpty()) {
+                            isRequestDone = false
+                            context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
+                                .edit()
+                                .putString("EventLocation", eventLocation)
+                                .apply()
+                            locationsViewModel.setEventLocation(LocationDetails("", 0.0, 0.0))
+                            startRequestingData()
+                            if (!warningViewModel.showConnectivitySnackBar.value) {
+                                isButtonClicked = true
+                                val coroutineScope = CoroutineScope(Dispatchers.Main)
+                                coroutineScope.launch {
+                                    locationsViewModel.location.collect {
+                                        eventLocation = it.name
+                                        isRequestDone = true
+                                        eventLocationLat = it.latitude
+                                        eventLocationLon = it.longitude
+                                    }
+                                }
+                                Toast.makeText(context, "Checking location", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
                             }
+                        } else {
+                            Toast.makeText(context, "Location is empty", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
-                    }
-                          },
-                modifier = modifier
-                    .height(80.dp)
-            ) {
-                Text(
-                    text = "Check\nLocation",
-                    textAlign = TextAlign.Center,
-                )
+                    },
+                    modifier = modifier
+                        .height(25.dp)
+                ) {
+                    Text(
+                        text = "Check",
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                Spacer(modifier = modifier.height(16.dp))
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        isRequestDone = false
+                        context.deleteSharedPreferences("EventLocation")
+                        startLocationUpdates()
+                        if (!warningViewModel.showGPSAlertDialog.value) {
+                            isButtonClicked = true
+                            val coroutineScope = CoroutineScope(Dispatchers.Main)
+                            coroutineScope.launch {
+                                locationsViewModel.location.collect {
+                                    eventLocation = it.name
+                                    eventLocationLat = it.latitude
+                                    eventLocationLon = it.longitude
+                                }
+                            }
+                            Toast.makeText(context, "Getting position", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = modifier
+                        .height(25.dp)
+                ) {
+                    Text(
+                        text = "GPS",
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
         Row(
@@ -493,14 +564,15 @@ fun NewEventScreen(
             modifier
                 .fillMaxWidth()
         ){
-            Text(text = "Participants:")
+            val tagSelected = tagItems.count { it.isSelected }
+            Text(text = "Tags:")
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
-                onClick = { participantsState.show() },
+                onClick = { tagsState.show() },
                 modifier = modifier
                     .height(25.dp)
             ) {
-                Text(text = participants.toString())
+                Text(text = if (tagSelected == 0) "Select" else "$tagSelected selected")
             }
         }
         OutlinedTextField(
@@ -529,12 +601,6 @@ fun NewEventScreen(
         )
 
         Spacer(modifier = modifier.weight(1f))
-
-        // Debug
-//        Text(text = "Debug: Show last saved image in app dir")
-//        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-//            lastFile?.let { Text(text = it) }
-//        }
 
         // Post button
         Button(
@@ -581,14 +647,26 @@ fun NewEventScreen(
                             eventName = eventTitle,
                             eventImage = localImageDir,
                             eventLocation = eventLocation,
+                            eventLocationLat = eventLocationLat,
+                            eventLocationLon = eventLocationLon,
                             eventDescription = eventCaption,
-                            timeStart = Date(startEventDate.toEpochSecond(ZoneOffset.UTC)),
-                            timeEnd = Date(endEventDate.toEpochSecond(ZoneOffset.UTC)),
+                            timeStart = Date.from(startEventDate.atZone(ZoneId.systemDefault()).toInstant()),
+                            timeEnd = Date.from(endEventDate.atZone(ZoneId.systemDefault()).toInstant()),
                             maxParticipants = maxParticipants,
                             participants = participants,
                             eventAdminId = adminId
                         )
                     )
+                    for (tag in tagItems) {
+                        if (tag.isSelected) {
+                            eventHasTagsViewModel.addNewTagToEvent(
+                                eventHasTag = EventHasTag(
+                                    eventId = eventId,
+                                    tagId = tag.id
+                                )
+                            )
+                        }
+                    }
                     onEvent()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()

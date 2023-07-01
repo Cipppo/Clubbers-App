@@ -6,6 +6,8 @@ import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.repos.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,12 +22,11 @@ class UsersViewModel @Inject constructor(
         repository.insertNewUser(user)
     }
 
-    private var _userSelected: User? = null
-    val userSelected
-        get() = _userSelected
+    private var _userSelected = MutableStateFlow<User?>(null)
+    val userSelected: StateFlow<User?> get() = _userSelected
 
     fun selectUser(user: User) {
-        _userSelected = user
+        _userSelected.value = user
     }
 
     fun updateUser(user: User) = viewModelScope.launch {
@@ -38,19 +39,28 @@ class UsersViewModel @Inject constructor(
 
     fun getUserById(userId: Int) = viewModelScope.launch {
         repository.getUserById(userId)
-            .collect {user ->
-                _userSelected = user
+            .collect { user ->
+                _userSelected.value = user
             }
     }
 
     fun getUserByUserName(userName: String) = viewModelScope.launch {
         repository.getUserByUserName(userName)
             .collect {user ->
-                _userSelected = user
+                _userSelected.value = user
             }
     }
 
-    fun getUserByEmail(userEmail: String): Flow<User> = repository.getUserByEmail(userEmail = userEmail)
+    fun getUserByEmail(userEmail: String) = viewModelScope.launch {
+        repository.getUserByEmail(userEmail)
+            .collect {user ->
+                _userSelected.value = user
+            }
+    }
+
+    private val _userId = MutableStateFlow(0)
+    val userId: StateFlow<Int> get() = _userId
+
 
     fun getAllUsers(): Flow<List<User>> = repository.getAllUsers()
 }

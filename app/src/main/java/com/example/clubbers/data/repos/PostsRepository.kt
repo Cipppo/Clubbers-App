@@ -27,4 +27,8 @@ class PostsRepository(private val postsDAO: PostsDAO) {
     fun getPostsByUserId(userId: Int): Flow<List<Post>> {
         return postsDAO.getPostsByUserId(userId)
     }
+
+    fun getPostsByEventId(eventId: Int): Flow<List<Post>> {
+        return postsDAO.getPostsByEventId(eventId)
+    }
 }

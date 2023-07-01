@@ -23,4 +23,8 @@ class EventsRepository(private val eventsDAO: EventsDAO) {
     fun getEventById(eventId: Int): Flow<Event> {
         return eventsDAO.getEventById(eventId)
     }
+
+    fun getEventsByName(eventName: String): Flow<List<Event>> {
+        return eventsDAO.getEventsByName(eventName)
+    }
 }

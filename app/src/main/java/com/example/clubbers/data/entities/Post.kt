@@ -20,6 +20,10 @@ data class Post(
     @ColumnInfo(name = "post_id")
     val postId: Int = 0,
 
+    /**
+     * TODO: to add more images to the post, the paths will be separated by commas
+     *  and then split into a list when needed
+     */
     @ColumnInfo(name = "post_image")
     var postImage: String,
 

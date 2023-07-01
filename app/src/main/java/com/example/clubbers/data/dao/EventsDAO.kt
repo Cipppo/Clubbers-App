@@ -11,12 +11,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface EventsDAO {
     // Get all events
-    @Query("SELECT * FROM events ORDER BY event_name ASC")
+    @Query("SELECT * FROM events ORDER BY time_start ASC")
     fun getEvents(): Flow<List<Event>>
 
     // Get event by id
     @Query("SELECT * FROM events WHERE event_id = :eventId")
     fun getEventById(eventId: Int): Flow<Event>
+
+    // Get events by event name
+    @Query("SELECT * FROM events WHERE event_name LIKE '%' || :eventName || '%' ORDER BY time_start ASC")
+    fun getEventsByName(eventName: String): Flow<List<Event>>
 
     // Insert event
     @Insert(onConflict = OnConflictStrategy.IGNORE)

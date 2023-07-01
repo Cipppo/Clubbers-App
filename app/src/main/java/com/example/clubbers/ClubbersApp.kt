@@ -2,8 +2,14 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
+<<<<<<< HEAD
 import android.util.Log
+=======
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+>>>>>>> develop
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +38,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -58,20 +66,25 @@ import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.EventScreen
+import com.example.clubbers.ui.FoundEventsScreen
 import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewEventScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
+import com.example.clubbers.ui.PostScreen
 import com.example.clubbers.ui.RegistrationScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
+import com.example.clubbers.ui.UserOptionScreen
 import com.example.clubbers.ui.notificationsScreen
-import com.example.clubbers.ui.userOptionScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.PostsViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -89,7 +102,9 @@ sealed class AppScreen(val name: String) {
 
     // Other Screens
     object Event : AppScreen("Event Details")
+    object Post : AppScreen("Post Details")
     object EventSelection : AppScreen("Select Event")
+    object FoundEvents : AppScreen("Found Events")
     object User : AppScreen("User Profile")
 
     //user registration Screens
@@ -124,8 +139,7 @@ fun TopAppBarFunction (
                 fontWeight = FontWeight.Medium
             )
         },
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp)),
+        modifier = modifier,
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = navigateUp) {
@@ -254,8 +268,7 @@ fun BottomAppBarFunction (
                 }
             }
         },
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(1.dp)),
+        modifier = modifier,
         containerColor = BottomAppBarDefaults.containerColor
     )
 
@@ -265,6 +278,7 @@ fun BottomAppBarFunction (
 @Composable
 fun NavigationApp (
     startRequestingData: () -> Unit,
+    startLocationUpdates: () -> Unit,
     warningViewModel: WarningViewModel,
     navController: NavHostController = rememberNavController()
 ) {
@@ -278,9 +292,16 @@ fun NavigationApp (
     logged = userName != "null"
 
     var isAdmin by rememberSaveable { mutableStateOf(false) }
+
     val backStackEntry by navController.currentBackStackEntryAsState()
+<<<<<<< HEAD
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
     if (logged) {
+=======
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
+
+    if (!userName.isNullOrEmpty()) {
+>>>>>>> develop
         val usersAndAdminsViewModel = hiltViewModel<UsersAndAdminsViewsViewModel>()
         isAdmin = usersAndAdminsViewModel.isAdmin(userName)
             .collectAsState(initial = false).value
@@ -288,8 +309,23 @@ fun NavigationApp (
 
     val snackBarHostState = remember { SnackbarHostState() }
 
+    val alpha = remember { Animatable(0f) }
+    val shadowAlpha = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        alpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 3000)
+        )
+        shadowAlpha.animateTo(
+            targetValue = 10f,
+            animationSpec = tween(durationMillis = 1000)
+        )
+    }
+
     Scaffold(
         topBar = {
+<<<<<<< HEAD
                  if (
                     currentScreen != AppScreen.Registration.name &&
                     currentScreen != AppScreen.Login.name &&
@@ -303,6 +339,23 @@ fun NavigationApp (
                          onNotifyPressed = { navController.navigate(AppScreen.Notifications.name)}
                      )
                  }
+=======
+            if (
+                currentScreen != AppScreen.Registration.name &&
+                currentScreen != AppScreen.Login.name &&
+                currentScreen != AppScreen.AdminRegistration.name
+            ) {
+                TopAppBarFunction(
+                    currentScreen = currentScreen,
+                    canNavigateBack = navController.previousBackStackEntry != null,
+                    navigateUp = { navController.navigateUp() },
+                    onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
+                    modifier = Modifier
+                        .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
+                        .alpha(alpha.value)
+                )
+            }
+>>>>>>> develop
         },
         snackbarHost = { SnackbarHost(snackBarHostState) },
         bottomBar = {
@@ -313,6 +366,9 @@ fun NavigationApp (
             ) {
                 BottomAppBarFunction(
                     isAdmin = isAdmin,
+                    modifier = Modifier
+                        .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
+                        .alpha(alpha.value),
                     currentScreen = currentScreen,
                     onHomeButtonClicked = {
                         navController.backQueue.clear()
@@ -344,11 +400,11 @@ fun NavigationApp (
                         }
                     },
                     onNewEventButtonClicked = {
-                       if (currentScreen == AppScreen.NewEvent.name) {
-                           navController.popBackStack()
-                           navController.navigate(AppScreen.NewEvent.name)
-                       } else
-                           navController.navigate(AppScreen.NewEvent.name)
+                        if (currentScreen == AppScreen.NewEvent.name) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.NewEvent.name)
+                        } else
+                            navController.navigate(AppScreen.NewEvent.name)
                     },
                     onDiscoverButtonClicked = {
                         if (currentScreen == AppScreen.Discover.name) {
@@ -368,26 +424,34 @@ fun NavigationApp (
             }
         }
     ) { innerPadding ->
-        NavigationGraph(
-            startRequestingData,
-            navController,
-            innerPadding,
-            warningViewModel
-        )
-        val context = LocalContext.current
-        if (warningViewModel.showConnectivitySnackBar.value) {
-            ConnectivitySnackBarComposable(
-                snackBarHostState = snackBarHostState,
-                applicationContext = context,
-                warningViewModel = warningViewModel
+        Box(
+            modifier = Modifier
+                .alpha(alpha.value)
+        ) {
+            NavigationGraph(
+                startRequestingData,
+                startLocationUpdates,
+                navController,
+                innerPadding,
+                warningViewModel
             )
+            val context = LocalContext.current
+            if (warningViewModel.showConnectivitySnackBar.value) {
+                ConnectivitySnackBarComposable(
+                    snackBarHostState = snackBarHostState,
+                    applicationContext = context,
+                    warningViewModel = warningViewModel
+                )
+            }
         }
+
     }
 }
 
 @Composable
 private fun NavigationGraph(
     startRequestingData: () -> Unit,
+    startLocationUpdates: () -> Unit,
     navController: NavHostController,
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
@@ -403,6 +467,7 @@ private fun NavigationGraph(
 
     val eventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
+    val postsViewModel = hiltViewModel<PostsViewModel>()
 
     NavHost(
         navController = navController,
@@ -416,14 +481,19 @@ private fun NavigationGraph(
 
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
-
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+
             TodayScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                onSearchAction = { navController.navigate(AppScreen.FoundEvents.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -431,16 +501,59 @@ private fun NavigationGraph(
         composable(route = AppScreen.Event.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+
             EventScreen(
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel,
+                postsViewModel = postsViewModel,
+                onClickAction = { navController.navigate(AppScreen.Post.name) }
+            )
+        }
+
+        // Post Screen
+        composable(route = AppScreen.Post.name) {
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+
+            PostScreen(
+                postsViewModel = postsViewModel,
+                usersViewModel = usersViewModel
+            )
+        }
+
+        // Found Events Screen
+        composable(route = AppScreen.FoundEvents.name) {
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+
+            FoundEventsScreen(
+                onEventSelected = { navController.navigate(AppScreen.Event.name) },
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
         // New Post Screen
         composable(route = AppScreen.NewPost.name) {
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val userMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                .getString("USER_LOGGED", "None")!!
+            usersViewModel.getUserIdByEmail(userMail)
+            val userId by usersViewModel.userId.collectAsState()
+
             NewPostScreen(
+                postsViewModel = postsViewModel,
+                eventsViewModel = eventsViewModel,
+                userId = userId,
                 onPost = { navController.navigate(AppScreen.Home.name) }
             )
         }
@@ -448,10 +561,12 @@ private fun NavigationGraph(
         // New Event Screen
         composable(route = AppScreen.NewEvent.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val tagsViewModel = hiltViewModel<TagsViewModel>()
+            val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
 
-            val adminName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+            val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
                 .getString("USER_LOGGED", "None")!!
-            adminsViewModel.getAdminIdByEmail(adminName)
+            adminsViewModel.getAdminIdByEmail(adminMail)
             val adminId by adminsViewModel.adminId.collectAsState()
 
             NewEventScreen(
@@ -460,7 +575,10 @@ private fun NavigationGraph(
                 locationsViewModel = locationsViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData,
-                warningViewModel = warningViewModel
+                startLocationUpdates = startLocationUpdates,
+                warningViewModel = warningViewModel,
+                tagsViewModel = tagsViewModel,
+                eventHasTagsViewModel = eventHasTagsViewModel
             )
         }
 
@@ -468,11 +586,22 @@ private fun NavigationGraph(
         composable(route = AppScreen.EventSelection.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+
+            val userMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                .getString("USER_LOGGED", "None")!!
+            usersViewModel.getUserIdByEmail(userMail)
+            val userId by usersViewModel.userId.collectAsState()
+
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             SelectEventForPostScreen(
                 onEventSelected = { navController.navigate(AppScreen.NewPost.name) },
+                userId = userId,
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -480,11 +609,16 @@ private fun NavigationGraph(
         composable(route = AppScreen.Discover.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             DiscoverScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                onSearchAction = { navController.navigate(AppScreen.FoundEvents.name) },
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel
             )
         }
 
@@ -492,17 +626,26 @@ private fun NavigationGraph(
         composable(route = AppScreen.Profile.name) {
             val usersViewModel = hiltViewModel<UsersViewModel>()
             PersonalProfileScreen(
+<<<<<<< HEAD
                 onOption = { navController.navigate(AppScreen.UserOption.name)},
                 onNotify = {navController.navigate(AppScreen.Notifications.name)},
                 usersViewModel = usersViewModel
+=======
+                onOption = {navController.navigate(AppScreen.UserOption.name)},
+                onNotify = {navController.navigate(AppScreen.Notifications.name)}
+>>>>>>> develop
             )
         }
 
+        // Admin Registration Screen
         composable(route = AppScreen.AdminRegistration.name){
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             ClubRegistrationScreen(
                 adminsViewModel,
-                onRegister = {navController.navigate(AppScreen.Home.name)}
+                onRegister = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                }
             )
         }
 
@@ -514,12 +657,15 @@ private fun NavigationGraph(
                 switchToRegister = {navController.navigate(AppScreen.Registration.name)},
                 switchToAdminRegister = {navController.navigate((AppScreen.AdminRegistration.name))},
                 usersViewModel = usersViewModel,
-                onLogin = {navController.navigate(AppScreen.Home.name)},
+                onLogin = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Home.name)
+                          },
                 adminsViewModel = adminsViewModel
             )
         }
 
-        // Registration Screen
+        // User Registration Screen
         composable(route = AppScreen.Registration.name){
             val usersViewModel = hiltViewModel<UsersViewModel>()
             RegistrationScreen(
@@ -531,12 +677,17 @@ private fun NavigationGraph(
             )
         }
 
+        // User Option Screen
         composable(route = AppScreen.UserOption.name){
-            userOptionScreen(
-                onLogout = {navController.navigate(AppScreen.Login.name)}
+            UserOptionScreen(
+                onLogout = {
+                    navController.backQueue.clear()
+                    navController.navigate(AppScreen.Login.name)
+                }
             )
         }
 
+        // Notifications Screen
         composable(route = AppScreen.Notifications.name){
             notificationsScreen()
         }

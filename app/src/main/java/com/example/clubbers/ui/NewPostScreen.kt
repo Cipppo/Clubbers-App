@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,15 +47,23 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.Post
+import com.example.clubbers.utilities.TakenPhotoDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
+import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.PostsViewModel
+import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.util.Objects
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewPostScreen(
     modifier: Modifier = Modifier,
+    postsViewModel: PostsViewModel,
+    eventsViewModel: EventsViewModel,
+    userId: Int,
     onPost: () -> Unit
 ) {
     val context = LocalContext.current
@@ -64,12 +72,11 @@ fun NewPostScreen(
         Objects.requireNonNull(context),
         context.packageName + ".provider", file)
 
-    var showPopup by rememberSaveable { mutableStateOf(false) }
+    val takenPhotoSheetState = rememberSheetState()
+    
+    val imageUriList = remember { mutableStateListOf<Uri>() }
 
-    var capturedImageUri by rememberSaveable {
-        mutableStateOf<Uri>(Uri.EMPTY)
-    }
-
+    var localImageDirList by rememberSaveable { mutableStateOf("") }
     var postCaption by rememberSaveable { mutableStateOf("") }
     val maxChar = 255
 
@@ -77,7 +84,7 @@ fun NewPostScreen(
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            capturedImageUri = uri
+            imageUriList.add(uri)
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
@@ -108,8 +115,8 @@ fun NewPostScreen(
                 .background(Color.Gray, MaterialTheme.shapes.small)
                 .clickable(
                     onClick = {
-                        if (capturedImageUri.path?.isNotEmpty() == true) {
-                            showPopup = true
+                        if (imageUriList.isNotEmpty()) {
+                            takenPhotoSheetState.show()
                         } else {
                             val permissionCheckResult = ContextCompat.checkSelfPermission(
                                 context,
@@ -125,67 +132,10 @@ fun NewPostScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (showPopup) {
-                AlertDialog(
-                    onDismissRequest = {
-                        showPopup = false
-                                       },
-                    title = { Text("Post Preview") },
-                    text = {
-                        Box(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(
-                                    ImageRequest.Builder(
-                                        LocalContext.current
-                                    ).data(data = capturedImageUri).apply(block = fun ImageRequest.Builder.() {
-                                        crossfade(true)
-                                        placeholder(R.drawable.ic_launcher_foreground)
-                                        error(R.drawable.ic_launcher_foreground)
-                                    }).build()
-                                ),
-                                contentDescription = "Captured Image",
-                                contentScale = ContentScale.Crop,
-                                modifier = modifier.fillMaxSize()
-                            )
-                        }
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            showPopup = false
-                            capturedImageUri = Uri.EMPTY
-                        },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Text("Take new photo")
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = {
-                            showPopup = false
-                                         },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Text("Cancel")
-                        }
-                    }
-                )
-            }
-
-            if (capturedImageUri.path?.isNotEmpty() == true) {
+            if (imageUriList.isNotEmpty()) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri)
+                        ImageRequest.Builder(LocalContext.current).data(data = imageUriList.first())
                             .apply(block = fun ImageRequest.Builder.() {
                                 crossfade(true)
                                 placeholder(R.drawable.ic_launcher_foreground)
@@ -233,18 +183,29 @@ fun NewPostScreen(
 
         Spacer(modifier = modifier.weight(1f))
 
-        // Debug
-        Text(text = "Debug: Show last saved image in app dir")
-        context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-            lastFile?.let { Text(text = it) }
-        }
-
         // Post button
         Button(
             onClick = {
                 val photoType = "Post"
-                if (capturedImageUri.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
+                val eventId = eventsViewModel.eventSelected!!.eventId
+
+                if (imageUriList.isNotEmpty()) {
+                    imageUriList.forEach {
+                        saveImage(context, context.applicationContext.contentResolver, it, photoType)
+                    }
+
+                    val lastNFiles = context.getFilesFromAppDir().takeLast(imageUriList.size)
+                    localImageDirList = lastNFiles.joinToString(separator = ",") { it }
+
+                    postsViewModel.addNewPost(
+                        Post(
+                            postImage = localImageDirList,
+                            postCaption = postCaption,
+                            postUserId = userId,
+                            postEventId = eventId
+                        )
+                    )
+
                     onPost()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
@@ -262,4 +223,10 @@ fun NewPostScreen(
             Text(text = "Post Photo")
         }
     }
+
+    TakenPhotoDialog(
+        title = "Taken Photo",
+        sheetState = takenPhotoSheetState,
+        imageUriList = imageUriList
+    )
 }

@@ -52,7 +52,9 @@ abstract class ClubbersDatabase : RoomDatabase() {
                     context.applicationContext,
                     ClubbersDatabase::class.java,
                     "clubbers_database"
-                ).build()
+                )
+                    .createFromAsset("database/clubbers_database.db")
+                    .build()
                 INSTANCE = instance
 
                 instance

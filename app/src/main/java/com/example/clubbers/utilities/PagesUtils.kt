@@ -1,12 +1,18 @@
 package com.example.clubbers.utilities
 
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,48 +21,83 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.util.lerp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.data.entities.Participates
+import com.example.clubbers.data.entities.Post
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.PostsViewModel
+import com.example.clubbers.viewModel.UsersViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.calculateCurrentOffsetForPage
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.maxkeppeker.sheets.core.models.base.rememberSheetState
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.math.absoluteValue
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -64,11 +105,27 @@ import com.google.maps.android.compose.rememberCameraPositionState
 fun CreateSearchTimeLine(
     modifier: Modifier,
     onClickAction: () -> Unit,
+    onSearchAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel,
+    isTodayEvents: Boolean
 ) {
-    val events = eventsViewModel.events.collectAsState(initial = listOf()).value
+    eventsViewModel.getAllEvents()
+    val events by eventsViewModel.events.collectAsState()
+    val todayEvents = if (isTodayEvents) {
+        events.filter { event ->
+            val timeStart = event.timeStart
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val eventDate = sdf.format(timeStart)
+            val currentDate = sdf.format(System.currentTimeMillis())
+            eventDate == currentDate
+        }
+    } else {
+        emptyList()
+    }
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -76,11 +133,10 @@ fun CreateSearchTimeLine(
                 .fillMaxSize(),
             content = {
                 stickyHeader {
-                    SearchBar(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .fillMaxWidth()
+                    AutoCompleteSearchBar(
+                        events = if (isTodayEvents) todayEvents else events,
+                        eventsViewModel = eventsViewModel,
+                        onSearchAction = onSearchAction
                     )
                     Divider(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
@@ -89,14 +145,33 @@ fun CreateSearchTimeLine(
                             .shadow(5.dp, RoundedCornerShape(1.dp))
                     )
                 }
-                items(events.size) { index ->
-                    EventItem(
-                        eventsViewModel = eventsViewModel,
-                        adminsViewModel = adminsViewModel,
-                        eventHasTagsViewModel = eventHasTagsViewModel,
-                        event = events[index],
-                        onClickAction = onClickAction
-                    )
+                if (isTodayEvents && todayEvents.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                            content = {
+                                Text(
+                                    text = "No events today",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(16.dp),
+                                )
+                            }
+                        )
+                    }
+                } else {
+                    items(if(isTodayEvents) todayEvents.size else events.size) { index ->
+                        EventItem(
+                            eventsViewModel = eventsViewModel,
+                            adminsViewModel = adminsViewModel,
+                            eventHasTagsViewModel = eventHasTagsViewModel,
+                            event = if (isTodayEvents) todayEvents[index] else events[index],
+                            participatesViewModel = participatesViewModel,
+                            usersViewModel = usersViewModel,
+                            onClickAction = onClickAction
+                        )
+                    }
                 }
             }
         )
@@ -111,23 +186,44 @@ fun CreateParticipatedEventTimeLine(
     onClickAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    passedEvents: List<Event> = emptyList(),
+    usersViewModel: UsersViewModel,
 ) {
-    val events = eventsViewModel.events.collectAsState(initial = listOf()).value
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             content = {
-                items(events.size) { index ->
-                    EventItem(
-                        eventsViewModel = eventsViewModel,
-                        adminsViewModel = adminsViewModel,
-                        eventHasTagsViewModel = eventHasTagsViewModel,
-                        event = events[index],
-                        onClickAction = onClickAction
-                    )
+                if (passedEvents.isNotEmpty()) {
+                    items(passedEvents.size) { index ->
+                        EventItem(
+                            eventsViewModel = eventsViewModel,
+                            adminsViewModel = adminsViewModel,
+                            eventHasTagsViewModel = eventHasTagsViewModel,
+                            event = passedEvents[index],
+                            participatesViewModel = participatesViewModel,
+                            usersViewModel = usersViewModel,
+                            onClickAction = onClickAction
+                        )
+                    }
+                } else {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                            content = {
+                                Text(
+                                    text = "No events participated right now",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(16.dp),
+                                )
+                            }
+                        )
+                    }
                 }
             }
         )
@@ -135,32 +231,126 @@ fun CreateParticipatedEventTimeLine(
 }
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(modifier: Modifier = Modifier) {
+fun AutoCompleteSearchBar(
+    events: List<Event>,
+    eventsViewModel: EventsViewModel,
+    onSearchAction: () -> Unit
+) {
     var searchText by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldSize by remember { mutableStateOf(Size.Zero) }
+    val eventNames = events.map { it.eventName }.distinct()
+    val context = LocalContext.current
 
-    OutlinedTextField (
+    OutlinedTextField(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                textFieldSize = coordinates.size.toSize()
+            },
         value = searchText,
-        onValueChange = { searchText = it },
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        label = { Text(text = "Search") },
+        onValueChange = {
+            searchText = it
+            expanded = true
+                        },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary,
             containerColor = MaterialTheme.colorScheme.surface,
         ),
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontSize = MaterialTheme.typography.bodySmall.fontSize
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
         singleLine = true,
-        leadingIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_search_24),
-                contentDescription = "Search icon"
-            )
+        trailingIcon = {
+            Row {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowDropDown,
+                        contentDescription = "Dropdown menu")
+                }
+                IconButton(onClick = {
+                    if (searchText.isNotEmpty() && searchText == eventNames.find { it == searchText }) {
+                        eventsViewModel.getEventsByName(searchText)
+                        onSearchAction()
+                    } else {
+                        Toast.makeText(context, "Event not found", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_check_24),
+                        contentDescription = "Search")
+                }
+            }
         }
     )
+    
+    AnimatedVisibility(visible = expanded) {
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 5.dp)
+                .width(textFieldSize.width.dp),
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .heightIn(max = 150.dp)
+            ) {
+                if (searchText.isNotEmpty()) {
+                    items(
+                        eventNames.filter {
+                            it.lowercase()
+                                .contains(searchText.lowercase())
+                        }
+                            .sorted()
+                    ) {
+                        EventNames(title = it) { title ->
+                            searchText = title
+                            expanded = false
+                        }
+                    }
+                } else {
+                    items(
+                        eventNames.sorted()
+                    ) {
+                        EventNames(title = it) { title ->
+                            searchText = title
+                            expanded = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun EventNames(
+    title: String,
+    onSelect: (String) -> Unit
+) {
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = { onSelect(title) }
+            )
+            .padding(10.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = MaterialTheme.typography.bodySmall.fontSize
+        )
+    }
 }
 
 
@@ -170,25 +360,34 @@ fun EventItem(
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    usersViewModel: UsersViewModel,
+    isSingleEvent: Boolean = false,
     event: Event,
     onClickAction: () -> Unit
 ) {
-    var showMapDialog by rememberSaveable { mutableStateOf(false) }
+    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     adminsViewModel.getAdminById(event.eventAdminId)
     val admin by adminsViewModel.admin.collectAsState()
     eventHasTagsViewModel.getTagsByEventId(event.eventId)
     val tags by eventHasTagsViewModel.tags.collectAsState()
 
+    val mapSheetState = rememberSheetState()
+
+    val eventTitle = event.eventName
     val adminName = admin?.adminUsername
     val proPicUri = admin?.adminImage
     val imageUri = event.eventImage
     val caption = event.eventDescription.orEmpty()
     val tagsList = tags?.map { it.tagName }
-    val timeStart = event.timeStart.toString()
-    val timeEnd = event.timeEnd.toString()
-    val place = event.eventLocation
-
+    val timeStart = format.format(event.timeStart)
+    val timeEnd = format.format(event.timeEnd)
+    val place = LocationDetails(
+        name = event.eventLocation,
+        latitude = event.eventLocationLat,
+        longitude = event.eventLocationLon
+    )
 
     ElevatedCard(
         modifier = Modifier
@@ -208,7 +407,7 @@ fun EventItem(
         }
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(bottom = 8.dp)
@@ -235,6 +434,11 @@ fun EventItem(
                 )
                 Spacer(modifier = Modifier.padding(end = 8.dp))
                 adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = eventTitle,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Image(
                 painter = rememberAsyncImagePainter(
@@ -248,13 +452,21 @@ fun EventItem(
                 ),
                 contentDescription = "Post/Event image",
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.medium)
+                    .fillMaxSize()
                     .border(
                         1.dp,
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                         shape = MaterialTheme.shapes.medium
                     )
-                    .heightIn(min = 180.dp)
+                    .run {
+                        if (isSingleEvent) {
+                            heightIn(180.dp)
+                        } else {
+                            height(180.dp)
+                        }
+                    },
+                contentScale = if (isSingleEvent) ContentScale.Crop else ContentScale.Fit
             )
             Text(
                 text = caption,
@@ -263,11 +475,13 @@ fun EventItem(
                     .padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.padding(top = 8.dp))
-            Text(
-                text = "Tags: ${ tagsList?.joinToString(separator = ", ") }",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            if(isSingleEvent) {
+                Text(
+                    text = "Tags: ${tagsList?.joinToString(separator = ", ")}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(modifier = Modifier.padding(top = 16.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -278,54 +492,277 @@ fun EventItem(
                     Text(text = "Ends: $timeEnd", style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = place,
-                    style = MaterialTheme.typography.bodySmall,
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    val textColor = if (event.participants == event.maxParticipants) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    Text(
+                        text = AnnotatedString(
+                            text = "Participants: "
+                        ) + AnnotatedString(
+                            text = "${event.participants}",
+                            spanStyle = SpanStyle(color = textColor)
+                        ) + AnnotatedString(
+                            text = " / ${event.maxParticipants}"
+                        ),
+
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = place.name.take(15) + if (place.name.length > 15) "..." else "",
+                        style = MaterialTheme.typography.bodySmall
+                            .copy(textDecoration = TextDecoration.Underline),
+                        modifier = Modifier
+                            .clickable(onClick = { mapSheetState.show() })
+                            .widthIn(max = 100.dp)
+                    )
+                }
+            }
+            if (isSingleEvent) {
+
+                participatesViewModel.getParticipants(event.eventId)
+                val participants by participatesViewModel.participants.collectAsState()
+
+                val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                    .getString("USER_LOGGED", "None")
+                usersViewModel.getUserByEmail(userName.orEmpty())
+                val user by usersViewModel.userSelected.collectAsState()
+
+                var isUserParticipating by rememberSaveable { mutableStateOf(false) }
+                isUserParticipating = participants.contains(user)
+
+                Row(
                     modifier = Modifier
-                        .clickable(onClick = { showMapDialog = true })
-                )
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    ElevatedButton(
+                        onClick = {
+                            val participant = user?.let {
+                                Participates(
+                                    eventId = event.eventId,
+                                    userId = it.userId
+                                )
+                            }
+                            if (isUserParticipating) participant?.let {
+                                participatesViewModel.deleteParticipant(it)
+                                event.participants--
+                                eventsViewModel.updateEvent(event)
+                            } else participant?.let {
+                                participatesViewModel.addNewParticipant(it)
+                                event.participants++
+                                eventsViewModel.updateEvent(event)
+                            }
+                        },
+                        enabled = event.participants < event.maxParticipants!!
+                    ) {
+                        if (isUserParticipating) {
+                            Text(
+                                text = "Leave",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else {
+                            Text(text = "Join")
+                        }
+                    }
+                }
             }
         }
     }
 
-    if (showMapDialog) {
-        val singapore = LatLng(1.35, 103.81)
-        val initialCameraPosition = CameraPosition.fromLatLngZoom(singapore, 10f)
-        AlertDialog(
-            onDismissRequest = { showMapDialog = false },
-            confirmButton = {
-                TextButton(onClick = { showMapDialog = false }) {
-                    Text(text = "Close")
-                }
-            },
-            text = {
-                MapView(initialCameraPosition = initialCameraPosition, markerPosition = singapore)
+    val locationLatLng = LatLng(place.latitude, place.longitude)
+    val initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
+    MapDialog(
+        title = "Location Map",
+        sheetState = mapSheetState,
+        placeName = place.name,
+        initialCameraPosition = initialCameraPosition,
+        locationLatLng = locationLatLng
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PostItem(
+    usersViewModel: UsersViewModel,
+    postsViewModel: PostsViewModel,
+    post: Post,
+    onClickAction: () -> Unit
+) {
+    usersViewModel.getUserById(post.postUserId)
+    val user by usersViewModel.userSelected.collectAsState()
+
+    val proPicUri = user?.userImage
+    val userName = user?.userName
+    val imageUriList: List<Uri> = post.postImage.split(",").map { Uri.parse(it) }
+
+    ElevatedCard(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                shape = MaterialTheme.shapes.small
+            ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        onClick = {
+            postsViewModel.selectPost(post)
+            onClickAction()
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(
+                            LocalContext.current
+                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                            crossfade(true)
+                            placeholder(R.drawable.ic_launcher_foreground)
+                            error(R.drawable.ic_launcher_foreground)
+                        }).build()
+                    ),
+                    contentDescription = "Profile picture",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            shape = CircleShape
+                        )
+                )
+                Spacer(modifier = Modifier.padding(end = 8.dp))
+                userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
             }
-        )
+            CarouselCard(
+                capturedImageUris = imageUriList
+            )
+            Text(
+                text = post.postCaption,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            Spacer(modifier = Modifier.padding(top = 8.dp))
+        }
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun MapView(
-    initialCameraPosition: CameraPosition,
-    markerPosition: LatLng
+fun CarouselCard(
+    capturedImageUris: List<Uri>,
+    currentImageIndex: MutableState<Int> = remember { mutableStateOf(0) }
 ) {
-    val cameraPositionState = rememberCameraPositionState { position = initialCameraPosition }
-    val markerState = MarkerState(markerPosition)
+    val pagerState = rememberPagerState(initialPage = 0)
+    val scope = rememberCoroutineScope()
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(300.dp)
-        .clip(shape = MaterialTheme.shapes.small)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp)
     ) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
+        HorizontalPager(
+            count = capturedImageUris.size,
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            modifier = Modifier
+                .height(350.dp)
+        ) { page ->
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .graphicsLayer {
+                        val pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
+                        lerp(
+                            start = 0.50f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                            .also { scale ->
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                        alpha = lerp(
+                            start = 0.50f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                    }
+            ) {
+                val currentImageUri = capturedImageUris[page]
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current).data(data = currentImageUri)
+                            .apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                    ),
+                    contentDescription = "Captured Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(300.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.small)
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Marker(
-                state = markerState,
-                title = "Title",
-            )
+            IconButton(
+                enabled = pagerState.currentPage > 0,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                }
+            ) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            repeat(capturedImageUris.size) {
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .size(5.dp)
+                        .background(
+                            color = if (pagerState.currentPage == it) {
+                                currentImageIndex.value = it
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                            }
+                        )
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                enabled = pagerState.currentPage < capturedImageUris.size - 1,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+            ) {
+                Icon(Icons.Filled.ArrowForward, contentDescription = "Forward")
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ import java.util.Date
         parentColumns = arrayOf("admin_id"),
         childColumns = arrayOf("event_admin_id"),
         onDelete = ForeignKey.CASCADE)
-])
+                                            ])
 data class Event(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "event_id")
@@ -26,6 +26,12 @@ data class Event(
     @ColumnInfo(name = "event_location")
     val eventLocation: String,
 
+    @ColumnInfo(name = "event_location_lat")
+    val eventLocationLat: Double,
+
+    @ColumnInfo(name = "event_location_lon")
+    val eventLocationLon: Double,
+
     @ColumnInfo(name = "event_description")
     val eventDescription: String?,
 
@@ -39,7 +45,7 @@ data class Event(
     val maxParticipants: Int?,
 
     @ColumnInfo(name = "participants")
-    val participants: Int = 0,
+    var participants: Int = 0,
 
     @ColumnInfo(name = "event_admin_id")
     val eventAdminId: Int

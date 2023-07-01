@@ -22,6 +22,10 @@ interface PostsDAO {
     @Query("SELECT * FROM posts WHERE user_id = :userId")
     fun getPostsByUserId(userId: Int): Flow<List<Post>>
 
+    // Get posts by event id
+    @Query("SELECT * FROM posts WHERE event_id = :eventId")
+    fun getPostsByEventId(eventId: Int): Flow<List<Post>>
+
     // Insert post
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(post: Post)

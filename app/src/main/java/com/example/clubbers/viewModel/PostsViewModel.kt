@@ -39,6 +39,13 @@ class PostsViewModel @Inject constructor(
             }
     }
 
+    fun getPostsByEventId(eventId: Int) = viewModelScope.launch {
+        repository.getPostsByEventId(eventId)
+            .collect { posts ->
+                _posts.value = posts
+            }
+    }
+
     fun addNewPost(post: Post) = viewModelScope.launch {
         repository.insertNewPost(post)
     }
