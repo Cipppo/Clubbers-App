@@ -251,6 +251,7 @@ fun AutoCompleteSearchBar(
             .onGloballyPositioned { coordinates ->
                 textFieldSize = coordinates.size.toSize()
             },
+        label = { Text(text = "Search by title") },
         value = searchText,
         onValueChange = {
             searchText = it
