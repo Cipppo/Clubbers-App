@@ -194,7 +194,7 @@ fun NewPostScreen(
                         saveImage(context, context.applicationContext.contentResolver, it, photoType)
                     }
 
-                    val lastNFiles = context.getFilesFromAppDir().takeLast(imageUriList.size)
+                    val lastNFiles = context.getFilesFromAppDir(photoType).takeLast(imageUriList.size)
                     localImageDirList = lastNFiles.joinToString(separator = ",") { it }
 
                     postsViewModel.addNewPost(

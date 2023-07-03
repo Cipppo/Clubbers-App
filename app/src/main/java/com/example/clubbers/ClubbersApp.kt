@@ -59,10 +59,12 @@ import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
+import com.example.clubbers.ui.EventLocationViewModel
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.FoundEventsScreen
 import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.LoginScreen
+import com.example.clubbers.ui.NewEventLocationScreen
 import com.example.clubbers.ui.NewEventScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
@@ -90,6 +92,7 @@ sealed class AppScreen(val name: String) {
     object Home : AppScreen("Home")
     object NewPost : AppScreen("Create Post")
     object NewEvent : AppScreen("Create Event")
+    object NewEventLocation : AppScreen("Select Event Location")
     object Discover : AppScreen("Discover")
     object Profile : AppScreen("Personal Profile")
     object Today : AppScreen("Today's Events")
@@ -423,6 +426,7 @@ private fun NavigationGraph(
     val eventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
     val postsViewModel = hiltViewModel<PostsViewModel>()
+    val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
 
     NavHost(
         navController = navController,
@@ -517,6 +521,22 @@ private fun NavigationGraph(
         composable(route = AppScreen.NewEvent.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val tagsViewModel = hiltViewModel<TagsViewModel>()
+
+            val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                .getString("USER_LOGGED", "None")!!
+            adminsViewModel.getAdminIdByEmail(adminMail)
+
+            NewEventScreen(
+                onNext = { navController.navigate(AppScreen.NewEventLocation.name) },
+                eventsViewModel = eventsViewModel,
+                eventLocationViewModel = eventLocationViewModel,
+                tagsViewModel = tagsViewModel,
+            )
+        }
+
+        // New Event Location Screen
+        composable(route = AppScreen.NewEventLocation.name) {
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
 
             val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -524,15 +544,15 @@ private fun NavigationGraph(
             adminsViewModel.getAdminIdByEmail(adminMail)
             val adminId by adminsViewModel.adminId.collectAsState()
 
-            NewEventScreen(
+            NewEventLocationScreen(
                 onEvent = { navController.navigate(AppScreen.Home.name) },
                 eventsViewModel = eventsViewModel,
                 locationsViewModel = locationsViewModel,
+                eventLocationViewModel = eventLocationViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData,
                 startLocationUpdates = startLocationUpdates,
                 warningViewModel = warningViewModel,
-                tagsViewModel = tagsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel
             )
         }

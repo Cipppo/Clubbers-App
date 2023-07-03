@@ -1,7 +1,6 @@
 package com.example.clubbers.ui
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -56,20 +55,12 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
-import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.details.TagsListItem
-import com.example.clubbers.data.entities.Event
-import com.example.clubbers.data.entities.EventHasTag
 import com.example.clubbers.utilities.NumbersDialog
 import com.example.clubbers.utilities.TagsListDialog
 import com.example.clubbers.utilities.createImageFile
-import com.example.clubbers.utilities.getFilesFromAppDir
-import com.example.clubbers.utilities.saveImage
-import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
-import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.TagsViewModel
-import com.example.clubbers.viewModel.WarningViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -78,30 +69,20 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Objects
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewEventScreen(
     modifier: Modifier = Modifier,
-    onEvent: () -> Unit,
-    startRequestingData: () -> Unit,
-    startLocationUpdates: () -> Unit,
+    onNext: () -> Unit,
     eventsViewModel: EventsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel,
-    locationsViewModel: LocationsViewModel,
-    warningViewModel: WarningViewModel,
+    eventLocationViewModel: EventLocationViewModel,
     tagsViewModel: TagsViewModel,
-    adminId: Int
 ) {
     val context = LocalContext.current
 
@@ -121,13 +102,9 @@ fun NewEventScreen(
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var localImageDir by rememberSaveable { mutableStateOf("") }
 
     var eventCaption by rememberSaveable { mutableStateOf("") }
     var eventTitle by rememberSaveable { mutableStateOf("") }
-    var eventLocation by rememberSaveable { mutableStateOf("")}
-    var eventLocationLat by rememberSaveable { mutableStateOf(0.0)}
-    var eventLocationLon by rememberSaveable { mutableStateOf(0.0)}
 
     val captionMaxChar = 255
     val titleMaxChar = 30
@@ -143,16 +120,10 @@ fun NewEventScreen(
     val endClockState = rememberSheetState()
 
     var maxParticipants by rememberSaveable { mutableStateOf(0) }
-    val participants = 0
     val maxParticipantsState = rememberSheetState()
     val tagsState = rememberSheetState()
 
     eventsViewModel.getAllEvents()
-    val eventsTemp = eventsViewModel.events.collectAsState()
-    val eventId = eventsTemp.value.size.plus(1)
-
-    var isButtonClicked by rememberSaveable { mutableStateOf(false) }
-    var isRequestDone by rememberSaveable { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -390,7 +361,7 @@ fun NewEventScreen(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = " Start Event:")
+            Text(text = "Start Event:")
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
                 onClick = { startCalendarState.show() },
@@ -417,7 +388,7 @@ fun NewEventScreen(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = " End Event:")
+            Text(text = "End Event:")
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
                 onClick = { endCalendarState.show() },
@@ -439,112 +410,7 @@ fun NewEventScreen(
                 )
             }
         }
-        Row (
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = eventLocation,
-                onValueChange = {
-                    if (it.length <= captionMaxChar) eventLocation = it
-                },
-                label = { Text(text = "Event Location") },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.onBackground,
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-                shape = MaterialTheme.shapes.small,
-                modifier = modifier
-                    .width(250.dp)
-                    .height(120.dp),
-                maxLines = 3,
-                supportingText = {
-                    if (isButtonClicked && eventLocation.isEmpty() && isRequestDone) {
-                        Text(
-                            text = "Location not found, Retry",
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Start,
-                        )
-                    }
-                    Text(
-                        text = "${eventLocation.length} / $captionMaxChar",
-                        modifier = modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.End,
-                    )
-                }
-            )
-            Spacer(modifier = modifier.weight(1f))
-            Column() {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        if (eventLocation.isNotEmpty()) {
-                            isRequestDone = false
-                            context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                                .edit()
-                                .putString("EventLocation", eventLocation)
-                                .apply()
-                            locationsViewModel.setEventLocation(LocationDetails("", 0.0, 0.0))
-                            startRequestingData()
-                            if (!warningViewModel.showConnectivitySnackBar.value) {
-                                isButtonClicked = true
-                                val coroutineScope = CoroutineScope(Dispatchers.Main)
-                                coroutineScope.launch {
-                                    locationsViewModel.location.collect {
-                                        eventLocation = it.name
-                                        isRequestDone = true
-                                        eventLocationLat = it.latitude
-                                        eventLocationLon = it.longitude
-                                    }
-                                }
-                                Toast.makeText(context, "Checking location", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, "Location is empty", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = modifier
-                        .height(25.dp)
-                ) {
-                    Text(
-                        text = "Check",
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                Spacer(modifier = modifier.height(16.dp))
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        isRequestDone = false
-                        context.deleteSharedPreferences("EventLocation")
-                        startLocationUpdates()
-                        if (!warningViewModel.showGPSAlertDialog.value) {
-                            isButtonClicked = true
-                            val coroutineScope = CoroutineScope(Dispatchers.Main)
-                            coroutineScope.launch {
-                                locationsViewModel.location.collect {
-                                    eventLocation = it.name
-                                    eventLocationLat = it.latitude
-                                    eventLocationLon = it.longitude
-                                }
-                            }
-                            Toast.makeText(context, "Getting position", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = modifier
-                        .height(25.dp)
-                ) {
-                    Text(
-                        text = "GPS",
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        }
+        Spacer(modifier = modifier.height(8.dp))
         Row(
             modifier
                 .fillMaxWidth(),
@@ -575,6 +441,7 @@ fun NewEventScreen(
                 Text(text = if (tagSelected == 0) "Select" else "$tagSelected selected")
             }
         }
+        Spacer(modifier = modifier.height(8.dp))
         OutlinedTextField(
             value = eventCaption,
             onValueChange = {
@@ -588,8 +455,8 @@ fun NewEventScreen(
             shape = MaterialTheme.shapes.small,
             modifier = modifier
                 .fillMaxWidth()
-                .height(110.dp),
-            maxLines = 2,
+                .height(180.dp),
+//            maxLines = 2,
             supportingText = {
                 Text(
                     text = "${eventCaption.length} / $captionMaxChar",
@@ -605,69 +472,41 @@ fun NewEventScreen(
         // Post button
         Button(
             onClick = {
-                val photoType = "Event"
                 if (eventTitle.isEmpty()) {
                     Toast.makeText(context, "Please enter an event title", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setTitle(eventTitle)
 
                 val startEventDate = LocalDateTime.of(selectedStartDate, selectedStartTime)
                 if (startEventDate.isBefore(LocalDateTime.now())) {
                     Toast.makeText(context, "Start date must be in the future", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setStartEventDate(startEventDate)
 
                 val endEventDate = LocalDateTime.of(selectedEndDate, selectedEndTime)
                 if (startEventDate.isAfter(endEventDate)) {
                     Toast.makeText(context, "End date must be after start date", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setEndEventDate(endEventDate)
 
-                if (eventLocation.isEmpty()) {
-                    Toast.makeText(context, "Please enter an event location", Toast.LENGTH_SHORT).show()
+                if (maxParticipants <= 0) {
+                    Toast.makeText(context, "Max participants must be greater than 0", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
-
-                if (maxParticipants < participants) {
-                    Toast.makeText(context, "Max participants must be greater than participants", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
+                eventLocationViewModel.setMaxParticipants(maxParticipants)
 
                 if (capturedImageUri.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
 
-                    context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-                        lastFile?.let {
-                            localImageDir = it
-                        }
-                    }
+                    eventLocationViewModel.setCapturedImageUri(capturedImageUri)
+                    eventLocationViewModel.setDescription(eventCaption)
 
-                    eventsViewModel.insertNewEvent(
-                        Event(
-                            eventName = eventTitle,
-                            eventImage = localImageDir,
-                            eventLocation = eventLocation,
-                            eventLocationLat = eventLocationLat,
-                            eventLocationLon = eventLocationLon,
-                            eventDescription = eventCaption,
-                            timeStart = Date.from(startEventDate.atZone(ZoneId.systemDefault()).toInstant()),
-                            timeEnd = Date.from(endEventDate.atZone(ZoneId.systemDefault()).toInstant()),
-                            maxParticipants = maxParticipants,
-                            participants = participants,
-                            eventAdminId = adminId
-                        )
-                    )
-                    for (tag in tagItems) {
-                        if (tag.isSelected) {
-                            eventHasTagsViewModel.addNewTagToEvent(
-                                eventHasTag = EventHasTag(
-                                    eventId = eventId,
-                                    tagId = tag.id
-                                )
-                            )
-                        }
-                    }
-                    onEvent()
+                    val tagListItem = tagItems.filter { it.isSelected }
+                    eventLocationViewModel.setTags(tagListItem)
+
+                    onNext()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
                 }
@@ -681,7 +520,7 @@ fun NewEventScreen(
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = modifier.width(8.dp))
-            Text(text = "Post Event")
+            Text(text = "Next: Select Location")
         }
     }
 }
