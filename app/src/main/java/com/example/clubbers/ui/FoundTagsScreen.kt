@@ -1,37 +1,36 @@
 package com.example.clubbers.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.example.clubbers.utilities.CreateSearchTimeLine
+import com.example.clubbers.utilities.CreateParticipatedEventTimeLine
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
-import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
 @Composable
-fun TodayScreen(
+fun FoundTagsScreen(
     modifier: Modifier = Modifier,
-    onEventClicked: () -> Unit,
-    onSearchAction: () -> Unit,
+    onEventSelected: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    tagsViewModel: TagsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel
 ) {
-    CreateSearchTimeLine(
+    val events by eventHasTagsViewModel.events.collectAsState()
+    CreateParticipatedEventTimeLine(
         modifier = modifier,
-        onClickAction = onEventClicked,
-        onSearchAction = onSearchAction,
+        onClickAction = onEventSelected,
         eventsViewModel = eventsViewModel,
         adminsViewModel = adminsViewModel,
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
-        usersViewModel = usersViewModel,
-        tagsViewModel = tagsViewModel,
-        isTodayEvents = true
+        passedEvents = events,
+        isSearchingTags = true,
+        usersViewModel = usersViewModel
     )
 }

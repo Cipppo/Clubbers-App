@@ -1,4 +1,4 @@
-package com.example.clubbers.ui
+package com.example.clubbers.viewModel
 
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf

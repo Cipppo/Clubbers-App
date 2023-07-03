@@ -40,6 +40,7 @@ import com.example.clubbers.utilities.MapView
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
 import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.WarningViewModel

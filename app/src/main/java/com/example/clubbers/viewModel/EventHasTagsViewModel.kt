@@ -30,8 +30,22 @@ class EventHasTagsViewModel @Inject constructor(
             }
     }
 
+    fun getTagsForEvents(eventIds: List<Int>) = viewModelScope.launch {
+        repository.getTagsForEvents(eventIds)
+            .collect { tags ->
+                _tags.value = tags
+            }
+    }
+
     fun getEventsByTagId(tagId: Int) = viewModelScope.launch {
         repository.getEventsByTagId(tagId)
+            .collect { events ->
+                _events.value = events
+            }
+    }
+
+    fun getEventsByTagName(tagName: String) = viewModelScope.launch {
+        repository.getEventsForTagName(tagName)
             .collect { events ->
                 _events.value = events
             }

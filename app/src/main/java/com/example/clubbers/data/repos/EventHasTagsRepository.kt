@@ -12,6 +12,14 @@ class EventHasTagsRepository(private val eventHasTagsDAO: EventHasTagsDAO) {
         return eventHasTagsDAO.getTagsForEvent(eventId)
     }
 
+    fun getTagsForEvents(eventIds: List<Int>): Flow<List<Tag>> {
+        return eventHasTagsDAO.getTagsForEvents(eventIds)
+    }
+
+    fun getEventsForTagName(tagName: String): Flow<List<Event>> {
+        return eventHasTagsDAO.getEventsForTagName(tagName)
+    }
+
     fun getEventsByTagId(tagId: Int): Flow<List<Event>> {
         return eventHasTagsDAO.getEventsForTag(tagId)
     }

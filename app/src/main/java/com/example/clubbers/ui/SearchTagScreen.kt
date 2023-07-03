@@ -11,14 +11,14 @@ import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
 @Composable
-fun TodayScreen(
+fun SearchTagScreen(
     modifier: Modifier = Modifier,
     onEventClicked: () -> Unit,
     onSearchAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
-    tagsViewModel: TagsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
+    tagsViewModel: TagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel
 ) {
@@ -32,6 +32,7 @@ fun TodayScreen(
         participatesViewModel = participatesViewModel,
         usersViewModel = usersViewModel,
         tagsViewModel = tagsViewModel,
-        isTodayEvents = true
+        isTodayEvents = false,
+        searchingTags = true
     )
 }

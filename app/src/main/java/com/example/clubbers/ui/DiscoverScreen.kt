@@ -7,6 +7,7 @@ import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
 @Composable
@@ -17,6 +18,7 @@ fun DiscoverScreen(
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
+    tagsViewModel: TagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel
 ) {
@@ -29,6 +31,7 @@ fun DiscoverScreen(
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
         usersViewModel = usersViewModel,
+        tagsViewModel = tagsViewModel,
         isTodayEvents = false
     )
 }

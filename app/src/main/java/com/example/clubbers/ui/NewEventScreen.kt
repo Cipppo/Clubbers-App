@@ -59,6 +59,7 @@ import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.utilities.NumbersDialog
 import com.example.clubbers.utilities.TagsListDialog
 import com.example.clubbers.utilities.createImageFile
+import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.TagsViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
