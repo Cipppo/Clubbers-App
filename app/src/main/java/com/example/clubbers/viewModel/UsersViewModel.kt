@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -60,7 +61,40 @@ class UsersViewModel @Inject constructor(
 
     private val _userId = MutableStateFlow(0)
     val userId: StateFlow<Int> get() = _userId
+    fun getUserIdByEmail(email: String) {
+        viewModelScope.launch {
+            repository.getUserIdByEmail(email)
+                .collect { userId ->
+                    _userId.value = userId
+                }
+        }
+    }
 
+    private var _name = MutableStateFlow("")
+
+    val userName: StateFlow<String> get() = _name
+
+    fun getUserFirstNameByEmail(email: String){
+        viewModelScope.launch {
+            repository.getUserByEmail(email).collect {
+                user ->
+                _name.value = user.userName + " " + user.userSurname
+            }
+        }
+    }
+
+    private var _bio = MutableStateFlow("")
+
+    val userBio: StateFlow<String> get() = _bio
+
+    fun getUserBioByEmail(email: String){
+        viewModelScope.launch {
+            repository.getUserByEmail(email).collect{
+                user ->
+                    _bio.value = user.userBio.toString()
+            }
+        }
+    }
 
     fun getAllUsers(): Flow<List<User>> = repository.getAllUsers()
 }

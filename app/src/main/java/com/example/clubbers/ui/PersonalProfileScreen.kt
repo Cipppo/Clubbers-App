@@ -62,16 +62,19 @@ import com.example.clubbers.viewModel.UsersViewModel
 fun PersonalProfileScreen(
     onOption: () -> Unit,
     onNotify: () -> Unit,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
 ){
 
 
 
     val selectedMenu = remember{ mutableStateOf("Posts")}
-
     val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
-    val user = usersViewModel.getUserByEmail(userEmail = userEmail).collectAsState(initial = listOf<User>())
+    usersViewModel.getUserFirstNameByEmail(userEmail)
+    usersViewModel.getUserBioByEmail(userEmail)
 
+
+    val userName = usersViewModel.userName.collectAsState().value
+    val userBio = usersViewModel.userBio.collectAsState().value
 
     Box(
         modifier = Modifier
@@ -97,7 +100,7 @@ fun PersonalProfileScreen(
                             .clip(CircleShape)
                     )
                     Spacer(modifier = Modifier.height(15.dp))
-                    Text(text = "", fontWeight = FontWeight.Bold)
+                    Text(text = userName, fontWeight = FontWeight.Bold)
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -122,7 +125,7 @@ fun PersonalProfileScreen(
             }
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                Text("UserBio")
+                Text(userBio)
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row(modifier = Modifier.fillMaxWidth()){
@@ -179,7 +182,7 @@ fun PersonalProfileScreen(
                 }
             }
             if(selectedMenu.value == "Posts"){
-                postFeed()
+                postFeed()  
             }
             if(selectedMenu.value == "Booked"){
                 userBookedEvents()

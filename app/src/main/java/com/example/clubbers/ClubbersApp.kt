@@ -2,12 +2,8 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
-<<<<<<< HEAD
-import android.util.Log
-=======
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
->>>>>>> develop
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -55,7 +50,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -128,7 +122,6 @@ fun TopAppBarFunction (
     currentScreen: String,
     canNavigateBack: Boolean,
     onSettingsPressed: () -> Unit,
-    onNotifyPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -152,12 +145,6 @@ fun TopAppBarFunction (
         },
         actions = {
             if (currentScreen == AppScreen.Profile.name) {
-                IconButton(onNotifyPressed){
-                    Icon(
-                        imageVector = Icons.Filled.Notifications,
-                        contentDescription = "Notifications Button"
-                    )
-                }
                 IconButton(onClick = onSettingsPressed) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
@@ -283,25 +270,13 @@ fun NavigationApp (
     navController: NavHostController = rememberNavController()
 ) {
     val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
-        .getString("USER_LOGGED", "None").orEmpty()
-
-    var logged = false
-
-
-
-    logged = userName != "null"
-
+        .getString("USER_LOGGED", "None")
     var isAdmin by rememberSaveable { mutableStateOf(false) }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-<<<<<<< HEAD
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
-    if (logged) {
-=======
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
 
     if (!userName.isNullOrEmpty()) {
->>>>>>> develop
         val usersAndAdminsViewModel = hiltViewModel<UsersAndAdminsViewsViewModel>()
         isAdmin = usersAndAdminsViewModel.isAdmin(userName)
             .collectAsState(initial = false).value
@@ -325,21 +300,6 @@ fun NavigationApp (
 
     Scaffold(
         topBar = {
-<<<<<<< HEAD
-                 if (
-                    currentScreen != AppScreen.Registration.name &&
-                    currentScreen != AppScreen.Login.name &&
-                    currentScreen != AppScreen.AdminRegistration.name
-                 ){
-                     TopAppBarFunction(
-                         currentScreen = currentScreen,
-                         canNavigateBack = navController.previousBackStackEntry != null,
-                         navigateUp = { navController.navigateUp() },
-                         onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
-                         onNotifyPressed = { navController.navigate(AppScreen.Notifications.name)}
-                     )
-                 }
-=======
             if (
                 currentScreen != AppScreen.Registration.name &&
                 currentScreen != AppScreen.Login.name &&
@@ -355,7 +315,6 @@ fun NavigationApp (
                         .alpha(alpha.value)
                 )
             }
->>>>>>> develop
         },
         snackbarHost = { SnackbarHost(snackBarHostState) },
         bottomBar = {
@@ -457,13 +416,9 @@ private fun NavigationGraph(
     warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier
 ) {
-    val userName =
+    val isLoggedIn =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
-            .getString("USER_LOGGED", "None").orEmpty()
-
-    var isLoggedIn = false
-
-    isLoggedIn = !(userName == "null" || userName == "None")
+            .contains("USER_LOGGED")
 
     val eventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
@@ -626,14 +581,9 @@ private fun NavigationGraph(
         composable(route = AppScreen.Profile.name) {
             val usersViewModel = hiltViewModel<UsersViewModel>()
             PersonalProfileScreen(
-<<<<<<< HEAD
-                onOption = { navController.navigate(AppScreen.UserOption.name)},
-                onNotify = {navController.navigate(AppScreen.Notifications.name)},
-                usersViewModel = usersViewModel
-=======
                 onOption = {navController.navigate(AppScreen.UserOption.name)},
-                onNotify = {navController.navigate(AppScreen.Notifications.name)}
->>>>>>> develop
+                onNotify = {navController.navigate(AppScreen.Notifications.name)},
+                usersViewModel = usersViewModel,
             )
         }
 
@@ -660,7 +610,7 @@ private fun NavigationGraph(
                 onLogin = {
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Home.name)
-                          },
+                },
                 adminsViewModel = adminsViewModel
             )
         }
@@ -673,7 +623,7 @@ private fun NavigationGraph(
                 onRegister = {
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Home.name)
-                             },
+                },
             )
         }
 
