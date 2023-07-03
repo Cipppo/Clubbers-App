@@ -23,6 +23,13 @@ class EventsViewModel @Inject constructor(
         }
     }
 
+    fun getFutureEvents() = viewModelScope.launch {
+        repository.getFutureEvents()
+            .collect {
+                _events.value = it
+            }
+    }
+
     fun insertNewEvent(event: Event) = viewModelScope.launch {
         repository.insertNewEvent(event)
     }

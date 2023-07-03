@@ -113,7 +113,7 @@ fun CreateSearchTimeLine(
     usersViewModel: UsersViewModel,
     isTodayEvents: Boolean
 ) {
-    eventsViewModel.getAllEvents()
+    eventsViewModel.getFutureEvents()
     val events by eventsViewModel.events.collectAsState()
     val todayEvents = if (isTodayEvents) {
         events.filter { event ->
