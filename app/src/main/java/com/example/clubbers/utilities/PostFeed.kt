@@ -19,17 +19,26 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
+import com.example.clubbers.viewModel.PostsViewModel
 
 @Composable
-fun postFeed(){
+fun postFeed(
+    userId: Int,
+    postsViewModel: PostsViewModel
+){
 
-    val posts = listOf<Int>(1, 2, 3, 4, 5)
+
+    postsViewModel.getPostsByUserId(userId = userId)
+    val posts = postsViewModel.posts.collectAsState().value
+
+
 
 
 
@@ -67,11 +76,13 @@ fun postFeed(){
                     Image(
                         painter = painterResource(id = R.drawable.ic_launcher_foreground),
                         contentDescription = "Description",
-                        modifier = Modifier.fillMaxWidth().border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = MaterialTheme.shapes.medium
-                        )
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                shape = MaterialTheme.shapes.medium
+                            )
                             .heightIn(min = 180.dp)
                     )
                     Text("PostCaption")
