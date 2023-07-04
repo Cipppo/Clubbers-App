@@ -2,6 +2,7 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +58,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
@@ -580,11 +583,25 @@ private fun NavigationGraph(
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
             val usersViewModel = hiltViewModel<UsersViewModel>()
-            PersonalProfileScreen(
-                onOption = {navController.navigate(AppScreen.UserOption.name)},
-                onNotify = {navController.navigate(AppScreen.Notifications.name)},
-                usersViewModel = usersViewModel,
-            )
+            val postViewModel = hiltViewModel<PostsViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+            val eventsViewModel = hiltViewModel<EventsViewModel>()
+            val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
+
+            if(userType == "USER"){
+                PersonalProfileScreen(
+                    onOption = {navController.navigate(AppScreen.UserOption.name)},
+                    onNotify = {navController.navigate(AppScreen.Notifications.name)},
+                    usersViewModel = usersViewModel,
+                    postsViewModel = postViewModel,
+                    participatesViewModel = participatesViewModel,
+                    eventsViewModel = eventsViewModel,
+                )
+            }else{
+                AdminProfileScreen()
+            }
+
+
         }
 
         // Admin Registration Screen
