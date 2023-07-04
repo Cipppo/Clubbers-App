@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +54,9 @@ import com.example.clubbers.R
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.utilities.postFeed
 import com.example.clubbers.utilities.userBookedEvents
+import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
 
@@ -63,18 +67,21 @@ fun PersonalProfileScreen(
     onOption: () -> Unit,
     onNotify: () -> Unit,
     usersViewModel: UsersViewModel,
+    postsViewModel: PostsViewModel,
+    participatesViewModel: ParticipatesViewModel,
+    eventsViewModel: EventsViewModel,
 ){
-
 
 
     val selectedMenu = remember{ mutableStateOf("Posts")}
     val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
     usersViewModel.getUserFirstNameByEmail(userEmail)
     usersViewModel.getUserBioByEmail(userEmail)
-
+    usersViewModel.getUserIdByEmail(userEmail)
 
     val userName = usersViewModel.userName.collectAsState().value
     val userBio = usersViewModel.userBio.collectAsState().value
+    val userId = usersViewModel.userId.collectAsState().value
 
     Box(
         modifier = Modifier
@@ -182,13 +189,13 @@ fun PersonalProfileScreen(
                 }
             }
             if(selectedMenu.value == "Posts"){
-                postFeed()  
+                postFeed(userId, postsViewModel)
             }
             if(selectedMenu.value == "Booked"){
-                userBookedEvents()
+                userBookedEvents(userId, participatesViewModel, eventsViewModel)
             }
             if(selectedMenu.value == "Been"){
-                userBookedEvents()
+                userBookedEvents(userId, participatesViewModel, eventsViewModel)
             }
         }
     }
