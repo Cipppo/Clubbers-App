@@ -236,13 +236,13 @@ fun NewEventLocationScreen(
             when {
                 mapVisible -> {
                     MapView(
-                        placeName = "Prova",
+                        placeName = eventLocation,
                         initialCameraPosition = initialCameraPosition,
                         markerPosition = locationLatLng)
                 }
                 !mapVisible -> {
                     MapView(
-                        placeName = "Prova",
+                        placeName = eventLocation,
                         initialCameraPosition = initialCameraPosition,
                         markerPosition = locationLatLng)
                 }
@@ -303,7 +303,7 @@ fun NewEventLocationScreen(
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = modifier.width(8.dp))
-            Text(text = "Next: Post event")
+            Text(text = "Post event")
         }
     }
 }

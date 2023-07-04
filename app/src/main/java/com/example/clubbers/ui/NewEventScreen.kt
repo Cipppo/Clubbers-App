@@ -457,7 +457,7 @@ fun NewEventScreen(
             modifier = modifier
                 .fillMaxWidth()
                 .height(180.dp),
-//            maxLines = 2,
+            maxLines = 5,
             supportingText = {
                 Text(
                     text = "${eventCaption.length} / $captionMaxChar",
