@@ -1,11 +1,14 @@
 package com.example.clubbers.ui
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -14,11 +17,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -27,6 +33,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.clubbers.NavigationApp
 import com.example.clubbers.data.details.LocationDetails
+import com.example.clubbers.ui.notifications.WelcomeNotificationService
 import com.example.clubbers.ui.theme.ClubbersTheme
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -38,8 +45,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import java.net.URLEncoder
+
+private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 123
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -125,6 +136,7 @@ class MainActivity : ComponentActivity() {
         } else {
             warningViewModel.setConnectivitySnackBarVisibility(true)
         }
+
 
         setContent {
             ClubbersTheme {
@@ -324,4 +336,5 @@ class MainActivity : ComponentActivity() {
     private companion object {
         private const val TAG = "OSM_REQUEST"
     }
+
 }
