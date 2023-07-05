@@ -1,7 +1,9 @@
 package com.example.clubbers.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.fonts.FontFamily
 import android.preference.PreferenceManager
 import android.util.Log
@@ -23,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -44,11 +47,15 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.room.Room
 import com.example.clubbers.R
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
+import com.example.clubbers.ui.notifications.WelcomeNotificationService
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import kotlinx.coroutines.flow.Flow
@@ -67,6 +74,9 @@ fun LoginScreen(
     usersViewModel: UsersViewModel,
     adminsViewModel: AdminsViewModel
 ){
+
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -149,6 +159,10 @@ fun LoginScreen(
 }
 
 
+
+
+
+
 fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences, adminList: List<Admin>): Unit{
     var i = usersList.size
     for(user in usersList){
@@ -159,6 +173,7 @@ fun attemptLogin(email: String, password: String, usersList: List<User>, navigat
                 apply()
             }
             navigateToHome()
+
         }
     }
     for(admin in adminList){
@@ -172,3 +187,5 @@ fun attemptLogin(email: String, password: String, usersList: List<User>, navigat
         }
     }
 }
+
+
