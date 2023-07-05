@@ -516,8 +516,8 @@ fun NewEventScreen(
             shape = MaterialTheme.shapes.small
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_send_24),
-                contentDescription = "Post event",
+                painter = painterResource(id = R.drawable.baseline_edit_location_alt_24),
+                contentDescription = "Edit location",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = modifier.width(8.dp))

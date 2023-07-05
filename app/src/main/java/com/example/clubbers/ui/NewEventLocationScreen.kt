@@ -1,7 +1,9 @@
 package com.example.clubbers.ui
 
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -52,6 +55,7 @@ import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.util.Date
 
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewEventLocationScreen(
@@ -102,113 +106,124 @@ fun NewEventLocationScreen(
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Row (
+        OutlinedTextField(
+            value = eventLocation,
+            onValueChange = {
+                if (it.length <= captionMaxChar) eventLocation = it
+            },
+            label = { Text(text = "Event Location") },
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = MaterialTheme.colorScheme.onBackground,
+                containerColor = MaterialTheme.colorScheme.background,
+            ),
+            shape = MaterialTheme.shapes.small,
             modifier = modifier
                 .fillMaxWidth()
+                .heightIn(min = 120.dp, max = 120.dp)
                 .height(120.dp),
+            maxLines = 2,
+            supportingText = {
+                if (isButtonClicked && eventLocation.isEmpty() && isRequestDone) {
+                    Text(
+                        text = "Location not found, Retry",
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Start,
+                    )
+                }
+                Text(
+                    text = "${eventLocation.length} / $captionMaxChar",
+                    modifier = modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.End,
+                )
+            }
+        )
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OutlinedTextField(
-                value = eventLocation,
-                onValueChange = {
-                    if (it.length <= captionMaxChar) eventLocation = it
-                },
-                label = { Text(text = "Event Location") },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.onBackground,
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-                shape = MaterialTheme.shapes.small,
-                modifier = modifier
-                    .width(250.dp)
-                    .height(120.dp),
-                maxLines = 2,
-                supportingText = {
-                    if (isButtonClicked && eventLocation.isEmpty() && isRequestDone) {
-                        Text(
-                            text = "Location not found, Retry",
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Start,
-                        )
-                    }
-                    Text(
-                        text = "${eventLocation.length} / $captionMaxChar",
-                        modifier = modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.End,
-                    )
-                }
-            )
-            Spacer(modifier = modifier.weight(1f))
-            Column {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        if (eventLocation.isNotEmpty()) {
-                            isRequestDone = false
-                            context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                                .edit()
-                                .putString("EventLocation", eventLocation)
-                                .apply()
-                            locationsViewModel.setEventLocation(LocationDetails("", 0.0, 0.0))
-                            startRequestingData()
-                            if (!warningViewModel.showConnectivitySnackBar.value) {
-                                isButtonClicked = true
-                                val coroutineScope = CoroutineScope(Dispatchers.Main)
-                                coroutineScope.launch {
-                                    locationsViewModel.location.collect {
-                                        eventLocation = it.name
-                                        isRequestDone = true
-                                        eventLocationLat = it.latitude
-                                        eventLocationLon = it.longitude
-                                    }
-                                }
-                                Toast.makeText(context, "Checking location", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, "Location is empty", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = modifier
-                        .height(25.dp)
-                ) {
-                    Text(
-                        text = "Check",
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                Spacer(modifier = modifier.height(16.dp))
-                ExtendedFloatingActionButton(
-                    onClick = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    if (eventLocation.isNotEmpty()) {
                         isRequestDone = false
-                        context.deleteSharedPreferences("EventLocation")
-                        startLocationUpdates()
-                        if (!warningViewModel.showGPSAlertDialog.value) {
+                        context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
+                            .edit()
+                            .putString("EventLocation", eventLocation)
+                            .apply()
+                        locationsViewModel.setEventLocation(LocationDetails("", 0.0, 0.0))
+                        startRequestingData()
+                        if (!warningViewModel.showConnectivitySnackBar.value) {
                             isButtonClicked = true
                             val coroutineScope = CoroutineScope(Dispatchers.Main)
                             coroutineScope.launch {
                                 locationsViewModel.location.collect {
                                     eventLocation = it.name
+                                    isRequestDone = true
                                     eventLocationLat = it.latitude
                                     eventLocationLon = it.longitude
                                 }
                             }
-                            Toast.makeText(context, "Getting position", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Checking location", Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    modifier = modifier
-                        .height(25.dp)
-                ) {
-                    Text(
-                        text = "GPS",
-                        textAlign = TextAlign.Center,
-                    )
-                }
+                    } else {
+                        Toast.makeText(context, "Location is empty", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = modifier
+                    .width(170.dp)
+                    .height(25.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_24),
+                    contentDescription = "Check",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = modifier.width(8.dp))
+                Text(
+                    text = "Check",
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(modifier = modifier.weight(1f))
+            ExtendedFloatingActionButton(
+                onClick = {
+                    isRequestDone = false
+                    context.deleteSharedPreferences("EventLocation")
+                    startLocationUpdates()
+                    if (!warningViewModel.showGPSAlertDialog.value) {
+                        isButtonClicked = true
+                        val coroutineScope = CoroutineScope(Dispatchers.Main)
+                        coroutineScope.launch {
+                            locationsViewModel.location.collect {
+                                eventLocation = it.name
+                                eventLocationLat = it.latitude
+                                eventLocationLon = it.longitude
+                            }
+                        }
+                        Toast.makeText(context, "Getting position", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = modifier
+                    .width(170.dp)
+                    .height(25.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_gps_fixed_24),
+                    contentDescription = "GPS",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = modifier.width(8.dp))
+                Text(
+                    text = "GPS",
+                    textAlign = TextAlign.Center,
+                )
             }
         }
         ExtendedFloatingActionButton(
@@ -216,11 +231,10 @@ fun NewEventLocationScreen(
                 locationLatLng = LatLng(eventLocationLat, eventLocationLon)
                 initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
                 mapVisible = !mapVisible
-//                mapSheetState.show()
             },
             modifier = modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(40.dp)
         ) {
             Text(
                 text = "Update map",
@@ -230,7 +244,7 @@ fun NewEventLocationScreen(
         ElevatedCard(
             modifier = modifier
                 .fillMaxWidth()
-                .height(300.dp),
+                .height(280.dp),
             shape = MaterialTheme.shapes.medium
         ) {
             when {
@@ -250,48 +264,52 @@ fun NewEventLocationScreen(
         }
         Button(
             onClick = {
-                val photoType = "Event"
+                try {
+                    val photoType = "Event"
 
-                if (eventLocation.isEmpty()) {
-                    Toast.makeText(context, "Please enter an event location", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-
-                if (capturedImageUri!!.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri!!, photoType)
-
-                    context.getFilesFromAppDir(photoType).lastOrNull().let { lastFile ->
-                        lastFile?.let {
-                            localImageDir = it
-                        }
+                    if (eventLocation.isEmpty()) {
+                        Toast.makeText(context, "Please enter an event location", Toast.LENGTH_SHORT).show()
+                        return@Button
                     }
 
-                    eventsViewModel.insertNewEvent(
-                        Event(
-                            eventName = eventTitle,
-                            eventImage = localImageDir,
-                            eventLocation = eventLocation,
-                            eventLocationLat = eventLocationLat,
-                            eventLocationLon = eventLocationLon,
-                            eventDescription = description,
-                            timeStart = Date.from(startEventDate!!.atZone(ZoneId.systemDefault()).toInstant()),
-                            timeEnd = Date.from(endEventDate!!.atZone(ZoneId.systemDefault()).toInstant()),
-                            maxParticipants = maxParticipants,
-                            participants = 0,
-                            eventAdminId = adminId
-                        )
-                    )
-                    for (tag in tags) {
-                        eventHasTagsViewModel.addNewTagToEvent(
-                            eventHasTag = EventHasTag(
-                                eventId = eventId,
-                                tagId = tag.id
+                    if (capturedImageUri!!.path?.isNotEmpty() == true) {
+                        saveImage(context, context.applicationContext.contentResolver, capturedImageUri!!, photoType)
+
+                        context.getFilesFromAppDir(photoType).lastOrNull().let { lastFile ->
+                            lastFile?.let {
+                                localImageDir = it
+                            }
+                        }
+
+                        eventsViewModel.insertNewEvent(
+                            Event(
+                                eventName = eventTitle,
+                                eventImage = localImageDir,
+                                eventLocation = eventLocation,
+                                eventLocationLat = eventLocationLat,
+                                eventLocationLon = eventLocationLon,
+                                eventDescription = description,
+                                timeStart = Date.from(startEventDate!!.atZone(ZoneId.systemDefault()).toInstant()),
+                                timeEnd = Date.from(endEventDate!!.atZone(ZoneId.systemDefault()).toInstant()),
+                                maxParticipants = maxParticipants,
+                                participants = 0,
+                                eventAdminId = adminId
                             )
                         )
+                        for (tag in tags) {
+                            eventHasTagsViewModel.addNewTagToEvent(
+                                eventHasTag = EventHasTag(
+                                    eventId = eventId,
+                                    tagId = tag.id
+                                )
+                            )
+                        }
+                        onEvent()
+                    } else {
+                        Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
                     }
-                    onEvent()
-                } else {
-                    Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
+                } catch (e: android.graphics.ImageDecoder.DecodeException) {
+                    Toast.makeText(context, "Updating position, please wait", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = modifier.fillMaxWidth(),
