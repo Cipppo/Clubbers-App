@@ -121,10 +121,12 @@ fun CreateSearchTimeLine(
     val todayEvents = if (isTodayEvents) {
         events.filter { event ->
             val timeStart = event.timeStart
+            val timeEnd = event.timeEnd
             val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            val eventDate = sdf.format(timeStart)
+            val eventStartDate = sdf.format(timeStart)
+            val eventEndDate = sdf.format(timeEnd)
             val currentDate = sdf.format(System.currentTimeMillis())
-            eventDate == currentDate
+            currentDate in eventStartDate..eventEndDate
         }
     } else {
         emptyList()
