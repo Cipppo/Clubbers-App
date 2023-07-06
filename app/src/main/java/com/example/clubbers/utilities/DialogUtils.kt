@@ -1,10 +1,12 @@
 package com.example.clubbers.utilities
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -381,6 +383,59 @@ fun TakenPhotoDialog(
                 )
             }
         }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PicOrGalleyChoicePopup(
+    context: Context,
+    uri: Uri,
+    galleryLauncher: ActivityResultLauncher<String>,
+    cameraLauncher: ActivityResultLauncher<Uri>,
+    permissionLauncher: ActivityResultLauncher<String>,
+    title: String,
+    sheetState: SheetState
+) {
+    CoreDialog(
+        state = sheetState,
+        selection = CoreSelection(
+            withButtonView = true,
+            positiveButton = SelectionButton(
+                text = "Take Picture",
+            ),
+            onPositiveClick = {
+                val permissionCheckResult = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                )
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    cameraLauncher.launch(uri)
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                sheetState.hide()
+            },
+            negativeButton = SelectionButton(
+                text = "Select from Gallery",
+            ),
+            onNegativeClick = {
+                val permissionCheckResult = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                )
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    galleryLauncher.launch("image/*")
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                sheetState.hide()
+            }
+        ),
+        header = Header.Default(
+            title = title
+        ),
+        body = {}
     )
 }
 

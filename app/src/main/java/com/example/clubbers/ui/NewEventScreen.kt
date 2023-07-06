@@ -1,7 +1,5 @@
 package com.example.clubbers.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,9 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -50,13 +46,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.utilities.NumbersDialog
+import com.example.clubbers.utilities.PicOrGalleyChoicePopup
 import com.example.clubbers.utilities.TagsListDialog
 import com.example.clubbers.utilities.TakenPhotoDialog
 import com.example.clubbers.utilities.createImageFile
@@ -98,13 +94,12 @@ fun NewEventScreen(
         Objects.requireNonNull(context),
         context.packageName + ".provider", file)
 
-    var showPopup by rememberSaveable { mutableStateOf(false) }
     val takenPhotoState = rememberSheetState()
+    val picOrGalleryState = rememberSheetState()
 
     val capturedImageUri = rememberSaveable {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
-
 
     var eventCaption by rememberSaveable { mutableStateOf("") }
     var eventTitle by rememberSaveable { mutableStateOf("") }
@@ -133,6 +128,17 @@ fun NewEventScreen(
     ) { success ->
         if (success) {
             capturedImageUri.value = uri
+        } else {
+            // Handle cancellation event
+            Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { newUri: Uri? ->
+        if (newUri != null) {
+            capturedImageUri.value = newUri
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
@@ -169,83 +175,23 @@ fun NewEventScreen(
                     .clickable(
                         onClick = {
                             if (capturedImageUri.value.path?.isNotEmpty() == true) {
-//                                showPopup = true
                                 takenPhotoState.show()
                             } else {
-                                val permissionCheckResult = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                )
-                                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                                    cameraLauncher.launch(uri)
-                                } else {
-                                    permissionLauncher.launch(Manifest.permission.CAMERA)
-                                }
+                                picOrGalleryState.show()
+//                                val permissionCheckResult = ContextCompat.checkSelfPermission(
+//                                    context,
+//                                    Manifest.permission.CAMERA
+//                                )
+//                                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+//                                    galleryLauncher.launch("image/*")
+//                                } else {
+//                                    permissionLauncher.launch(Manifest.permission.CAMERA)
+//                                }
                             }
                         }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (showPopup) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            showPopup = false
-                        },
-                        title = { Text("Post Preview") },
-                        text = {
-                            Box(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Image(
-                                    painter = rememberAsyncImagePainter(
-                                        ImageRequest.Builder(
-                                            LocalContext.current
-                                        ).data(data = capturedImageUri.value)
-                                            .apply(block = fun ImageRequest.Builder.() {
-                                                crossfade(true)
-                                                placeholder(R.drawable.ic_launcher_foreground)
-                                                error(R.drawable.ic_launcher_foreground)
-                                            }).build()
-                                    ),
-                                    contentDescription = "Captured Image",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = modifier.fillMaxSize()
-                                )
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showPopup = false
-                                    capturedImageUri.value = Uri.EMPTY
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text("Take new photo")
-                            }
-                        },
-                        dismissButton = {
-                            Button(
-                                onClick = {
-                                    showPopup = false
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
-                    )
-                }
-
                 if (capturedImageUri.value.path?.isNotEmpty() == true) {
                     Image(
                         painter = rememberAsyncImagePainter(
@@ -532,5 +478,15 @@ fun NewEventScreen(
         title = "Event Preview",
         sheetState = takenPhotoState,
         capturedImageUri = capturedImageUri
+    )
+
+    PicOrGalleyChoicePopup(
+        context = context,
+        uri = uri,
+        galleryLauncher = galleryLauncher,
+        cameraLauncher = cameraLauncher,
+        permissionLauncher = permissionLauncher,
+        title = "Choose what to do",
+        sheetState = picOrGalleryState
     )
 }
