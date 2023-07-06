@@ -10,6 +10,7 @@ import android.content.RestrictionsManager.RESULT_ERROR
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.Toast
@@ -42,9 +43,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -130,7 +133,24 @@ fun ClubRegistrationScreen(
             }
         }
 
+        var hasNotificationPermission by remember {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                mutableStateOf(
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                )
+            }else mutableStateOf(true)
 
+        }
+
+
+        val NotifypermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission() ,
+            onResult = {isGranted ->
+                hasNotificationPermission = isGranted
+            })
 
 
         if (step1.value) {
@@ -325,7 +345,8 @@ fun ClubRegistrationScreen(
                 onClick = ({ registerNewAdmin(username.value.text, email.value.text, password.value.text, capturedImageUri.value.path.orEmpty(),bioText.value.text, "", adminsViewModel, onRegister, sharedPreferences )
                 if (capturedImageUri.value.path?.isNotEmpty() == true){
                     saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value, "ProPic")
-                }}),
+                }
+                    NotifypermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)}),
                 elevation = ButtonDefaults.elevatedButtonElevation(
                     defaultElevation = 10.dp,
                     pressedElevation = 15.dp,

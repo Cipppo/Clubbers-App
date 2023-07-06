@@ -64,7 +64,10 @@ import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.viewModel.UsersViewModel
 import java.util.Objects
 import android.Manifest
+import android.os.Build
 import com.example.clubbers.utilities.saveImage
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,6 +120,26 @@ fun RegistrationScreen(
                 capturedImageUri.value = uri
             }
         }
+
+        var hasNotificationPermission by remember {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                mutableStateOf(
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                )
+            }else mutableStateOf(true)
+
+        }
+
+
+        val NotifypermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission() ,
+            onResult = {isGranted ->
+                hasNotificationPermission = isGranted
+            })
+
 
         val permissionLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -318,6 +341,7 @@ fun RegistrationScreen(
                     onRegister,
                     sharedPreferences
                 )
+                    NotifypermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                           if (capturedImageUri.value.path?.isNotEmpty() == true){
                               saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value, "ProPic")
                           }},
