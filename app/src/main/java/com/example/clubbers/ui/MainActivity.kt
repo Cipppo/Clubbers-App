@@ -17,14 +17,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -33,7 +30,6 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.clubbers.NavigationApp
 import com.example.clubbers.data.details.LocationDetails
-import com.example.clubbers.ui.notifications.WelcomeNotificationService
 import com.example.clubbers.ui.theme.ClubbersTheme
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -45,7 +41,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import java.net.URLEncoder
 
@@ -137,6 +132,7 @@ class MainActivity : ComponentActivity() {
             warningViewModel.setConnectivitySnackBarVisibility(true)
         }
 
+        createNotificationChannel()
 
         setContent {
             ClubbersTheme {
@@ -335,6 +331,17 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         private const val TAG = "OSM_REQUEST"
+    }
+
+    private fun createNotificationChannel(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val channel = NotificationChannel(
+                "1", "notification_channel", NotificationManager.IMPORTANCE_HIGH
+            )
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
     }
 
 }
