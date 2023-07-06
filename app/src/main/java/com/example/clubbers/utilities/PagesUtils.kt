@@ -1,5 +1,7 @@
 package com.example.clubbers.utilities
 
+import android.app.Application
+import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -74,6 +76,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.util.lerp
+import androidx.core.app.NotificationCompat
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
@@ -95,6 +98,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -439,6 +443,8 @@ fun EventItem(
         longitude = event.eventLocationLon
     )
 
+    val context = LocalContext.current
+
     ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -601,6 +607,11 @@ fun EventItem(
                             } else participant?.let {
                                 participatesViewModel.addNewParticipant(it)
                                 event.participants++
+                                sendEventParticipationNotification(
+                                    context = context,
+                                    eventTitle = eventTitle,
+                                    date = timeStart,
+                                    place = place.name)
                                 eventsViewModel.updateEvent(event)
                             }
                         },
@@ -630,6 +641,18 @@ fun EventItem(
         locationLatLng = locationLatLng
     )
 }
+
+fun sendEventParticipationNotification(context: Context, eventTitle: String, date: String, place: String){
+    val NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notification = NotificationCompat.Builder(context, "1")
+        .setContentTitle("Stai partecipando all'evento $eventTitle !")
+        .setContentText("L'evento prenderà parte il $date a $place")
+        .setSmallIcon(R.drawable.baseline_notifications_24)
+        .build()
+    NotificationManager.notify(1, notification)
+}
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
