@@ -33,4 +33,8 @@ interface EventsDAO {
     // Delete event
     @Query("DELETE FROM events WHERE event_id = :eventId")
     suspend fun delete(eventId: Int)
+
+    // Get future events
+    @Query("SELECT * FROM events WHERE time_end > :currentTime ORDER BY time_start ASC")
+    fun getFutureEvents(currentTime: Long): Flow<List<Event>>
 }

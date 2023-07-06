@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -68,15 +69,19 @@ import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
+import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.FoundEventsScreen
+import com.example.clubbers.ui.FoundTagsScreen
 import com.example.clubbers.ui.HomeScreen
 import com.example.clubbers.ui.LoginScreen
+import com.example.clubbers.ui.NewEventLocationScreen
 import com.example.clubbers.ui.NewEventScreen
 import com.example.clubbers.ui.NewPostScreen
 import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.PostScreen
 import com.example.clubbers.ui.RegistrationScreen
+import com.example.clubbers.ui.SearchTagScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.UserOptionScreen
@@ -99,6 +104,7 @@ sealed class AppScreen(val name: String) {
     object Home : AppScreen("Home")
     object NewPost : AppScreen("Create Post")
     object NewEvent : AppScreen("Create Event")
+    object NewEventLocation : AppScreen("Select Event Location")
     object Discover : AppScreen("Discover")
     object Profile : AppScreen("Personal Profile")
     object Today : AppScreen("Today's Events")
@@ -108,7 +114,9 @@ sealed class AppScreen(val name: String) {
     object Post : AppScreen("Post Details")
     object EventSelection : AppScreen("Select Event")
     object FoundEvents : AppScreen("Found Events")
+    object FoundTags : AppScreen("Found Tags")
     object User : AppScreen("User Profile")
+    object SearchTag : AppScreen("Search Tag")
 
     //user registration Screens
     object Login : AppScreen("Login")
@@ -131,6 +139,7 @@ fun TopAppBarFunction (
     currentScreen: String,
     canNavigateBack: Boolean,
     onSettingsPressed: () -> Unit,
+    onTagPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -158,6 +167,12 @@ fun TopAppBarFunction (
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings Button")
+                }
+            } else if (currentScreen == AppScreen.Discover.name) {
+                IconButton(onClick = onTagPressed) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_tag_24),
+                        contentDescription = "Search Tag Button")
                 }
             }
         },
@@ -270,6 +285,7 @@ fun BottomAppBarFunction (
 
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp (
@@ -319,6 +335,7 @@ fun NavigationApp (
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { navController.navigateUp() },
                     onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
+                    onTagPressed = { navController.navigate(AppScreen.SearchTag.name) },
                     modifier = Modifier
                         .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
                         .alpha(alpha.value)
@@ -416,6 +433,7 @@ fun NavigationApp (
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 private fun NavigationGraph(
     startRequestingData: () -> Unit,
@@ -432,10 +450,8 @@ private fun NavigationGraph(
     val eventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
     val postsViewModel = hiltViewModel<PostsViewModel>()
-    val context = LocalContext.current
-
-
-
+    val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
+    val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
 
 
 
@@ -452,6 +468,7 @@ private fun NavigationGraph(
         // Today's Events Screen
         composable(route = AppScreen.Today.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val tagsViewModel = hiltViewModel<TagsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             val usersViewModel = hiltViewModel<UsersViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
@@ -463,7 +480,8 @@ private fun NavigationGraph(
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
-                usersViewModel = usersViewModel
+                usersViewModel = usersViewModel,
+                tagsViewModel = tagsViewModel
             )
         }
 
@@ -532,6 +550,22 @@ private fun NavigationGraph(
         composable(route = AppScreen.NewEvent.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val tagsViewModel = hiltViewModel<TagsViewModel>()
+
+            val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+                .getString("USER_LOGGED", "None")!!
+            adminsViewModel.getAdminIdByEmail(adminMail)
+
+            NewEventScreen(
+                onNext = { navController.navigate(AppScreen.NewEventLocation.name) },
+                eventsViewModel = eventsViewModel,
+                eventLocationViewModel = eventLocationViewModel,
+                tagsViewModel = tagsViewModel,
+            )
+        }
+
+        // New Event Location Screen
+        composable(route = AppScreen.NewEventLocation.name) {
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
 
             val adminMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -539,15 +573,15 @@ private fun NavigationGraph(
             adminsViewModel.getAdminIdByEmail(adminMail)
             val adminId by adminsViewModel.adminId.collectAsState()
 
-            NewEventScreen(
+            NewEventLocationScreen(
                 onEvent = { navController.navigate(AppScreen.Home.name) },
                 eventsViewModel = eventsViewModel,
                 locationsViewModel = locationsViewModel,
+                eventLocationViewModel = eventLocationViewModel,
                 adminId = adminId,
                 startRequestingData = startRequestingData,
                 startLocationUpdates = startLocationUpdates,
                 warningViewModel = warningViewModel,
-                tagsViewModel = tagsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel
             )
         }
@@ -578,6 +612,7 @@ private fun NavigationGraph(
         // Discover Screen
         composable(route = AppScreen.Discover.name) {
             val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val tagsViewModel = hiltViewModel<TagsViewModel>()
             val eventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
             val usersViewModel = hiltViewModel<UsersViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
@@ -588,7 +623,41 @@ private fun NavigationGraph(
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
-                usersViewModel = usersViewModel
+                usersViewModel = usersViewModel,
+                tagsViewModel = tagsViewModel
+            )
+        }
+
+        // Search Tags Screen
+        composable(route = AppScreen.SearchTag.name) {
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val tagsViewModel = hiltViewModel<TagsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+            SearchTagScreen(
+                eventHasTagsViewModel = sharedEventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel,
+                eventsViewModel = eventsViewModel,
+                onEventClicked = { navController.navigate(AppScreen.Event.name) },
+                onSearchAction = { navController.navigate(AppScreen.FoundTags.name) },
+                adminsViewModel = adminsViewModel,
+                tagsViewModel = tagsViewModel
+            )
+        }
+
+        // Found Tags Screen
+        composable(route = AppScreen.FoundTags.name) {
+            val adminsViewModel = hiltViewModel<AdminsViewModel>()
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+            FoundTagsScreen(
+                eventHasTagsViewModel = sharedEventHasTagsViewModel,
+                participatesViewModel = participatesViewModel,
+                usersViewModel = usersViewModel,
+                eventsViewModel = eventsViewModel,
+                adminsViewModel = adminsViewModel,
+                onEventSelected = { navController.navigate(AppScreen.Event.name) }
             )
         }
 

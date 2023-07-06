@@ -18,10 +18,17 @@ import java.util.Locale
 
 
 // Debug function to get all files from the app directory
-fun Context.getFilesFromAppDir(): List<String> {
+fun Context.getFilesFromAppDir(photoType: String): List<String> {
     val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     val files = mutableListOf<String>()
-    storageDir?.walkTopDown()?.forEach { file ->
+    val directoryName = when(photoType) {
+        "Event" -> "Events"
+        "Post" -> "Posts"
+        "ProPic" -> "ProPics"
+        else -> throw IllegalArgumentException("Invalid photo type")
+    }
+    val storageDirWithType = storageDir?.resolve(directoryName)
+    storageDirWithType?.walkTopDown()?.forEach { file ->
         if (file.isFile) {
             files.add(file.absolutePath)
         }

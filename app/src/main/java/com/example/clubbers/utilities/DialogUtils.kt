@@ -1,11 +1,14 @@
 package com.example.clubbers.utilities
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.details.TagsListItem
 import com.google.android.gms.maps.model.CameraPosition
@@ -61,6 +67,7 @@ import com.maxkeppeker.sheets.core.models.CoreSelection
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.SheetState
+import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.io.File
 import java.util.Objects
 
@@ -224,7 +231,7 @@ fun MapDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TakenPhotoDialog(
+fun TakenPhotoCarouselDialog(
     title: String,
     sheetState: SheetState,
     imageUriList: MutableList<Uri>,
@@ -236,6 +243,8 @@ fun TakenPhotoDialog(
     var file by remember { mutableStateOf<File?>(null) }
     var uri by remember { mutableStateOf<Uri?>(null) }
 
+    val picOrGalleryState = rememberSheetState()
+
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
@@ -244,6 +253,17 @@ fun TakenPhotoDialog(
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { newUri ->
+        if (newUri != null) {
+            imageUriList.add(newUri)
+        } else {
+            // Handle cancellation event
+            Toast.makeText(context, "Gallery cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -278,15 +298,7 @@ fun TakenPhotoDialog(
                         )
                     }
 
-                    val permissionCheckResult = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.CAMERA
-                    )
-                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                        cameraLauncher.launch(uri)
-                    } else {
-                        permissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
+                    picOrGalleryState.show()
                 }
                               },
             negativeButton = SelectionButton(
@@ -322,6 +334,124 @@ fun TakenPhotoDialog(
                 )
             }
         }
+    )
+
+    PicOrGalleyChoicePopup(
+        context = context,
+        uri = if (uri != null) uri!! else Uri.EMPTY,
+        galleryLauncher = galleryLauncher,
+        cameraLauncher = cameraLauncher,
+        permissionLauncher = permissionLauncher,
+        title = "Chose what to do",
+        sheetState = picOrGalleryState
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TakenPhotoDialog(
+    title: String,
+    sheetState: SheetState,
+    capturedImageUri: MutableState<Uri>
+) {
+    CoreDialog(
+        state = sheetState,
+        selection = CoreSelection(
+            withButtonView = true,
+            positiveButton = SelectionButton(
+                text = "Done",
+            ),
+            onPositiveClick = {
+                sheetState.hide()
+            },
+            negativeButton = SelectionButton(
+                text = "Delete",
+            ),
+            onNegativeClick = {
+                sheetState.hide()
+                capturedImageUri.value = Uri.EMPTY
+            }
+        ),
+        header = Header.Default(
+            title = title
+        ),
+        body = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(
+                            LocalContext.current
+                        ).data(data = capturedImageUri.value)
+                            .apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                    ),
+                    contentDescription = "Captured Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PicOrGalleyChoicePopup(
+    context: Context,
+    uri: Uri,
+    galleryLauncher: ActivityResultLauncher<String>,
+    cameraLauncher: ActivityResultLauncher<Uri>,
+    permissionLauncher: ActivityResultLauncher<String>,
+    title: String,
+    sheetState: SheetState
+) {
+    CoreDialog(
+        state = sheetState,
+        selection = CoreSelection(
+            withButtonView = true,
+            positiveButton = SelectionButton(
+                text = "Take Picture",
+            ),
+            onPositiveClick = {
+                val permissionCheckResult = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                )
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    cameraLauncher.launch(uri)
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                sheetState.hide()
+            },
+            negativeButton = SelectionButton(
+                text = "Select from Gallery",
+            ),
+            onNegativeClick = {
+                val permissionCheckResult = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                )
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    galleryLauncher.launch("image/*")
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                sheetState.hide()
+            }
+        ),
+        header = Header.Default(
+            title = title
+        ),
+        body = {}
     )
 }
 

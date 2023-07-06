@@ -7,6 +7,7 @@ import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
 @Composable
@@ -16,6 +17,7 @@ fun TodayScreen(
     onSearchAction: () -> Unit,
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
+    tagsViewModel: TagsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel
@@ -29,6 +31,7 @@ fun TodayScreen(
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
         usersViewModel = usersViewModel,
+        tagsViewModel = tagsViewModel,
         isTodayEvents = true
     )
 }

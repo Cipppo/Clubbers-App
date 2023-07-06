@@ -86,6 +86,7 @@ import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
+import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -109,19 +110,23 @@ fun CreateSearchTimeLine(
     eventsViewModel: EventsViewModel,
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
+    tagsViewModel: TagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel,
+    searchingTags: Boolean = false,
     isTodayEvents: Boolean
 ) {
-    eventsViewModel.getAllEvents()
+    eventsViewModel.getFutureEvents()
     val events by eventsViewModel.events.collectAsState()
     val todayEvents = if (isTodayEvents) {
         events.filter { event ->
             val timeStart = event.timeStart
+            val timeEnd = event.timeEnd
             val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            val eventDate = sdf.format(timeStart)
+            val eventStartDate = sdf.format(timeStart)
+            val eventEndDate = sdf.format(timeEnd)
             val currentDate = sdf.format(System.currentTimeMillis())
-            eventDate == currentDate
+            currentDate in eventStartDate..eventEndDate
         }
     } else {
         emptyList()
@@ -136,7 +141,10 @@ fun CreateSearchTimeLine(
                     AutoCompleteSearchBar(
                         events = if (isTodayEvents) todayEvents else events,
                         eventsViewModel = eventsViewModel,
-                        onSearchAction = onSearchAction
+                        onSearchAction = onSearchAction,
+                        searchingTags = searchingTags,
+                        eventHasTagsViewModel = eventHasTagsViewModel,
+                        tagsViewModel = tagsViewModel
                     )
                     Divider(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
@@ -189,6 +197,7 @@ fun CreateParticipatedEventTimeLine(
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     passedEvents: List<Event> = emptyList(),
+    isSearchingTags: Boolean = false,
     usersViewModel: UsersViewModel,
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
@@ -217,7 +226,7 @@ fun CreateParticipatedEventTimeLine(
                             contentAlignment = Alignment.Center,
                             content = {
                                 Text(
-                                    text = "No events participated right now",
+                                    text = if (isSearchingTags) "No events for this tag" else "No events participated right now",
                                     style = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.padding(16.dp),
                                 )
@@ -235,13 +244,19 @@ fun CreateParticipatedEventTimeLine(
 @Composable
 fun AutoCompleteSearchBar(
     events: List<Event>,
+    searchingTags: Boolean,
     eventsViewModel: EventsViewModel,
+    eventHasTagsViewModel: EventHasTagsViewModel,
+    tagsViewModel: TagsViewModel,
     onSearchAction: () -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     val eventNames = events.map { it.eventName }.distinct()
+    tagsViewModel.getAllTags()
+    val tags by tagsViewModel.tags.collectAsState()
+    val tagNames = tags.map { it.tagName }.distinct()
     val context = LocalContext.current
 
     OutlinedTextField(
@@ -251,6 +266,7 @@ fun AutoCompleteSearchBar(
             .onGloballyPositioned { coordinates ->
                 textFieldSize = coordinates.size.toSize()
             },
+        label = { Text(text = if(searchingTags) "Search by tags" else "Search by title") },
         value = searchText,
         onValueChange = {
             searchText = it
@@ -279,11 +295,20 @@ fun AutoCompleteSearchBar(
                         contentDescription = "Dropdown menu")
                 }
                 IconButton(onClick = {
-                    if (searchText.isNotEmpty() && searchText == eventNames.find { it == searchText }) {
-                        eventsViewModel.getEventsByName(searchText)
-                        onSearchAction()
+                    if (!searchingTags) {
+                        if (searchText.isNotEmpty() && searchText == eventNames.find { it == searchText }) {
+                            eventsViewModel.getEventsByName(searchText)
+                            onSearchAction()
+                        } else {
+                            Toast.makeText(context, "Event not found", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
-                        Toast.makeText(context, "Event not found", Toast.LENGTH_SHORT).show()
+                        if (searchText.isNotEmpty() && searchText == tagNames.find { it == searchText }) {
+                            eventHasTagsViewModel.getEventsByTagName(searchText)
+                            onSearchAction()
+                        } else {
+                            Toast.makeText(context, "Event not found", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }) {
                     Icon(
@@ -305,25 +330,50 @@ fun AutoCompleteSearchBar(
                     .heightIn(max = 150.dp)
             ) {
                 if (searchText.isNotEmpty()) {
-                    items(
-                        eventNames.filter {
-                            it.lowercase()
-                                .contains(searchText.lowercase())
+                    if (searchingTags)
+                        items(
+                            tagNames.filter {
+                                it.lowercase()
+                                    .contains(searchText.lowercase())
+                            }
+                                .sorted()
+                        ) {
+                            EventNames(title = it) { title ->
+                                searchText = title
+                                expanded = false
+                            }
                         }
-                            .sorted()
-                    ) {
-                        EventNames(title = it) { title ->
-                            searchText = title
-                            expanded = false
+                    else
+                        items(
+                            eventNames.filter {
+                                it.lowercase()
+                                    .contains(searchText.lowercase())
+                            }
+                                .sorted()
+                        ) {
+                            EventNames(title = it) { title ->
+                                searchText = title
+                                expanded = false
+                            }
                         }
-                    }
                 } else {
-                    items(
-                        eventNames.sorted()
-                    ) {
-                        EventNames(title = it) { title ->
-                            searchText = title
-                            expanded = false
+                    if (searchingTags)
+                        items(
+                            tagNames.sorted()
+                        ) {
+                            EventNames(title = it) { title ->
+                                searchText = title
+                                expanded = false
+                            }
+                        }
+                    else {
+                        items(
+                            eventNames.sorted()
+                        ) {
+                            EventNames(title = it) { title ->
+                                searchText = title
+                                expanded = false
+                            }
                         }
                     }
                 }

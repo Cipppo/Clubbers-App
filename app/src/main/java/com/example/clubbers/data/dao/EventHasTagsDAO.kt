@@ -25,6 +25,13 @@ interface EventHasTagsDAO {
             "WHERE event_has_tag.tag_id = :tagId")
     fun getEventsForTag(tagId: Int): Flow<List<Event>>
 
+    // Get all events for a tag name
+    @Query("SELECT * FROM event_has_tag " +
+            "INNER JOIN events ON event_has_tag.event_id = events.event_id " +
+            "INNER JOIN tags ON event_has_tag.tag_id = tags.tag_id " +
+            "WHERE tags.tag_name = :tagName")
+    fun getEventsForTagName(tagName: String): Flow<List<Event>>
+
     // Insert tag for an event
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(eventHasTag: EventHasTag)
@@ -44,4 +51,10 @@ interface EventHasTagsDAO {
     // Delete all tags for an event
     @Query("DELETE FROM event_has_tag WHERE event_id = :eventId")
     suspend fun deleteAll(eventId: Int)
+
+    // Get all tags for list of events
+    @Query("SELECT * FROM event_has_tag " +
+            "INNER JOIN tags ON event_has_tag.tag_id = tags.tag_id " +
+            "WHERE event_has_tag.event_id IN (:eventIds)")
+    fun getTagsForEvents(eventIds: List<Int>): Flow<List<Tag>>
 }

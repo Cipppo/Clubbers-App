@@ -1,7 +1,5 @@
 package com.example.clubbers.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,13 +40,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.Post
-import com.example.clubbers.utilities.TakenPhotoDialog
+import com.example.clubbers.utilities.PicOrGalleyChoicePopup
+import com.example.clubbers.utilities.TakenPhotoCarouselDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
@@ -73,6 +71,7 @@ fun NewPostScreen(
         context.packageName + ".provider", file)
 
     val takenPhotoSheetState = rememberSheetState()
+    val picOrGalleryState = rememberSheetState()
     
     val imageUriList = remember { mutableStateListOf<Uri>() }
 
@@ -88,6 +87,17 @@ fun NewPostScreen(
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { newUri: Uri? ->
+        if (newUri != null) {
+            imageUriList.add(newUri)
+        } else {
+            // Handle cancellation event
+            Toast.makeText(context, "Selezione immagine annullata", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -118,15 +128,7 @@ fun NewPostScreen(
                         if (imageUriList.isNotEmpty()) {
                             takenPhotoSheetState.show()
                         } else {
-                            val permissionCheckResult = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA
-                            )
-                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                                cameraLauncher.launch(uri)
-                            } else {
-                                permissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
+                            picOrGalleryState.show()
                         }
                     }
                 ),
@@ -194,7 +196,7 @@ fun NewPostScreen(
                         saveImage(context, context.applicationContext.contentResolver, it, photoType)
                     }
 
-                    val lastNFiles = context.getFilesFromAppDir().takeLast(imageUriList.size)
+                    val lastNFiles = context.getFilesFromAppDir(photoType).takeLast(imageUriList.size)
                     localImageDirList = lastNFiles.joinToString(separator = ",") { it }
 
                     postsViewModel.addNewPost(
@@ -224,9 +226,19 @@ fun NewPostScreen(
         }
     }
 
-    TakenPhotoDialog(
+    TakenPhotoCarouselDialog(
         title = "Taken Photo",
         sheetState = takenPhotoSheetState,
         imageUriList = imageUriList
+    )
+
+    PicOrGalleyChoicePopup(
+        context = context,
+        uri = uri,
+        galleryLauncher = galleryLauncher,
+        cameraLauncher = cameraLauncher,
+        permissionLauncher = permissionLauncher,
+        title = "Choose what to do",
+        sheetState = picOrGalleryState
     )
 }

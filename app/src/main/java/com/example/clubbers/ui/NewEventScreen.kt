@@ -1,8 +1,5 @@
 package com.example.clubbers.ui
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,9 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -51,25 +46,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
-import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.details.TagsListItem
-import com.example.clubbers.data.entities.Event
-import com.example.clubbers.data.entities.EventHasTag
 import com.example.clubbers.utilities.NumbersDialog
+import com.example.clubbers.utilities.PicOrGalleyChoicePopup
 import com.example.clubbers.utilities.TagsListDialog
+import com.example.clubbers.utilities.TakenPhotoDialog
 import com.example.clubbers.utilities.createImageFile
-import com.example.clubbers.utilities.getFilesFromAppDir
-import com.example.clubbers.utilities.saveImage
-import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
-import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.TagsViewModel
-import com.example.clubbers.viewModel.WarningViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -78,30 +67,20 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Objects
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewEventScreen(
     modifier: Modifier = Modifier,
-    onEvent: () -> Unit,
-    startRequestingData: () -> Unit,
-    startLocationUpdates: () -> Unit,
+    onNext: () -> Unit,
     eventsViewModel: EventsViewModel,
-    eventHasTagsViewModel: EventHasTagsViewModel,
-    locationsViewModel: LocationsViewModel,
-    warningViewModel: WarningViewModel,
+    eventLocationViewModel: EventLocationViewModel,
     tagsViewModel: TagsViewModel,
-    adminId: Int
 ) {
     val context = LocalContext.current
 
@@ -115,19 +94,15 @@ fun NewEventScreen(
         Objects.requireNonNull(context),
         context.packageName + ".provider", file)
 
-    var showPopup by rememberSaveable { mutableStateOf(false) }
+    val takenPhotoState = rememberSheetState()
+    val picOrGalleryState = rememberSheetState()
 
-    var capturedImageUri by rememberSaveable {
+    val capturedImageUri = rememberSaveable {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var localImageDir by rememberSaveable { mutableStateOf("") }
-
     var eventCaption by rememberSaveable { mutableStateOf("") }
     var eventTitle by rememberSaveable { mutableStateOf("") }
-    var eventLocation by rememberSaveable { mutableStateOf("")}
-    var eventLocationLat by rememberSaveable { mutableStateOf(0.0)}
-    var eventLocationLon by rememberSaveable { mutableStateOf(0.0)}
 
     val captionMaxChar = 255
     val titleMaxChar = 30
@@ -143,22 +118,27 @@ fun NewEventScreen(
     val endClockState = rememberSheetState()
 
     var maxParticipants by rememberSaveable { mutableStateOf(0) }
-    val participants = 0
     val maxParticipantsState = rememberSheetState()
     val tagsState = rememberSheetState()
 
     eventsViewModel.getAllEvents()
-    val eventsTemp = eventsViewModel.events.collectAsState()
-    val eventId = eventsTemp.value.size.plus(1)
-
-    var isButtonClicked by rememberSaveable { mutableStateOf(false) }
-    var isRequestDone by rememberSaveable { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            capturedImageUri = uri
+            capturedImageUri.value = uri
+        } else {
+            // Handle cancellation event
+            Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { newUri: Uri? ->
+        if (newUri != null) {
+            capturedImageUri.value = newUri
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
@@ -194,87 +174,19 @@ fun NewEventScreen(
                     .background(Color.Gray, MaterialTheme.shapes.small)
                     .clickable(
                         onClick = {
-                            if (capturedImageUri.path?.isNotEmpty() == true) {
-                                showPopup = true
+                            if (capturedImageUri.value.path?.isNotEmpty() == true) {
+                                takenPhotoState.show()
                             } else {
-                                val permissionCheckResult = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                )
-                                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                                    cameraLauncher.launch(uri)
-                                } else {
-                                    permissionLauncher.launch(Manifest.permission.CAMERA)
-                                }
+                                picOrGalleryState.show()
                             }
                         }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (showPopup) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            showPopup = false
-                        },
-                        title = { Text("Post Preview") },
-                        text = {
-                            Box(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Image(
-                                    painter = rememberAsyncImagePainter(
-                                        ImageRequest.Builder(
-                                            LocalContext.current
-                                        ).data(data = capturedImageUri)
-                                            .apply(block = fun ImageRequest.Builder.() {
-                                                crossfade(true)
-                                                placeholder(R.drawable.ic_launcher_foreground)
-                                                error(R.drawable.ic_launcher_foreground)
-                                            }).build()
-                                    ),
-                                    contentDescription = "Captured Image",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = modifier.fillMaxSize()
-                                )
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showPopup = false
-                                    capturedImageUri = Uri.EMPTY
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text("Take new photo")
-                            }
-                        },
-                        dismissButton = {
-                            Button(
-                                onClick = {
-                                    showPopup = false
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
-                    )
-                }
-
-                if (capturedImageUri.path?.isNotEmpty() == true) {
+                if (capturedImageUri.value.path?.isNotEmpty() == true) {
                     Image(
                         painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri)
+                            ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri.value)
                                 .apply(block = fun ImageRequest.Builder.() {
                                     crossfade(true)
                                     placeholder(R.drawable.ic_launcher_foreground)
@@ -390,7 +302,7 @@ fun NewEventScreen(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = " Start Event:")
+            Text(text = "Start Event:")
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
                 onClick = { startCalendarState.show() },
@@ -417,7 +329,7 @@ fun NewEventScreen(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = " End Event:")
+            Text(text = "End Event:")
             Spacer(modifier = modifier.weight(1f))
             ExtendedFloatingActionButton(
                 onClick = { endCalendarState.show() },
@@ -439,112 +351,7 @@ fun NewEventScreen(
                 )
             }
         }
-        Row (
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = eventLocation,
-                onValueChange = {
-                    if (it.length <= captionMaxChar) eventLocation = it
-                },
-                label = { Text(text = "Event Location") },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.onBackground,
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-                shape = MaterialTheme.shapes.small,
-                modifier = modifier
-                    .width(250.dp)
-                    .height(120.dp),
-                maxLines = 3,
-                supportingText = {
-                    if (isButtonClicked && eventLocation.isEmpty() && isRequestDone) {
-                        Text(
-                            text = "Location not found, Retry",
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Start,
-                        )
-                    }
-                    Text(
-                        text = "${eventLocation.length} / $captionMaxChar",
-                        modifier = modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.End,
-                    )
-                }
-            )
-            Spacer(modifier = modifier.weight(1f))
-            Column() {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        if (eventLocation.isNotEmpty()) {
-                            isRequestDone = false
-                            context.getSharedPreferences("EventLocation", Context.MODE_PRIVATE)
-                                .edit()
-                                .putString("EventLocation", eventLocation)
-                                .apply()
-                            locationsViewModel.setEventLocation(LocationDetails("", 0.0, 0.0))
-                            startRequestingData()
-                            if (!warningViewModel.showConnectivitySnackBar.value) {
-                                isButtonClicked = true
-                                val coroutineScope = CoroutineScope(Dispatchers.Main)
-                                coroutineScope.launch {
-                                    locationsViewModel.location.collect {
-                                        eventLocation = it.name
-                                        isRequestDone = true
-                                        eventLocationLat = it.latitude
-                                        eventLocationLon = it.longitude
-                                    }
-                                }
-                                Toast.makeText(context, "Checking location", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, "Location is empty", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = modifier
-                        .height(25.dp)
-                ) {
-                    Text(
-                        text = "Check",
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                Spacer(modifier = modifier.height(16.dp))
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        isRequestDone = false
-                        context.deleteSharedPreferences("EventLocation")
-                        startLocationUpdates()
-                        if (!warningViewModel.showGPSAlertDialog.value) {
-                            isButtonClicked = true
-                            val coroutineScope = CoroutineScope(Dispatchers.Main)
-                            coroutineScope.launch {
-                                locationsViewModel.location.collect {
-                                    eventLocation = it.name
-                                    eventLocationLat = it.latitude
-                                    eventLocationLon = it.longitude
-                                }
-                            }
-                            Toast.makeText(context, "Getting position", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "GPS is disabled", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = modifier
-                        .height(25.dp)
-                ) {
-                    Text(
-                        text = "GPS",
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        }
+        Spacer(modifier = modifier.height(8.dp))
         Row(
             modifier
                 .fillMaxWidth(),
@@ -575,6 +382,7 @@ fun NewEventScreen(
                 Text(text = if (tagSelected == 0) "Select" else "$tagSelected selected")
             }
         }
+        Spacer(modifier = modifier.height(8.dp))
         OutlinedTextField(
             value = eventCaption,
             onValueChange = {
@@ -588,8 +396,8 @@ fun NewEventScreen(
             shape = MaterialTheme.shapes.small,
             modifier = modifier
                 .fillMaxWidth()
-                .height(110.dp),
-            maxLines = 2,
+                .height(180.dp),
+            maxLines = 5,
             supportingText = {
                 Text(
                     text = "${eventCaption.length} / $captionMaxChar",
@@ -605,69 +413,41 @@ fun NewEventScreen(
         // Post button
         Button(
             onClick = {
-                val photoType = "Event"
                 if (eventTitle.isEmpty()) {
                     Toast.makeText(context, "Please enter an event title", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setTitle(eventTitle)
 
                 val startEventDate = LocalDateTime.of(selectedStartDate, selectedStartTime)
                 if (startEventDate.isBefore(LocalDateTime.now())) {
                     Toast.makeText(context, "Start date must be in the future", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setStartEventDate(startEventDate)
 
                 val endEventDate = LocalDateTime.of(selectedEndDate, selectedEndTime)
                 if (startEventDate.isAfter(endEventDate)) {
                     Toast.makeText(context, "End date must be after start date", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setEndEventDate(endEventDate)
 
-                if (eventLocation.isEmpty()) {
-                    Toast.makeText(context, "Please enter an event location", Toast.LENGTH_SHORT).show()
+                if (maxParticipants <= 0) {
+                    Toast.makeText(context, "Max participants must be greater than 0", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                eventLocationViewModel.setMaxParticipants(maxParticipants)
 
-                if (maxParticipants < participants) {
-                    Toast.makeText(context, "Max participants must be greater than participants", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
+                if (capturedImageUri.value.path?.isNotEmpty() == true) {
 
-                if (capturedImageUri.path?.isNotEmpty() == true) {
-                    saveImage(context, context.applicationContext.contentResolver, capturedImageUri, photoType)
+                    eventLocationViewModel.setCapturedImageUri(capturedImageUri.value)
+                    eventLocationViewModel.setDescription(eventCaption)
 
-                    context.getFilesFromAppDir().lastOrNull().let { lastFile ->
-                        lastFile?.let {
-                            localImageDir = it
-                        }
-                    }
+                    val tagListItem = tagItems.filter { it.isSelected }
+                    eventLocationViewModel.setTags(tagListItem)
 
-                    eventsViewModel.insertNewEvent(
-                        Event(
-                            eventName = eventTitle,
-                            eventImage = localImageDir,
-                            eventLocation = eventLocation,
-                            eventLocationLat = eventLocationLat,
-                            eventLocationLon = eventLocationLon,
-                            eventDescription = eventCaption,
-                            timeStart = Date.from(startEventDate.atZone(ZoneId.systemDefault()).toInstant()),
-                            timeEnd = Date.from(endEventDate.atZone(ZoneId.systemDefault()).toInstant()),
-                            maxParticipants = maxParticipants,
-                            participants = participants,
-                            eventAdminId = adminId
-                        )
-                    )
-                    for (tag in tagItems) {
-                        if (tag.isSelected) {
-                            eventHasTagsViewModel.addNewTagToEvent(
-                                eventHasTag = EventHasTag(
-                                    eventId = eventId,
-                                    tagId = tag.id
-                                )
-                            )
-                        }
-                    }
-                    onEvent()
+                    onNext()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
                 }
@@ -676,12 +456,28 @@ fun NewEventScreen(
             shape = MaterialTheme.shapes.small
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_send_24),
-                contentDescription = "Post event",
+                painter = painterResource(id = R.drawable.baseline_edit_location_alt_24),
+                contentDescription = "Edit location",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = modifier.width(8.dp))
-            Text(text = "Post Event")
+            Text(text = "Next: Select Location")
         }
     }
+
+    TakenPhotoDialog(
+        title = "Event Preview",
+        sheetState = takenPhotoState,
+        capturedImageUri = capturedImageUri
+    )
+
+    PicOrGalleyChoicePopup(
+        context = context,
+        uri = uri,
+        galleryLauncher = galleryLauncher,
+        cameraLauncher = cameraLauncher,
+        permissionLauncher = permissionLauncher,
+        title = "Choose what to do",
+        sheetState = picOrGalleryState
+    )
 }
