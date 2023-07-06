@@ -67,6 +67,7 @@ import com.maxkeppeker.sheets.core.models.CoreSelection
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.SheetState
+import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.io.File
 import java.util.Objects
 
@@ -242,6 +243,8 @@ fun TakenPhotoCarouselDialog(
     var file by remember { mutableStateOf<File?>(null) }
     var uri by remember { mutableStateOf<Uri?>(null) }
 
+    val picOrGalleryState = rememberSheetState()
+
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
@@ -250,6 +253,17 @@ fun TakenPhotoCarouselDialog(
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { newUri ->
+        if (newUri != null) {
+            imageUriList.add(newUri)
+        } else {
+            // Handle cancellation event
+            Toast.makeText(context, "Gallery cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -284,15 +298,17 @@ fun TakenPhotoCarouselDialog(
                         )
                     }
 
-                    val permissionCheckResult = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.CAMERA
-                    )
-                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                        cameraLauncher.launch(uri)
-                    } else {
-                        permissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
+                    picOrGalleryState.show()
+
+//                    val permissionCheckResult = ContextCompat.checkSelfPermission(
+//                        context,
+//                        Manifest.permission.CAMERA
+//                    )
+//                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+//                        cameraLauncher.launch(uri)
+//                    } else {
+//                        permissionLauncher.launch(Manifest.permission.CAMERA)
+//                    }
                 }
                               },
             negativeButton = SelectionButton(
@@ -328,6 +344,16 @@ fun TakenPhotoCarouselDialog(
                 )
             }
         }
+    )
+
+    PicOrGalleyChoicePopup(
+        context = context,
+        uri = if (uri != null) uri!! else Uri.EMPTY,
+        galleryLauncher = galleryLauncher,
+        cameraLauncher = cameraLauncher,
+        permissionLauncher = permissionLauncher,
+        title = "Chose what to do",
+        sheetState = picOrGalleryState
     )
 }
 
