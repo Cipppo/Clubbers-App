@@ -48,7 +48,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.Post
-import com.example.clubbers.utilities.TakenPhotoDialog
+import com.example.clubbers.utilities.TakenPhotoCarouselDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
@@ -224,7 +224,7 @@ fun NewPostScreen(
         }
     }
 
-    TakenPhotoDialog(
+    TakenPhotoCarouselDialog(
         title = "Taken Photo",
         sheetState = takenPhotoSheetState,
         imageUriList = imageUriList

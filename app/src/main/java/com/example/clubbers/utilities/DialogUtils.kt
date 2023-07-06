@@ -6,6 +6,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.details.TagsListItem
 import com.google.android.gms.maps.model.CameraPosition
@@ -224,7 +228,7 @@ fun MapDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TakenPhotoDialog(
+fun TakenPhotoCarouselDialog(
     title: String,
     sheetState: SheetState,
     imageUriList: MutableList<Uri>,
@@ -319,6 +323,61 @@ fun TakenPhotoDialog(
                 CarouselCard(
                     capturedImageUris = imageUriList,
                     currentImageIndex = currentImageIndex,
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TakenPhotoDialog(
+    title: String,
+    sheetState: SheetState,
+    capturedImageUri: MutableState<Uri>
+) {
+    CoreDialog(
+        state = sheetState,
+        selection = CoreSelection(
+            withButtonView = true,
+            positiveButton = SelectionButton(
+                text = "Done",
+            ),
+            onPositiveClick = {
+                sheetState.hide()
+            },
+            negativeButton = SelectionButton(
+                text = "Delete",
+            ),
+            onNegativeClick = {
+                sheetState.hide()
+                capturedImageUri.value = Uri.EMPTY
+            }
+        ),
+        header = Header.Default(
+            title = title
+        ),
+        body = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(
+                            LocalContext.current
+                        ).data(data = capturedImageUri.value)
+                            .apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                    ),
+                    contentDescription = "Captured Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

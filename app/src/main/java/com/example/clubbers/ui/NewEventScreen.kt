@@ -58,6 +58,7 @@ import com.example.clubbers.R
 import com.example.clubbers.data.details.TagsListItem
 import com.example.clubbers.utilities.NumbersDialog
 import com.example.clubbers.utilities.TagsListDialog
+import com.example.clubbers.utilities.TakenPhotoDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
@@ -98,8 +99,9 @@ fun NewEventScreen(
         context.packageName + ".provider", file)
 
     var showPopup by rememberSaveable { mutableStateOf(false) }
+    val takenPhotoState = rememberSheetState()
 
-    var capturedImageUri by rememberSaveable {
+    val capturedImageUri = rememberSaveable {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
@@ -130,7 +132,7 @@ fun NewEventScreen(
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            capturedImageUri = uri
+            capturedImageUri.value = uri
         } else {
             // Handle cancellation event
             Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
@@ -166,8 +168,9 @@ fun NewEventScreen(
                     .background(Color.Gray, MaterialTheme.shapes.small)
                     .clickable(
                         onClick = {
-                            if (capturedImageUri.path?.isNotEmpty() == true) {
-                                showPopup = true
+                            if (capturedImageUri.value.path?.isNotEmpty() == true) {
+//                                showPopup = true
+                                takenPhotoState.show()
                             } else {
                                 val permissionCheckResult = ContextCompat.checkSelfPermission(
                                     context,
@@ -200,7 +203,7 @@ fun NewEventScreen(
                                     painter = rememberAsyncImagePainter(
                                         ImageRequest.Builder(
                                             LocalContext.current
-                                        ).data(data = capturedImageUri)
+                                        ).data(data = capturedImageUri.value)
                                             .apply(block = fun ImageRequest.Builder.() {
                                                 crossfade(true)
                                                 placeholder(R.drawable.ic_launcher_foreground)
@@ -217,7 +220,7 @@ fun NewEventScreen(
                             Button(
                                 onClick = {
                                     showPopup = false
-                                    capturedImageUri = Uri.EMPTY
+                                    capturedImageUri.value = Uri.EMPTY
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
@@ -243,10 +246,10 @@ fun NewEventScreen(
                     )
                 }
 
-                if (capturedImageUri.path?.isNotEmpty() == true) {
+                if (capturedImageUri.value.path?.isNotEmpty() == true) {
                     Image(
                         painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri)
+                            ImageRequest.Builder(LocalContext.current).data(data = capturedImageUri.value)
                                 .apply(block = fun ImageRequest.Builder.() {
                                     crossfade(true)
                                     placeholder(R.drawable.ic_launcher_foreground)
@@ -499,9 +502,9 @@ fun NewEventScreen(
                 }
                 eventLocationViewModel.setMaxParticipants(maxParticipants)
 
-                if (capturedImageUri.path?.isNotEmpty() == true) {
+                if (capturedImageUri.value.path?.isNotEmpty() == true) {
 
-                    eventLocationViewModel.setCapturedImageUri(capturedImageUri)
+                    eventLocationViewModel.setCapturedImageUri(capturedImageUri.value)
                     eventLocationViewModel.setDescription(eventCaption)
 
                     val tagListItem = tagItems.filter { it.isSelected }
@@ -524,4 +527,10 @@ fun NewEventScreen(
             Text(text = "Next: Select Location")
         }
     }
+
+    TakenPhotoDialog(
+        title = "Event Preview",
+        sheetState = takenPhotoState,
+        capturedImageUri = capturedImageUri
+    )
 }
