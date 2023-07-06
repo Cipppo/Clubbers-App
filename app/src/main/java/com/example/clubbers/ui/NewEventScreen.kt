@@ -178,15 +178,6 @@ fun NewEventScreen(
                                 takenPhotoState.show()
                             } else {
                                 picOrGalleryState.show()
-//                                val permissionCheckResult = ContextCompat.checkSelfPermission(
-//                                    context,
-//                                    Manifest.permission.CAMERA
-//                                )
-//                                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-//                                    galleryLauncher.launch("image/*")
-//                                } else {
-//                                    permissionLauncher.launch(Manifest.permission.CAMERA)
-//                                }
                             }
                         }
                     ),

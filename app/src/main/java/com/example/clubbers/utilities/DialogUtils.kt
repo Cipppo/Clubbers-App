@@ -299,16 +299,6 @@ fun TakenPhotoCarouselDialog(
                     }
 
                     picOrGalleryState.show()
-
-//                    val permissionCheckResult = ContextCompat.checkSelfPermission(
-//                        context,
-//                        Manifest.permission.CAMERA
-//                    )
-//                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-//                        cameraLauncher.launch(uri)
-//                    } else {
-//                        permissionLauncher.launch(Manifest.permission.CAMERA)
-//                    }
                 }
                               },
             negativeButton = SelectionButton(
