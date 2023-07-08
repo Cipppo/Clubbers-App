@@ -1,13 +1,8 @@
 package com.example.clubbers
 
-import android.Manifest
 import android.app.Application
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -53,12 +48,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -70,7 +63,6 @@ import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
-import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.FoundEventsScreen
 import com.example.clubbers.ui.FoundTagsScreen
@@ -90,6 +82,7 @@ import com.example.clubbers.ui.UserSearchPage
 import com.example.clubbers.ui.notificationsScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
@@ -126,7 +119,7 @@ sealed class AppScreen(val name: String) {
     object AdminRegistration : AppScreen("Admin Registration Page")
     object UserOption : AppScreen("User Option Page")
     object Notifications : AppScreen("User Notifications Page")
-    object UserSearch : AppScreen("User search Page")
+    object UserSearch : AppScreen("User Search Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -677,7 +670,7 @@ private fun NavigationGraph(
             val usersViewModel = hiltViewModel<UsersViewModel>()
             val postViewModel = hiltViewModel<PostsViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
-            val eventsViewModel = hiltViewModel<EventsViewModel>()
+            val personalProfileEventsViewModel = hiltViewModel<EventsViewModel>()
             val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
 
             if(userType == "USER"){
@@ -687,7 +680,7 @@ private fun NavigationGraph(
                     usersViewModel = usersViewModel,
                     postsViewModel = postViewModel,
                     participatesViewModel = participatesViewModel,
-                    eventsViewModel = eventsViewModel,
+                    eventsViewModel = personalProfileEventsViewModel,
                 )
             }else{
                 AdminProfileScreen()
