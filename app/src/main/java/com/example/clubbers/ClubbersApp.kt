@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -85,6 +86,7 @@ import com.example.clubbers.ui.SearchTagScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.UserOptionScreen
+import com.example.clubbers.ui.UserSearchPage
 import com.example.clubbers.ui.notificationsScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
@@ -124,6 +126,7 @@ sealed class AppScreen(val name: String) {
     object AdminRegistration : AppScreen("Admin Registration Page")
     object UserOption : AppScreen("User Option Page")
     object Notifications : AppScreen("User Notifications Page")
+    object UserSearch : AppScreen("User search Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -140,6 +143,7 @@ fun TopAppBarFunction (
     canNavigateBack: Boolean,
     onSettingsPressed: () -> Unit,
     onTagPressed: () -> Unit,
+    onSearchPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -167,6 +171,12 @@ fun TopAppBarFunction (
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings Button")
+                }
+                IconButton(onClick =  onSearchPressed ) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "User Search"
+                    )
                 }
             } else if (currentScreen == AppScreen.Discover.name) {
                 IconButton(onClick = onTagPressed) {
@@ -335,6 +345,7 @@ fun NavigationApp (
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { navController.navigateUp() },
                     onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
+                    onSearchPressed = { navController.navigate(AppScreen.UserSearch.name) },
                     onTagPressed = { navController.navigate(AppScreen.SearchTag.name) },
                     modifier = Modifier
                         .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
@@ -738,6 +749,13 @@ private fun NavigationGraph(
         // Notifications Screen
         composable(route = AppScreen.Notifications.name){
             notificationsScreen()
+        }
+
+        composable(route = AppScreen.UserSearch.name){
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            UserSearchPage(modifier = Modifier.fillMaxSize(),
+                onClickAction = {navController.navigate(AppScreen.Profile.name)},
+                usersViewModel = usersViewModel)
         }
 
     }
