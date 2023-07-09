@@ -1,6 +1,5 @@
 package com.example.clubbers.utilities
 
-import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
@@ -98,7 +97,6 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -643,13 +641,13 @@ fun EventItem(
 }
 
 fun sendEventParticipationNotification(context: Context, eventTitle: String, date: String, place: String){
-    val NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val notification = NotificationCompat.Builder(context, "1")
         .setContentTitle("Stai partecipando all'evento $eventTitle !")
         .setContentText("L'evento prenderà parte il $date a $place")
         .setSmallIcon(R.drawable.baseline_notifications_24)
         .build()
-    NotificationManager.notify(1, notification)
+    notificationManager.notify(1, notification)
 }
 
 

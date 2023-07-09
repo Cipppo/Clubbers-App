@@ -26,8 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -46,8 +48,6 @@ import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +167,7 @@ fun LoginScreen(
 
 
 
-fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences, adminList: List<Admin>, context: Context): Unit{
+fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences, adminList: List<Admin>, context: Context){
     var i = usersList.size
     for(user in usersList){
         if(user.userEmail == email && user.userPassword == password){

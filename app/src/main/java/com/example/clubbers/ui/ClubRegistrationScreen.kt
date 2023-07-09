@@ -114,7 +114,7 @@ fun ClubRegistrationScreen(
             if(isGranted){
                 capturedImageUri.value = uri
             }else{
-                Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Camera cancelled", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -131,7 +131,7 @@ fun ClubRegistrationScreen(
         }
 
 
-        val NotifypermissionLauncher = rememberLauncherForActivityResult(
+        val notifyPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission() ,
             onResult = {isGranted ->
                 hasNotificationPermission = isGranted
@@ -332,7 +332,7 @@ fun ClubRegistrationScreen(
                         saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value, "ProPic")
                     }
 
-                    NotifypermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    notifyPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 
                     context.getFilesFromAppDir(photoType).lastOrNull().let { lastFile ->
                         lastFile?.let {
@@ -384,7 +384,7 @@ fun userBioCheck(userBioText: String): Boolean{
     return userBioText.isNotBlank()
 }
 
-fun registerNewAdmin(username: String, email: String, password: String, image: String, userBio: String, address: String, adminsViewModel: AdminsViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences): Unit{
+fun registerNewAdmin(username: String, email: String, password: String, image: String, userBio: String, address: String, adminsViewModel: AdminsViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences) {
     val newAdmin = Admin(
         0,
         username,

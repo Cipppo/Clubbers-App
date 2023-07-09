@@ -132,7 +132,7 @@ fun RegistrationScreen(
         }
 
 
-        val NotifypermissionLauncher = rememberLauncherForActivityResult(
+        val notifyPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission() ,
             onResult = {isGranted ->
                 hasNotificationPermission = isGranted
@@ -328,7 +328,7 @@ fun RegistrationScreen(
             Spacer(modifier = Modifier.height(20.dp))
             Button(
                 onClick = {
-                    NotifypermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    notifyPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     if (capturedImageUri.value.path?.isNotEmpty() == true){
                         saveImage(context, context.applicationContext.contentResolver, capturedImageUri.value, photoType)
                     }
@@ -376,7 +376,7 @@ fun secondStageEntriesCheck(bioText: String, usernameText: String): Boolean{
     return bioText.isNotBlank() && usernameText.isNotBlank()
 }
 
-fun registerNewUser(firstname: String, secondName: String, username: String, email: String, password: String,userProPicPath: String, userBio: String, usersViewModel: UsersViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences): Unit{
+fun registerNewUser(firstname: String, secondName: String, username: String, email: String, password: String,userProPicPath: String, userBio: String, usersViewModel: UsersViewModel, onRegister: () -> Unit, sharedPreferences: SharedPreferences){
     val newUser = User(
         0,
         firstname,
