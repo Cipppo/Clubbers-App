@@ -466,28 +466,31 @@ fun EventItem(
                 modifier = Modifier
                     .padding(bottom = 8.dp)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(
-                            LocalContext.current
-                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
-                            crossfade(true)
-                            placeholder(R.drawable.ic_launcher_foreground)
-                            error(R.drawable.ic_launcher_foreground)
-                        }).build()
-                    ),
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.padding(end = 8.dp))
-                adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                if (isSingleEvent) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(
+                                LocalContext.current
+                            ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                        ),
+                        contentDescription = "Profile picture",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.padding(end = 8.dp))
+                    adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = eventTitle,
@@ -658,10 +661,11 @@ fun PostItem(
     usersViewModel: UsersViewModel,
     postsViewModel: PostsViewModel,
     post: Post,
+    isSinglePost: Boolean = false,
     onClickAction: () -> Unit
 ) {
     usersViewModel.getUserById(post.postUserId)
-    val user by usersViewModel.userSelected.collectAsState()
+    val user by usersViewModel.userById.collectAsState()
 
     val proPicUri = user?.userImage
     val userName = user?.userName
@@ -689,31 +693,33 @@ fun PostItem(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(
-                            LocalContext.current
-                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
-                            crossfade(true)
-                            placeholder(R.drawable.ic_launcher_foreground)
-                            error(R.drawable.ic_launcher_foreground)
-                        }).build()
-                    ),
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.padding(end = 8.dp))
-                userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+            if (isSinglePost) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(
+                                LocalContext.current
+                            ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                        ),
+                        contentDescription = "Profile picture",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.padding(end = 8.dp))
+                    userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                }
             }
             CarouselCard(
                 capturedImageUris = imageUriList

@@ -37,10 +37,12 @@ class UsersViewModel @Inject constructor(
         repository.deleteUser(user)
     }
 
+    private var _userById = MutableStateFlow<User?>(null)
+    val userById: StateFlow<User?> get() = _userById
     fun getUserById(userId: Int) = viewModelScope.launch {
         repository.getUserById(userId)
             .collect { user ->
-                _userSelected.value = user
+                _userById.value = user
             }
     }
 

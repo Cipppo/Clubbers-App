@@ -31,6 +31,7 @@ fun PostScreen(
                     usersViewModel = usersViewModel,
                     postsViewModel = postsViewModel,
                     post = post!!,
+                    isSinglePost = true,
                     onClickAction = { }
                 )
             }
