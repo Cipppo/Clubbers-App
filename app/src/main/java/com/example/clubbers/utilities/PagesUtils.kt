@@ -580,7 +580,7 @@ fun EventItem(
                 val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
                     .getString("USER_LOGGED", "None")
                 usersViewModel.getUserByEmail(userName.orEmpty())
-                val user by usersViewModel.userSelected.collectAsState()
+                val user by usersViewModel.userByMail.collectAsState()
 
                 var isUserParticipating by rememberSaveable { mutableStateOf(false) }
                 isUserParticipating = participants.contains(user)
