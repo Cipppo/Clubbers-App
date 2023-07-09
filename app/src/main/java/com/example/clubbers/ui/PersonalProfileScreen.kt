@@ -74,14 +74,13 @@ fun PersonalProfileScreen(
 
 
     val selectedMenu = remember{ mutableStateOf("Posts")}
-    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
-    usersViewModel.getUserFirstNameByEmail(userEmail)
-    usersViewModel.getUserBioByEmail(userEmail)
-    usersViewModel.getUserIdByEmail(userEmail)
+    val user = usersViewModel.userSelected.collectAsState().value
+    Log.d("USERUSER", user?.userName.toString())
+    //val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
 
-    val userName = usersViewModel.userName.collectAsState().value
-    val userBio = usersViewModel.userBio.collectAsState().value
-    val userId = usersViewModel.userId.collectAsState().value
+    val userName = user?.userName.orEmpty()
+    val userBio = user?.userBio.orEmpty()
+    val userId = user?.userId.toString().toInt()
 
     Box(
         modifier = Modifier

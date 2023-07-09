@@ -1,5 +1,6 @@
 package com.example.clubbers.ui
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -92,7 +93,7 @@ fun UserSearchPage(
                         )
                     }
                     items(users.size) { index ->
-                        userItem(users[index], onClickAction = onClickAction)
+                        userItem(users[index], onClickAction = onClickAction, usersViewModel = usersViewModel)
                     }
                 }
             )
@@ -227,13 +228,17 @@ fun UserNames(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun userItem(user: User, onClickAction: () -> Unit){
+fun userItem(user: User, onClickAction: () -> Unit, usersViewModel: UsersViewModel){
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp),
-        onClick = onClickAction) {
+        onClick ={
+            usersViewModel.selectUser(user = user)
+            Log.d("USERUSER", user.userName)
+            onClickAction()
+        }) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(id = R.drawable.default_avatar),

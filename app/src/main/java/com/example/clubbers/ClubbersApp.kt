@@ -172,17 +172,18 @@ fun TopAppBarFunction (
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings Button")
                 }
-                IconButton(onClick =  onSearchPressed ) {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = "User Search"
-                    )
-                }
             } else if (currentScreen == AppScreen.Discover.name) {
                 IconButton(onClick = onTagPressed) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.baseline_tag_24),
                         contentDescription = "Search Tag Button")
+                }
+            }else if (currentScreen == AppScreen.Home.name){
+                IconButton(onClick =  onSearchPressed ) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "User Search"
+                    )
                 }
             }
         },
@@ -308,6 +309,8 @@ fun NavigationApp (
         .getString("USER_LOGGED", "None")
     var isAdmin by rememberSaveable { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
 
@@ -316,6 +319,11 @@ fun NavigationApp (
         isAdmin = usersAndAdminsViewModel.isAdmin(userName)
             .collectAsState(initial = false).value
     }
+
+    val usersViewModel = hiltViewModel<UsersViewModel>()
+
+    var email = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -412,8 +420,10 @@ fun NavigationApp (
                     onProfileButtonClicked = {
                         if (currentScreen == AppScreen.Profile.name) {
                             navController.popBackStack()
+                            usersViewModel.getUserByEmail(email)
                             navController.navigate(AppScreen.Profile.name)
                         } else
+                            usersViewModel.getUserByEmail(email)
                             navController.navigate(AppScreen.Profile.name)
                     }
                 )
@@ -429,7 +439,8 @@ fun NavigationApp (
                 startLocationUpdates,
                 navController,
                 innerPadding,
-                warningViewModel
+                warningViewModel,
+                usersViewModel = usersViewModel
             )
             val context = LocalContext.current
             if (warningViewModel.showConnectivitySnackBar.value) {
@@ -452,7 +463,8 @@ private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    usersViewModel: UsersViewModel
 ) {
     val isLoggedIn =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -463,7 +475,6 @@ private fun NavigationGraph(
     val postsViewModel = hiltViewModel<PostsViewModel>()
     val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
     val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
-
 
 
     NavHost(
@@ -674,7 +685,6 @@ private fun NavigationGraph(
 
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
-            val usersViewModel = hiltViewModel<UsersViewModel>()
             val postViewModel = hiltViewModel<PostsViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             val eventsViewModel = hiltViewModel<EventsViewModel>()
@@ -752,7 +762,6 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.UserSearch.name){
-            val usersViewModel = hiltViewModel<UsersViewModel>()
             UserSearchPage(modifier = Modifier.fillMaxSize(),
                 onClickAction = {navController.navigate(AppScreen.Profile.name)},
                 usersViewModel = usersViewModel)
