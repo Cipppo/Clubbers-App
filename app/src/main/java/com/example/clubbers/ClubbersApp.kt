@@ -423,8 +423,8 @@ fun NavigationApp (
                             usersViewModel.getUserByEmail(email)
                             navController.navigate(AppScreen.Profile.name)
                         } else
-                            usersViewModel.getUserByEmail(email)
-                            navController.navigate(AppScreen.Profile.name)
+                                usersViewModel.getUserByEmail(email)
+                                navController.navigate(AppScreen.Profile.name)
                     }
                 )
             }
