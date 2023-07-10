@@ -327,7 +327,7 @@ fun TakenPhotoCarouselDialog(
             title = title
         ),
         body = {
-            Column() {
+            Column {
                 CarouselCard(
                     capturedImageUris = imageUriList,
                     currentImageIndex = currentImageIndex,

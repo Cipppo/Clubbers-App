@@ -6,8 +6,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,10 +55,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.User
-import com.example.clubbers.utilities.EventItem
 import com.example.clubbers.viewModel.UsersViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -93,7 +88,8 @@ fun UserSearchPage(
                         )
                     }
                     items(users.size) { index ->
-                        userItem(users[index], onClickAction = onClickAction, usersViewModel = usersViewModel)
+
+                        UserItem(users[index], onClickAction = onClickAction, usersViewModel = usersViewModel)
                     }
                 }
             )
@@ -228,7 +224,12 @@ fun UserNames(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun userItem(user: User, onClickAction: () -> Unit, usersViewModel: UsersViewModel){
+fun UserItem(
+    user: User,
+    onClickAction: () -> Unit,
+    usersViewModel: UsersViewModel
+){
+    val proPicUri = user.userImage
 
     Card(
         modifier = Modifier
@@ -241,7 +242,15 @@ fun userItem(user: User, onClickAction: () -> Unit, usersViewModel: UsersViewMod
         }) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(id = R.drawable.default_avatar),
+                painter = rememberAsyncImagePainter(
+                    ImageRequest.Builder(
+                        LocalContext.current
+                    ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_launcher_foreground)
+                        error(R.drawable.ic_launcher_foreground)
+                    }).build()
+                ),
                 contentDescription = "Profile Avatar",
                 modifier = Modifier
                     .size(80.dp)

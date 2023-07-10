@@ -1,6 +1,5 @@
 package com.example.clubbers.utilities
 
-import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
@@ -98,7 +97,6 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -468,28 +466,31 @@ fun EventItem(
                 modifier = Modifier
                     .padding(bottom = 8.dp)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(
-                            LocalContext.current
-                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
-                            crossfade(true)
-                            placeholder(R.drawable.ic_launcher_foreground)
-                            error(R.drawable.ic_launcher_foreground)
-                        }).build()
-                    ),
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.padding(end = 8.dp))
-                adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                if (isSingleEvent) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(
+                                LocalContext.current
+                            ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                        ),
+                        contentDescription = "Profile picture",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.padding(end = 8.dp))
+                    adminName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = eventTitle,
@@ -582,7 +583,7 @@ fun EventItem(
                 val userName = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
                     .getString("USER_LOGGED", "None")
                 usersViewModel.getUserByEmail(userName.orEmpty())
-                val user by usersViewModel.userSelected.collectAsState()
+                val user by usersViewModel.userByMail.collectAsState()
 
                 var isUserParticipating by rememberSaveable { mutableStateOf(false) }
                 isUserParticipating = participants.contains(user)
@@ -643,13 +644,13 @@ fun EventItem(
 }
 
 fun sendEventParticipationNotification(context: Context, eventTitle: String, date: String, place: String){
-    val NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val notification = NotificationCompat.Builder(context, "1")
         .setContentTitle("Stai partecipando all'evento $eventTitle !")
         .setContentText("L'evento prenderà parte il $date a $place")
         .setSmallIcon(R.drawable.baseline_notifications_24)
         .build()
-    NotificationManager.notify(1, notification)
+    notificationManager.notify(1, notification)
 }
 
 
@@ -660,10 +661,11 @@ fun PostItem(
     usersViewModel: UsersViewModel,
     postsViewModel: PostsViewModel,
     post: Post,
+    isSinglePost: Boolean = false,
     onClickAction: () -> Unit
 ) {
     usersViewModel.getUserById(post.postUserId)
-    val user by usersViewModel.userSelected.collectAsState()
+    val user by usersViewModel.userById.collectAsState()
 
     val proPicUri = user?.userImage
     val userName = user?.userName
@@ -691,31 +693,33 @@ fun PostItem(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(
-                            LocalContext.current
-                        ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
-                            crossfade(true)
-                            placeholder(R.drawable.ic_launcher_foreground)
-                            error(R.drawable.ic_launcher_foreground)
-                        }).build()
-                    ),
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.padding(end = 8.dp))
-                userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+            if (isSinglePost) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(
+                                LocalContext.current
+                            ).data(data = proPicUri).apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()
+                        ),
+                        contentDescription = "Profile picture",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.padding(end = 8.dp))
+                    userName?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                }
             }
             CarouselCard(
                 capturedImageUris = imageUriList

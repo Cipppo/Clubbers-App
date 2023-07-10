@@ -1,6 +1,5 @@
 package com.example.clubbers.viewModel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clubbers.data.entities.User
@@ -9,7 +8,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,10 +37,12 @@ class UsersViewModel @Inject constructor(
         repository.deleteUser(user)
     }
 
+    private var _userById = MutableStateFlow<User?>(null)
+    val userById: StateFlow<User?> get() = _userById
     fun getUserById(userId: Int) = viewModelScope.launch {
         repository.getUserById(userId)
             .collect { user ->
-                _userSelected.value = user
+                _userById.value = user
             }
     }
 
@@ -53,10 +53,13 @@ class UsersViewModel @Inject constructor(
             }
     }
 
+    private var _userByMail = MutableStateFlow<User?>(null)
+    val userByMail: StateFlow<User?> get() = _userByMail
+
     fun getUserByEmail(userEmail: String) = viewModelScope.launch {
         repository.getUserByEmail(userEmail)
             .collect {user ->
-                _userSelected.value = user
+                _userByMail.value = user
             }
     }
 
