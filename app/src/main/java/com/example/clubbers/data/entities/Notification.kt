@@ -22,5 +22,5 @@ data class Notification(
     var message: String,
 
     @ColumnInfo(name = "isRead")
-    var read: Boolean = false
+    var read: Int = 0
 )

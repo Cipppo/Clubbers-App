@@ -55,7 +55,7 @@ abstract class ClubbersDatabase : RoomDatabase() {
                     ClubbersDatabase::class.java,
                     "clubbers_database"
                 )
-                    .createFromAsset("database/clubbers_database.db")
+                    //.createFromAsset("database/clubbers_database.db")
                     .build()
                 INSTANCE = instance
 
