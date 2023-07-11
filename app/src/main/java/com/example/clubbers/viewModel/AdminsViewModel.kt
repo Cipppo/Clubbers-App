@@ -35,7 +35,7 @@ class AdminsViewModel @Inject constructor(
 
     fun getAdminById(adminId: Int) = viewModelScope.launch {
         repository.getAdminById(adminId)
-            .collect() { admin ->
+            .collect { admin ->
                 _admin.value = admin
             }
     }

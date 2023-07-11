@@ -1,12 +1,13 @@
 package com.example.clubbers.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.fonts.FontFamily
-import android.preference.PreferenceManager
-import android.util.Log
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,38 +25,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.textInputServiceFactory
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.Room
+import androidx.core.content.ContextCompat
 import com.example.clubbers.R
-import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.toList
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +59,28 @@ fun LoginScreen(
     usersViewModel: UsersViewModel,
     adminsViewModel: AdminsViewModel
 ){
+
+    val context = LocalContext.current
+
+    var hasNotificationPermission by remember {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            mutableStateOf(
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        }else mutableStateOf(true)
+
+    }
+
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission() ,
+        onResult = {isGranted ->
+            hasNotificationPermission = isGranted
+        })
+
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -118,7 +132,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = { attemptLogin(username.value.text, password.value.text, usersList, onLogin, sharedPreferences, adminList) },
+                onClick = {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    attemptLogin(username.value.text, password.value.text, usersList, onLogin, sharedPreferences, adminList, context) },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -149,7 +165,9 @@ fun LoginScreen(
 }
 
 
-fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences, adminList: List<Admin>): Unit{
+
+
+fun attemptLogin(email: String, password: String, usersList: List<User>, navigateToHome: () -> Unit, sharedPreferences: SharedPreferences, adminList: List<Admin>, context: Context){
     var i = usersList.size
     for(user in usersList){
         if(user.userEmail == email && user.userPassword == password){
@@ -159,6 +177,7 @@ fun attemptLogin(email: String, password: String, usersList: List<User>, navigat
                 apply()
             }
             navigateToHome()
+
         }
     }
     for(admin in adminList){
@@ -172,3 +191,7 @@ fun attemptLogin(email: String, password: String, usersList: List<User>, navigat
         }
     }
 }
+
+
+
+

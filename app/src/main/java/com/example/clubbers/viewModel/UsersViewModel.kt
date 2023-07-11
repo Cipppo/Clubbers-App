@@ -37,10 +37,12 @@ class UsersViewModel @Inject constructor(
         repository.deleteUser(user)
     }
 
+    private var _userById = MutableStateFlow<User?>(null)
+    val userById: StateFlow<User?> get() = _userById
     fun getUserById(userId: Int) = viewModelScope.launch {
         repository.getUserById(userId)
             .collect { user ->
-                _userSelected.value = user
+                _userById.value = user
             }
     }
 
@@ -51,10 +53,13 @@ class UsersViewModel @Inject constructor(
             }
     }
 
+    private var _userByMail = MutableStateFlow<User?>(null)
+    val userByMail: StateFlow<User?> get() = _userByMail
+
     fun getUserByEmail(userEmail: String) = viewModelScope.launch {
         repository.getUserByEmail(userEmail)
             .collect {user ->
-                _userSelected.value = user
+                _userByMail.value = user
             }
     }
 
@@ -66,6 +71,32 @@ class UsersViewModel @Inject constructor(
                 .collect { userId ->
                     _userId.value = userId
                 }
+        }
+    }
+
+    private var _name = MutableStateFlow("")
+
+    val userName: StateFlow<String> get() = _name
+
+    fun getUserFirstNameByEmail(email: String){
+        viewModelScope.launch {
+            repository.getUserByEmail(email).collect {
+                user ->
+                _name.value = user.userName + " " + user.userSurname
+            }
+        }
+    }
+
+    private var _bio = MutableStateFlow("")
+
+    val userBio: StateFlow<String> get() = _bio
+
+    fun getUserBioByEmail(email: String){
+        viewModelScope.launch {
+            repository.getUserByEmail(email).collect{
+                user ->
+                    _bio.value = user.userBio.toString()
+            }
         }
     }
 

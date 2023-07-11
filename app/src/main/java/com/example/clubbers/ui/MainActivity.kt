@@ -1,11 +1,14 @@
 package com.example.clubbers.ui
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -40,6 +43,9 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import org.json.JSONObject
 import java.net.URLEncoder
+
+private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 123
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -125,6 +131,8 @@ class MainActivity : ComponentActivity() {
         } else {
             warningViewModel.setConnectivitySnackBarVisibility(true)
         }
+
+        createNotificationChannel()
 
         setContent {
             ClubbersTheme {
@@ -324,4 +332,16 @@ class MainActivity : ComponentActivity() {
     private companion object {
         private const val TAG = "OSM_REQUEST"
     }
+
+    private fun createNotificationChannel(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val channel = NotificationChannel(
+                "1", "notification_channel", NotificationManager.IMPORTANCE_HIGH
+            )
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
+    }
+
 }

@@ -2,12 +2,15 @@ package com.example.clubbers
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,10 +59,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
-import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.ui.EventScreen
 import com.example.clubbers.ui.FoundEventsScreen
 import com.example.clubbers.ui.FoundTagsScreen
@@ -75,9 +78,11 @@ import com.example.clubbers.ui.SearchTagScreen
 import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.UserOptionScreen
+import com.example.clubbers.ui.UserSearchPage
 import com.example.clubbers.ui.notificationsScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
+import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
@@ -114,6 +119,7 @@ sealed class AppScreen(val name: String) {
     object AdminRegistration : AppScreen("Admin Registration Page")
     object UserOption : AppScreen("User Option Page")
     object Notifications : AppScreen("User Notifications Page")
+    object UserSearch : AppScreen("User Search Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -130,6 +136,7 @@ fun TopAppBarFunction (
     canNavigateBack: Boolean,
     onSettingsPressed: () -> Unit,
     onTagPressed: () -> Unit,
+    onSearchPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -157,6 +164,12 @@ fun TopAppBarFunction (
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings Button")
+                }
+                IconButton(onClick =  onSearchPressed ) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "User Search"
+                    )
                 }
             } else if (currentScreen == AppScreen.Discover.name) {
                 IconButton(onClick = onTagPressed) {
@@ -275,6 +288,7 @@ fun BottomAppBarFunction (
 
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp (
@@ -324,6 +338,7 @@ fun NavigationApp (
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { navController.navigateUp() },
                     onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
+                    onSearchPressed = { navController.navigate(AppScreen.UserSearch.name) },
                     onTagPressed = { navController.navigate(AppScreen.SearchTag.name) },
                     modifier = Modifier
                         .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
@@ -422,6 +437,7 @@ fun NavigationApp (
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 private fun NavigationGraph(
     startRequestingData: () -> Unit,
@@ -440,6 +456,7 @@ private fun NavigationGraph(
     val postsViewModel = hiltViewModel<PostsViewModel>()
     val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
     val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+
 
 
     NavHost(
@@ -650,10 +667,26 @@ private fun NavigationGraph(
 
         // Personal Profile Screen
         composable(route = AppScreen.Profile.name) {
-            PersonalProfileScreen(
-                onOption = {navController.navigate(AppScreen.UserOption.name)},
-                onNotify = {navController.navigate(AppScreen.Notifications.name)}
-            )
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            val postViewModel = hiltViewModel<PostsViewModel>()
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+            val personalProfileEventsViewModel = hiltViewModel<EventsViewModel>()
+            val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
+
+            if(userType == "USER"){
+                PersonalProfileScreen(
+                    onOption = {navController.navigate(AppScreen.UserOption.name)},
+                    onNotify = {navController.navigate(AppScreen.Notifications.name)},
+                    usersViewModel = usersViewModel,
+                    postsViewModel = postViewModel,
+                    participatesViewModel = participatesViewModel,
+                    eventsViewModel = personalProfileEventsViewModel,
+                )
+            }else{
+                AdminProfileScreen()
+            }
+
+
         }
 
         // Admin Registration Screen
@@ -679,7 +712,7 @@ private fun NavigationGraph(
                 onLogin = {
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Home.name)
-                          },
+                },
                 adminsViewModel = adminsViewModel
             )
         }
@@ -692,7 +725,7 @@ private fun NavigationGraph(
                 onRegister = {
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Home.name)
-                             },
+                },
             )
         }
 
@@ -709,6 +742,13 @@ private fun NavigationGraph(
         // Notifications Screen
         composable(route = AppScreen.Notifications.name){
             notificationsScreen()
+        }
+
+        composable(route = AppScreen.UserSearch.name){
+            val usersViewModel = hiltViewModel<UsersViewModel>()
+            UserSearchPage(modifier = Modifier.fillMaxSize(),
+                onClickAction = {navController.navigate(AppScreen.Profile.name)},
+                usersViewModel = usersViewModel)
         }
 
     }
