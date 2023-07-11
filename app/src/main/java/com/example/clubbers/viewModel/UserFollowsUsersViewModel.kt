@@ -16,20 +16,23 @@ class UserFollowsUsersViewModel @Inject constructor(
     private val repository: UserFollowsUsersRepository
 ) : ViewModel() {
 
-    private val _users = MutableStateFlow<List<User>>(emptyList())
-    val users: StateFlow<List<User>> get() = _users
+    private val _followers = MutableStateFlow<List<User>>(emptyList())
+    val followers: StateFlow<List<User>> get() = _followers
 
     fun getFollowers(userId: Int) = viewModelScope.launch {
         repository.getFollowers(userId)
             .collect { users ->
-                _users.value = users
+                _followers.value = users
             }
     }
+
+    private val _followed = MutableStateFlow<List<User>>(emptyList())
+    val followed: StateFlow<List<User>> get() = _followed
 
     fun getFollowed(userId: Int) = viewModelScope.launch {
         repository.getFollowed(userId)
             .collect { users ->
-                _users.value = users
+                _followed.value = users
             }
     }
 
