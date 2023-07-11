@@ -3,6 +3,7 @@ package com.example.clubbers
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -88,6 +89,8 @@ import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.TagsViewModel
+import com.example.clubbers.viewModel.UserFollowsAdminsViewModel
+import com.example.clubbers.viewModel.UserFollowsUsersViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
@@ -317,6 +320,9 @@ fun NavigationApp (
 
     var email = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
 
+    usersViewModel.getUserByEmail(email)
+    var loggedUser = usersViewModel.userByMail.collectAsState().value
+
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -413,11 +419,21 @@ fun NavigationApp (
                     onProfileButtonClicked = {
                         if (currentScreen == AppScreen.Profile.name) {
                             navController.popBackStack()
-                            usersViewModel.getUserByEmail(email)
+                            Log.d("TASTO", email)
+                            if (loggedUser != null) {
+                                usersViewModel.selectUser(loggedUser)
+                            }else{
+                                Log.d("NULLPOINTTR", "ci siamo")
+                            }
                             navController.navigate(AppScreen.Profile.name)
                         } else
-                                usersViewModel.getUserByEmail(email)
-                                navController.navigate(AppScreen.Profile.name)
+                            Log.d("TASTO", email)
+                            if (loggedUser != null) {
+                                usersViewModel.selectUser(loggedUser)
+                            }else{
+                                Log.d("NULLPOINTTR", "ci siamo")
+                            }
+                        navController.navigate(AppScreen.Profile.name)
                     }
                 )
             }
@@ -682,6 +698,9 @@ private fun NavigationGraph(
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
             val personalProfileEventsViewModel = hiltViewModel<EventsViewModel>()
             val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
+            val userFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
+            val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
+
 
             if(userType == "USER"){
                 PersonalProfileScreen(
@@ -691,6 +710,8 @@ private fun NavigationGraph(
                     postsViewModel = postViewModel,
                     participatesViewModel = participatesViewModel,
                     eventsViewModel = personalProfileEventsViewModel,
+                    userFollowsAdminsViewModel = userFollowsAdminsViewModel,
+                    userFollowsUsersViewModel = userFollowsUsersViewModel
                 )
             }else{
                 AdminProfileScreen()
