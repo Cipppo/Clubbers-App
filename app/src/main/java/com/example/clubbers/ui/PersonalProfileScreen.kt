@@ -272,6 +272,8 @@ fun countFollowers(userId: Int, userFollowsUsersViewModel: UserFollowsUsersViewM
 
 }
 
+//fun sendFollowNotification(from: Int, to: Int)
+
 @Composable
 fun countFollowed(userId: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel): Int{
 
