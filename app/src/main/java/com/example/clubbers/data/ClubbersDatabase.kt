@@ -22,7 +22,8 @@ import com.example.clubbers.utilities.DateConverter
     UserFollowsUser::class,
     UserFollowsAdmin::class,
     Participates::class,
-    EventHasTag::class
+    EventHasTag::class,
+    Notification::class,
                      ],
     views = [
         UsersAndAdminsView::class
@@ -41,6 +42,7 @@ abstract class ClubbersDatabase : RoomDatabase() {
     abstract fun userFollowsUsersDAO(): UserFollowsUsersDAO
     abstract fun userFollowsAdminsDAO(): UserFollowsAdminsDAO
     abstract fun usersAndAdminsViewsDAO(): UsersAndAdminsViewsDAO
+    abstract fun NotificationsDAO(): NotificationsDAO
 
     companion object {
         @Volatile
