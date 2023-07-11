@@ -5,6 +5,7 @@ import com.example.clubbers.ClubbersApp
 import com.example.clubbers.data.repos.AdminsRepository
 import com.example.clubbers.data.repos.EventHasTagsRepository
 import com.example.clubbers.data.repos.EventsRepository
+import com.example.clubbers.data.repos.NotificationsRepository
 import com.example.clubbers.data.repos.ParticipatesRepository
 import com.example.clubbers.data.repos.PostsRepository
 import com.example.clubbers.data.repos.TagsRepository
@@ -71,4 +72,9 @@ object DataModule {
     @Provides
     fun provideUsersAndAdminsViewsRepository(@ApplicationContext context: Context) =
         UsersAndAdminsViewsRepository((context.applicationContext as ClubbersApp).database.usersAndAdminsViewsDAO())
+
+    @Singleton
+    @Provides
+    fun provideNotificationRepository(@ApplicationContext context: Context) =
+        NotificationsRepository((context.applicationContext as ClubbersApp).database.NotificationsDAO())
 }
