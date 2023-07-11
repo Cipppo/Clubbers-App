@@ -236,8 +236,7 @@ fun UserItem(
             .fillMaxWidth()
             .padding(2.dp),
         onClick ={
-            usersViewModel.selectUser(user = user)
-            Log.d("USERUSER", user.userName)
+            usersViewModel.selectUser(user)
             onClickAction()
         }) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
