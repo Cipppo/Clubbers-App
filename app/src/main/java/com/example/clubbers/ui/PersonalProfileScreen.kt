@@ -1,6 +1,7 @@
 package com.example.clubbers.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,11 +34,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.User
+import com.example.clubbers.data.entities.UserFollowsUser
 import com.example.clubbers.utilities.PostFeed
 import com.example.clubbers.utilities.UserBookedEvents
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
+import com.example.clubbers.viewModel.UserFollowsAdminsViewModel
+import com.example.clubbers.viewModel.UserFollowsUsersViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
 
@@ -50,13 +55,42 @@ fun PersonalProfileScreen(
     postsViewModel: PostsViewModel,
     participatesViewModel: ParticipatesViewModel,
     eventsViewModel: EventsViewModel,
+    userFollowsUsersViewModel: UserFollowsUsersViewModel,
+    userFollowsAdminsViewModel: UserFollowsAdminsViewModel
 ){
 
 
-    val selectedMenu = remember{ mutableStateOf("Posts")}
+    val selectedMenu = remember{ mutableStateOf("Possts")}
     val user = usersViewModel.userSelected.collectAsState().value
     Log.d("USERUSER", user?.userName.toString())
-    //val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+
+    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+    usersViewModel.getUserByEmail(userEmail = userEmail)
+    val currentUser = usersViewModel.userByMail.collectAsState().value
+
+    var followers = remember { mutableStateOf(0) }
+    var followed = 0
+
+    followers.value = countFollowers(userId = user?.userId.toString().toInt(), userFollowsUsersViewModel = userFollowsUsersViewModel)
+    followed = countFollowed(userId = user?.userId.toString().toInt(), userFollowsUsersViewModel = userFollowsUsersViewModel)
+    var personalProfile = true
+
+    var amIFollowingResult = remember {
+        mutableStateOf(false)
+    }
+
+    if ( user?.userEmail.orEmpty() != userEmail ){
+        personalProfile = false
+        amIFollowingResult.value = amIFollowing(
+            currentUserId = currentUser?.userId.toString().toInt(),
+            destUserId = user?.userId.toString().toInt(),
+            destUserType = "USER",
+            userFollowsAdminsViewModel = userFollowsAdminsViewModel,
+            userFollowsUsersViewModel = userFollowsUsersViewModel
+        )
+        Log.d("RESULTF", amIFollowingResult.toString())
+    }
+
 
     val userName = user?.userName.orEmpty()
     val userBio = user?.userBio.orEmpty()
@@ -93,13 +127,13 @@ fun PersonalProfileScreen(
                         Text(text = "Followers", style = TextStyle(fontWeight = FontWeight.Bold))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        Text(text = "8", style = TextStyle(fontWeight = FontWeight.Bold))
+                        Text(text = followers.value.toString(), style = TextStyle(fontWeight = FontWeight.Bold))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         Text(text = "Followed", style = TextStyle(fontWeight = FontWeight.Bold))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        Text(text = "8", style = TextStyle(fontWeight = FontWeight.Bold))
+                        Text(text = followed.toString(), style = TextStyle(fontWeight = FontWeight.Bold))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         Text(text = "Events", style = TextStyle(fontWeight = FontWeight.Bold))
@@ -114,9 +148,19 @@ fun PersonalProfileScreen(
                 Text(userBio)
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Row(modifier = Modifier.fillMaxWidth()){
-                Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Follow")
+            Row(modifier = Modifier.fillMaxWidth()) {
+                if (!personalProfile) {
+                    if (!amIFollowingResult.value) {
+                        Button(onClick = { handleFollowPression(currentUser?.userId.toString().toInt(), userId, userFollowsUsersViewModel)
+                                         amIFollowingResult.value = true}, modifier = Modifier.fillMaxWidth()) {
+                            Text("Follow")
+                        }
+                    }else{
+                        Button(onClick = { handleUnfollowPression(currentUser?.userId.toString().toInt(), userId, userFollowsUsersViewModel)
+                                         amIFollowingResult.value = false}, modifier = Modifier.fillMaxWidth()) {
+                            Text("Unfollow")
+                        }
+                    }
                 }
             }
             Divider()
@@ -178,5 +222,61 @@ fun PersonalProfileScreen(
             }
         }
     }
+
+}
+
+
+@Composable
+fun amIFollowing(currentUserId: Int, destUserId: Int, destUserType: String, userFollowsAdminsViewModel: UserFollowsAdminsViewModel, userFollowsUsersViewModel: UserFollowsUsersViewModel): Boolean {
+    if(destUserType == "USER"){
+        userFollowsUsersViewModel.getFollowed(currentUserId)
+        val currentUserFollowed = userFollowsUsersViewModel.followed.collectAsState().value
+        for(user in currentUserFollowed){
+            var res = user.userId == destUserId
+            Log.d("USERD", res.toString())
+            return user.userId == destUserId
+        }
+    }
+    return false
+
+
+}
+
+
+fun handleFollowPression(from: Int, to: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel){
+
+    val newFollow = UserFollowsUser(
+        FollowedId = to,
+        FollowerId = from,
+    )
+
+    userFollowsUsersViewModel.insert(newFollow)
+}
+
+fun handleUnfollowPression(from: Int, to: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel){
+
+    val newUnFollow = UserFollowsUser(
+        FollowedId = to,
+        FollowerId = from,
+    )
+
+    userFollowsUsersViewModel.delete(newUnFollow)
+}
+
+@Composable
+fun countFollowers(userId: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel): Int {
+
+    userFollowsUsersViewModel.getFollowers(userId)
+
+    return userFollowsUsersViewModel.followers.collectAsState().value.count()
+
+}
+
+@Composable
+fun countFollowed(userId: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel): Int{
+
+    userFollowsUsersViewModel.getFollowed(userId = userId)
+    Log.d("FOLLOWED", userFollowsUsersViewModel.followed.collectAsState().value.count().toString())
+    return userFollowsUsersViewModel.followed.collectAsState().value.count()
 
 }
