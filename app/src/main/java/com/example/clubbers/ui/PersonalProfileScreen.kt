@@ -202,7 +202,7 @@ fun PersonalProfileScreen(
                 }
             }
             if(selectedMenu.value == "Posts"){
-                PostFeed(userId, postsViewModel, eventsViewModel)
+                PostFeed(user, postsViewModel, eventsViewModel)
             }
             if(selectedMenu.value == "Booked"){
                 UserBookedEvents(userId, participatesViewModel, eventsViewModel, onBookedEventClick)

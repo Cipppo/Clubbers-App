@@ -21,22 +21,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.User
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 
 @Composable
 fun PostFeed(
-    userId: Int,
+    user: User?,
     postsViewModel: PostsViewModel,
     eventsViewModel: EventsViewModel
 ){
 
 
-    postsViewModel.getPostsByUserId(userId = userId)
-    val posts = postsViewModel.posts.collectAsState().value
+    postsViewModel.getPostsByUserId(userId = user?.userId.toString().toInt())
+    val posts = postsViewModel.posts.collectAsState().value.reversed()
 
 
 
@@ -59,7 +63,14 @@ fun PostFeed(
                         verticalAlignment =Alignment.CenterVertically,
                         modifier = Modifier.padding(bottom = 8.dp)) {
                         Image(
-                            painter = painterResource(id = R.drawable.default_avatar),
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(
+                                    LocalContext.current
+                                ).data(data = user?.userImage).apply(block = fun ImageRequest.Builder.() {
+                                    crossfade(true)
+                                    placeholder(R.drawable.ic_launcher_foreground)
+                                    error(R.drawable.ic_launcher_foreground)
+                                }).build()),
                             contentDescription = "PostPic",
                             modifier = Modifier
                                 .size(48.dp)
@@ -76,7 +87,14 @@ fun PostFeed(
                         Text(text= "username is been at $eventName", style = MaterialTheme.typography.bodySmall)
                     }
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(
+                                LocalContext.current
+                            ).data(data = post.postImage).apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.ic_launcher_foreground)
+                                error(R.drawable.ic_launcher_foreground)
+                            }).build()),
                         contentDescription = "Description",
                         modifier = Modifier
                             .fillMaxWidth()
