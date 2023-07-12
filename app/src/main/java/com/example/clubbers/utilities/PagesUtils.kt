@@ -3,6 +3,7 @@ package com.example.clubbers.utilities
 import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -450,7 +451,9 @@ fun EventItem(
 
     val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
     usersViewModel.getUserByEmail(userEmail)
-    val userId = usersViewModel.userByMail.collectAsState().value.toString().toInt()
+
+    val userId = usersViewModel.userByMail.collectAsState().value?.userId.toString().toInt()
+
 
     val context = LocalContext.current
 
