@@ -3,7 +3,6 @@ package com.example.clubbers.utilities
 import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -432,6 +431,10 @@ fun EventItem(
     val admin by adminsViewModel.admin.collectAsState()
     eventHasTagsViewModel.getTagsByEventId(event.eventId)
     val tags by eventHasTagsViewModel.tags.collectAsState()
+    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+    usersViewModel.getUserByEmail(userEmail)
+    val user by usersViewModel.userByMail.collectAsState()
+    val userId = if (user != null) user!!.userId else 0
 
     val mapSheetState = rememberSheetState()
 
@@ -448,11 +451,6 @@ fun EventItem(
         latitude = event.eventLocationLat,
         longitude = event.eventLocationLon
     )
-
-    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
-    usersViewModel.getUserByEmail(userEmail)
-
-    val userId = usersViewModel.userByMail.collectAsState().value?.userId.toString().toInt()
 
 
     val context = LocalContext.current
@@ -671,7 +669,7 @@ fun sendEventParticipationNotification(context: Context, eventTitle: String, dat
 
 
 
-    var new_notification = Notification(
+    val new_notification = Notification(
         senderId = 0,
         receiverId = userId,
         message = "Stai partecipando all'evento $eventTitle !",

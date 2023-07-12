@@ -330,10 +330,10 @@ fun NavigationApp (
 
     val usersViewModel = hiltViewModel<UsersViewModel>()
 
-    var email = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+    val email = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
 
     usersViewModel.getUserByEmail(email)
-    var loggedUser = usersViewModel.userByMail.collectAsState().value
+    val loggedUser = usersViewModel.userByMail.collectAsState().value
 
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -462,7 +462,7 @@ fun NavigationApp (
                 navController,
                 innerPadding,
                 warningViewModel,
-                usersViewModel = usersViewModel
+                sharedUsersViewModel = usersViewModel
             )
             val context = LocalContext.current
             if (warningViewModel.showConnectivitySnackBar.value) {
@@ -486,7 +486,7 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier,
-    usersViewModel: UsersViewModel
+    sharedUsersViewModel: UsersViewModel
 ) {
     val isLoggedIn =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -734,7 +734,7 @@ private fun NavigationGraph(
                 PersonalProfileScreen(
                     onOption = {navController.navigate(AppScreen.UserOption.name)},
                     onNotify = {navController.navigate(AppScreen.Notifications.name)},
-                    usersViewModel = usersViewModel,
+                    usersViewModel = sharedUsersViewModel,
                     postsViewModel = postViewModel,
                     participatesViewModel = participatesViewModel,
                     eventsViewModel = personalProfileEventsViewModel,
@@ -806,7 +806,7 @@ private fun NavigationGraph(
         composable(route = AppScreen.UserSearch.name){
             UserSearchPage(modifier = Modifier.fillMaxSize(),
                 onClickAction = {navController.navigate(AppScreen.Profile.name)},
-                usersViewModel = usersViewModel)
+                usersViewModel = sharedUsersViewModel)
         }
 
         composable(route = AppScreen.Notifications.name){
