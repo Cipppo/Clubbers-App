@@ -56,6 +56,7 @@ abstract class ClubbersDatabase : RoomDatabase() {
                     "clubbers_database"
                 )
                     .createFromAsset("database/clubbers_database.db")
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
 

@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -51,9 +53,10 @@ fun NotificationScreen(
     val user by usersViewModel.userByMail.collectAsState()
     val userId = user?.userId
     notificationsViewModel.getAllUserNotifications(user?.userId.toString().toInt())
-    var notifications = notificationsViewModel.allUserNotifications.collectAsState().value
+    var notifications = notificationsViewModel.allUserNotifications.collectAsState().value.reversed()
 
     Scaffold(modifier = modifier) { innerPadding ->
+        Spacer(modifier = Modifier.height(10.dp))
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
@@ -82,11 +85,15 @@ fun notificationItem(
             .padding(2.dp),
         ) {
             if(notification.notification_type == "SUBSCRIPTION"){
-                Text(notification.message)
+                Row(Modifier.fillMaxWidth()){
+                    Text(text = "NUOVA ISCRIZIONE\n${notification.message}", fontWeight = FontWeight.Bold)
+                }
             }else if(notification.notification_type == "FOLLOW"){
                 usersViewModel.getUserById(notification.senderId)
                 var from = usersViewModel.userById.collectAsState().value?.userUsername
-                Text("$from ${notification.message}")
+                Row(Modifier.fillMaxWidth()){
+                    Text(text = "NUOVO FOLLOWER!\n${from} ${notification.message}", fontWeight = FontWeight.Bold)
+                }
             }
 
     }

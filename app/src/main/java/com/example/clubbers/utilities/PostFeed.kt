@@ -24,12 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
+import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 
 @Composable
 fun PostFeed(
     userId: Int,
-    postsViewModel: PostsViewModel
+    postsViewModel: PostsViewModel,
+    eventsViewModel: EventsViewModel
 ){
 
 
@@ -69,7 +71,9 @@ fun PostFeed(
                                 )
                         )
                         Spacer(modifier = Modifier.padding(end = 8.dp))
-                        Text(text= "username is been at NOME EVENTO", style = MaterialTheme.typography.bodySmall)
+                        eventsViewModel.getEventById(post.postEventId)
+                        var eventName = eventsViewModel.eventSelected?.eventName
+                        Text(text= "username is been at $eventName", style = MaterialTheme.typography.bodySmall)
                     }
                     Image(
                         painter = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -83,7 +87,7 @@ fun PostFeed(
                             )
                             .heightIn(min = 180.dp)
                     )
-                    Text("PostCaption")
+                    Text(post.postCaption)
                 }
             }
         }

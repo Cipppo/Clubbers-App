@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,11 +27,13 @@ import com.example.clubbers.R
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserBookedEvents(
     userId: Int,
     participatesViewModel: ParticipatesViewModel,
     eventsViewModel: EventsViewModel,
+    onBookedEventClick: () -> Unit,
 ){
 
     participatesViewModel.getEvents(userId = userId)
@@ -49,6 +52,8 @@ fun UserBookedEvents(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                onClick = { eventsViewModel.selectEvent(event)
+                            onBookedEventClick() }
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(

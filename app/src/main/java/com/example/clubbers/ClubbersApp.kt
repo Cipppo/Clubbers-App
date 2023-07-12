@@ -730,7 +730,6 @@ private fun NavigationGraph(
             val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
             val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
 
-
             if(userType == "USER"){
                 PersonalProfileScreen(
                     onOption = {navController.navigate(AppScreen.UserOption.name)},
@@ -741,7 +740,8 @@ private fun NavigationGraph(
                     eventsViewModel = personalProfileEventsViewModel,
                     userFollowsAdminsViewModel = userFollowsAdminsViewModel,
                     userFollowsUsersViewModel = userFollowsUsersViewModel,
-                    notificationsViewModel = notificationsViewModel
+                    notificationsViewModel = notificationsViewModel,
+                    onBookedEventClick = {navController.navigate(AppScreen.Event.name)}
                 )
             }else{
                 AdminProfileScreen()
