@@ -39,4 +39,8 @@ class UsersRepository(private val usersDAO: UsersDAO) {
     fun getAllUsers(): Flow<List<User>>{
         return usersDAO.getAllUsers()
     }
+
+    fun getUserIdfromMail(userEmail: String): Flow<Int>{
+        return usersDAO.getIdFromEmail(userEmail)
+    }
 }

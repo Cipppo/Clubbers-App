@@ -62,6 +62,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.data.entities.User
 import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
@@ -99,6 +100,7 @@ import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
 import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 sealed class AppScreen(val name: String) {
@@ -456,14 +458,17 @@ fun NavigationApp (
             modifier = Modifier
                 .alpha(alpha.value)
         ) {
-            NavigationGraph(
-                startRequestingData,
-                startLocationUpdates,
-                navController,
-                innerPadding,
-                warningViewModel,
-                sharedUsersViewModel = usersViewModel
-            )
+            if (loggedUser != null) {
+                NavigationGraph(
+                    startRequestingData,
+                    startLocationUpdates,
+                    navController,
+                    innerPadding,
+                    warningViewModel,
+                    sharedUsersViewModel = usersViewModel,
+                    loggedUser = loggedUser
+                )
+            }
             val context = LocalContext.current
             if (warningViewModel.showConnectivitySnackBar.value) {
                 ConnectivitySnackBarComposable(
@@ -486,17 +491,20 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier,
-    sharedUsersViewModel: UsersViewModel
+    sharedUsersViewModel: UsersViewModel,
+    loggedUser: User,
 ) {
     val isLoggedIn =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
             .contains("USER_LOGGED")
 
-    val eventsViewModel = hiltViewModel<EventsViewModel>()
+    val sharedEventsViewModel = hiltViewModel<EventsViewModel>()
     val locationsViewModel = hiltViewModel<LocationsViewModel>()
     val postsViewModel = hiltViewModel<PostsViewModel>()
     val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
     val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+    val sharedPostViewModel = hiltViewModel<PostsViewModel>()
+    val sharedUsersFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
 
 
     NavHost(
@@ -506,7 +514,14 @@ private fun NavigationGraph(
     ) {
         // Home Screen
         composable(route = AppScreen.Home.name) {
-            HomeScreen()
+
+            HomeScreen(
+                postsViewModel = sharedPostViewModel,
+                usersViewModel = sharedUsersViewModel,
+                userFollowsUsersViewModel = sharedUsersFollowsUsersViewModel,
+                eventsViewModel = sharedEventsViewModel,
+                user = loggedUser
+            )
         }
 
         // Today's Events Screen
@@ -521,7 +536,7 @@ private fun NavigationGraph(
             TodayScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
                 onSearchAction = { navController.navigate(AppScreen.FoundEvents.name) },
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
@@ -540,7 +555,7 @@ private fun NavigationGraph(
             val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
 
             EventScreen(
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
@@ -571,7 +586,7 @@ private fun NavigationGraph(
 
             FoundEventsScreen(
                 onEventSelected = { navController.navigate(AppScreen.Event.name) },
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
@@ -590,7 +605,7 @@ private fun NavigationGraph(
 
             NewPostScreen(
                 postsViewModel = postsViewModel,
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 userId = userId,
                 onPost = { navController.navigate(AppScreen.Home.name) }
             )
@@ -607,7 +622,7 @@ private fun NavigationGraph(
 
             NewEventScreen(
                 onNext = { navController.navigate(AppScreen.NewEventLocation.name) },
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 eventLocationViewModel = eventLocationViewModel,
                 tagsViewModel = tagsViewModel,
             )
@@ -625,7 +640,7 @@ private fun NavigationGraph(
 
             NewEventLocationScreen(
                 onEvent = { navController.navigate(AppScreen.Home.name) },
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 locationsViewModel = locationsViewModel,
                 eventLocationViewModel = eventLocationViewModel,
                 adminId = adminId,
@@ -652,7 +667,7 @@ private fun NavigationGraph(
             SelectEventForPostScreen(
                 onEventSelected = { navController.navigate(AppScreen.NewPost.name) },
                 userId = userId,
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
@@ -673,7 +688,7 @@ private fun NavigationGraph(
             DiscoverScreen(
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
                 onSearchAction = { navController.navigate(AppScreen.FoundEvents.name) },
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
@@ -694,7 +709,7 @@ private fun NavigationGraph(
                 eventHasTagsViewModel = sharedEventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
                 usersViewModel = usersViewModel,
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 onEventClicked = { navController.navigate(AppScreen.Event.name) },
                 onSearchAction = { navController.navigate(AppScreen.FoundTags.name) },
                 adminsViewModel = adminsViewModel,
@@ -713,7 +728,7 @@ private fun NavigationGraph(
                 eventHasTagsViewModel = sharedEventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
                 usersViewModel = usersViewModel,
-                eventsViewModel = eventsViewModel,
+                eventsViewModel = sharedEventsViewModel,
                 adminsViewModel = adminsViewModel,
                 onEventSelected = { navController.navigate(AppScreen.Event.name) },
                 notificationsViewModel = notificationsViewModel
@@ -724,7 +739,6 @@ private fun NavigationGraph(
         composable(route = AppScreen.Profile.name) {
             val postViewModel = hiltViewModel<PostsViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
-            val personalProfileEventsViewModel = hiltViewModel<EventsViewModel>()
             val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
             val userFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
             val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
@@ -737,7 +751,7 @@ private fun NavigationGraph(
                     usersViewModel = sharedUsersViewModel,
                     postsViewModel = postViewModel,
                     participatesViewModel = participatesViewModel,
-                    eventsViewModel = personalProfileEventsViewModel,
+                    eventsViewModel = sharedEventsViewModel,
                     userFollowsAdminsViewModel = userFollowsAdminsViewModel,
                     userFollowsUsersViewModel = userFollowsUsersViewModel,
                     notificationsViewModel = notificationsViewModel,
