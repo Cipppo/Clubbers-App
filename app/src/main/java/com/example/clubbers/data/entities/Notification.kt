@@ -18,6 +18,9 @@ data class Notification(
     @ColumnInfo(name = "receiver")
     var receiverId: Int,
 
+    @ColumnInfo(name = "notification_type")
+    var notification_type: String,
+
     @ColumnInfo(name = "message")
     var message: String,
 

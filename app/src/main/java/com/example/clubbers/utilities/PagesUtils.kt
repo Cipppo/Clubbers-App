@@ -668,11 +668,13 @@ fun sendEventParticipationNotification(context: Context, eventTitle: String, dat
     notificationManager.notify(1, notification)
 
 
+    val notification_type = "SUBSCRIPTION"
 
     val new_notification = Notification(
         senderId = 0,
         receiverId = userId,
         message = "Stai partecipando all'evento $eventTitle !",
+        notification_type = notification_type
     )
 
     notificationsViewModel.addNewNotification(notification = new_notification)

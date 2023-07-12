@@ -34,11 +34,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.clubbers.R
+import com.example.clubbers.data.entities.Notification
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.data.entities.UserFollowsUser
 import com.example.clubbers.utilities.PostFeed
 import com.example.clubbers.utilities.UserBookedEvents
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.UserFollowsAdminsViewModel
@@ -56,7 +58,8 @@ fun PersonalProfileScreen(
     participatesViewModel: ParticipatesViewModel,
     eventsViewModel: EventsViewModel,
     userFollowsUsersViewModel: UserFollowsUsersViewModel,
-    userFollowsAdminsViewModel: UserFollowsAdminsViewModel
+    userFollowsAdminsViewModel: UserFollowsAdminsViewModel,
+    notificationsViewModel: NotificationsViewModel
 ){
 
 
@@ -151,7 +154,7 @@ fun PersonalProfileScreen(
             Row(modifier = Modifier.fillMaxWidth()) {
                 if (!personalProfile) {
                     if (!amIFollowingResult.value) {
-                        Button(onClick = { handleFollowPression(currentUser?.userId.toString().toInt(), userId, userFollowsUsersViewModel)
+                        Button(onClick = { handleFollowPression(currentUser?.userId.toString().toInt(), userId, userFollowsUsersViewModel, notificationsViewModel = notificationsViewModel)
                                          amIFollowingResult.value = true}, modifier = Modifier.fillMaxWidth()) {
                             Text("Follow")
                         }
@@ -243,14 +246,26 @@ fun amIFollowing(currentUserId: Int, destUserId: Int, destUserType: String, user
 }
 
 
-fun handleFollowPression(from: Int, to: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel){
+fun handleFollowPression(from: Int, to: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel, notificationsViewModel: NotificationsViewModel){
 
     val newFollow = UserFollowsUser(
         FollowedId = to,
         FollowerId = from,
     )
-
     userFollowsUsersViewModel.insert(newFollow)
+
+    val notificationMessage = "ha iniziato a seguirti"
+    val notification_type = "FOLLOW"
+
+
+    val newNotification = Notification(
+        senderId = from,
+        receiverId = to,
+        message = notificationMessage,
+        notification_type = notification_type
+    )
+
+    notificationsViewModel.addNewNotification(newNotification)
 }
 
 fun handleUnfollowPression(from: Int, to: Int, userFollowsUsersViewModel: UserFollowsUsersViewModel){

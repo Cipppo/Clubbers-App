@@ -728,6 +728,7 @@ private fun NavigationGraph(
             val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
             val userFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
             val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
+            val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
 
 
             if(userType == "USER"){
@@ -739,7 +740,8 @@ private fun NavigationGraph(
                     participatesViewModel = participatesViewModel,
                     eventsViewModel = personalProfileEventsViewModel,
                     userFollowsAdminsViewModel = userFollowsAdminsViewModel,
-                    userFollowsUsersViewModel = userFollowsUsersViewModel
+                    userFollowsUsersViewModel = userFollowsUsersViewModel,
+                    notificationsViewModel = notificationsViewModel
                 )
             }else{
                 AdminProfileScreen()
@@ -816,7 +818,7 @@ private fun NavigationGraph(
 
             NotificationScreen(
                 modifier = modifier.fillMaxSize(),
-                usersViewModel = usersViewModel,
+                usersViewModel = sharedUsersViewModel,
                 notificationsViewModel = notificationsViewModel
             )
         }

@@ -1,12 +1,15 @@
 package com.example.clubbers.ui
 
 import android.content.Context
+import android.widget.Space
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,9 +46,10 @@ fun NotificationScreen(
     usersViewModel: UsersViewModel,
     notificationsViewModel: NotificationsViewModel){
 
-    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
-    usersViewModel.getUserByEmail(userEmail)
-    var user = usersViewModel.userByMail.collectAsState().value
+    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None")
+    usersViewModel.getUserByEmail(userEmail.orEmpty())
+    val user by usersViewModel.userByMail.collectAsState()
+    val userId = user?.userId
     notificationsViewModel.getAllUserNotifications(user?.userId.toString().toInt())
     var notifications = notificationsViewModel.allUserNotifications.collectAsState().value
 
@@ -57,7 +62,7 @@ fun NotificationScreen(
                 stickyHeader {
                 }
                 items(notifications.size) { index ->
-                    notificationItem(modifier = modifier, notification = notifications[index])
+                    notificationItem(modifier = modifier, notification = notifications[index], usersViewModel)
                 }
             }
         )
@@ -68,14 +73,22 @@ fun NotificationScreen(
 @Composable
 fun notificationItem(
     modifier: Modifier,
-    notification: Notification
+    notification: Notification,
+    usersViewModel: UsersViewModel
 ){
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp),
         ) {
-            Text("notifica")
+            if(notification.notification_type == "SUBSCRIPTION"){
+                Text(notification.message)
+            }else if(notification.notification_type == "FOLLOW"){
+                usersViewModel.getUserById(notification.senderId)
+                var from = usersViewModel.userById.collectAsState().value?.userUsername
+                Text("$from ${notification.message}")
+            }
 
     }
+    Spacer(modifier = Modifier.height(10.dp))
 }
