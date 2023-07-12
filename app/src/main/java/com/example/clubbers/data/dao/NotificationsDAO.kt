@@ -1,6 +1,8 @@
 package com.example.clubbers.data.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.clubbers.data.entities.Notification
 import kotlinx.coroutines.flow.Flow
@@ -21,4 +23,7 @@ interface NotificationsDAO {
 
     @Query("UPDATE notifications SET isRead = 1 WHERE receiver = :receiverId")
     fun readAllNotifications(receiverId: Int): Unit
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(Notification: Notification)
 }

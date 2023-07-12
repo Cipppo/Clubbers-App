@@ -8,6 +8,7 @@ import com.example.clubbers.utilities.CreateParticipatedEventTimeLine
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 
@@ -19,7 +20,8 @@ fun FoundEventsScreen(
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    notificationsViewModel: NotificationsViewModel
 ) {
     val events by eventsViewModel.foundEvents.collectAsState()
     CreateParticipatedEventTimeLine(
@@ -30,6 +32,7 @@ fun FoundEventsScreen(
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
         passedEvents = events,
-        usersViewModel = usersViewModel
+        usersViewModel = usersViewModel,
+        notificationsViewModel = notificationsViewModel
     )
 }

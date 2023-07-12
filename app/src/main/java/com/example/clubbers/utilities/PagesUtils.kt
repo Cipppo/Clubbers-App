@@ -81,11 +81,13 @@ import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.entities.Event
+import com.example.clubbers.data.entities.Notification
 import com.example.clubbers.data.entities.Participates
 import com.example.clubbers.data.entities.Post
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.TagsViewModel
@@ -116,7 +118,8 @@ fun CreateSearchTimeLine(
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel,
     searchingTags: Boolean = false,
-    isTodayEvents: Boolean
+    isTodayEvents: Boolean,
+    notificationsViewModel: NotificationsViewModel,
 ) {
     eventsViewModel.getFutureEvents()
     val events by eventsViewModel.events.collectAsState()
@@ -179,7 +182,8 @@ fun CreateSearchTimeLine(
                             event = if (isTodayEvents) todayEvents[index] else events[index],
                             participatesViewModel = participatesViewModel,
                             usersViewModel = usersViewModel,
-                            onClickAction = onClickAction
+                            onClickAction = onClickAction,
+                            notificationsViewModel = notificationsViewModel,
                         )
                     }
                 }
@@ -198,6 +202,7 @@ fun CreateParticipatedEventTimeLine(
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
+    notificationsViewModel: NotificationsViewModel,
     passedEvents: List<Event> = emptyList(),
     isSearchingTags: Boolean = false,
     usersViewModel: UsersViewModel,
@@ -217,7 +222,8 @@ fun CreateParticipatedEventTimeLine(
                             event = passedEvents[index],
                             participatesViewModel = participatesViewModel,
                             usersViewModel = usersViewModel,
-                            onClickAction = onClickAction
+                            onClickAction = onClickAction,
+                            notificationsViewModel = notificationsViewModel,
                         )
                     }
                 } else {
@@ -413,6 +419,7 @@ fun EventItem(
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
+    notificationsViewModel: NotificationsViewModel,
     usersViewModel: UsersViewModel,
     isSingleEvent: Boolean = false,
     event: Event,
@@ -440,6 +447,10 @@ fun EventItem(
         latitude = event.eventLocationLat,
         longitude = event.eventLocationLon
     )
+
+    val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
+    usersViewModel.getUserByEmail(userEmail)
+    val userId = usersViewModel.userByMail.collectAsState().value.toString().toInt()
 
     val context = LocalContext.current
 
@@ -585,6 +596,7 @@ fun EventItem(
                 usersViewModel.getUserByEmail(userName.orEmpty())
                 val user by usersViewModel.userByMail.collectAsState()
 
+
                 var isUserParticipating by rememberSaveable { mutableStateOf(false) }
                 isUserParticipating = participants.contains(user)
 
@@ -612,7 +624,9 @@ fun EventItem(
                                     context = context,
                                     eventTitle = eventTitle,
                                     date = timeStart,
-                                    place = place.name)
+                                    place = place.name,
+                                    notificationsViewModel = notificationsViewModel,
+                                    userId = userId)
                                 eventsViewModel.updateEvent(event)
                             }
                         },
@@ -643,7 +657,7 @@ fun EventItem(
     )
 }
 
-fun sendEventParticipationNotification(context: Context, eventTitle: String, date: String, place: String){
+fun sendEventParticipationNotification(context: Context, eventTitle: String, date: String, place: String, notificationsViewModel: NotificationsViewModel, userId: Int){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val notification = NotificationCompat.Builder(context, "1")
         .setContentTitle("Stai partecipando all'evento $eventTitle !")
@@ -651,6 +665,17 @@ fun sendEventParticipationNotification(context: Context, eventTitle: String, dat
         .setSmallIcon(R.drawable.baseline_notifications_24)
         .build()
     notificationManager.notify(1, notification)
+
+
+
+    var new_notification = Notification(
+        senderId = 0,
+        receiverId = userId,
+        message = "Stai partecipando all'evento $eventTitle !",
+    )
+
+    notificationsViewModel.addNewNotification(notification = new_notification)
+
 }
 
 

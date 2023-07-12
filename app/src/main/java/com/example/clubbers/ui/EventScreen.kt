@@ -15,6 +15,7 @@ import com.example.clubbers.utilities.PostItem
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
@@ -29,7 +30,8 @@ fun EventScreen(
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
     usersViewModel: UsersViewModel,
-    onClickAction: () -> Unit
+    onClickAction: () -> Unit,
+    notificationsViewModel: NotificationsViewModel
 ) {
     val event = eventsViewModel.eventSelected
     postsViewModel.getPostsByEventId(event!!.eventId)
@@ -50,7 +52,8 @@ fun EventScreen(
                     participatesViewModel = participatesViewModel,
                     usersViewModel = usersViewModel,
                     isSingleEvent = true,
-                    onClickAction = { }
+                    onClickAction = { },
+                    notificationsViewModel = notificationsViewModel
                 )
             }
             items(posts) { post ->

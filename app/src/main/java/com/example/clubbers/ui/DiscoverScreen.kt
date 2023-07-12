@@ -6,6 +6,7 @@ import com.example.clubbers.utilities.CreateSearchTimeLine
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.TagsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
@@ -20,7 +21,8 @@ fun DiscoverScreen(
     eventHasTagsViewModel: EventHasTagsViewModel,
     tagsViewModel: TagsViewModel,
     participatesViewModel: ParticipatesViewModel,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    notificationsViewModel: NotificationsViewModel
 ) {
     CreateSearchTimeLine(
         modifier = modifier,
@@ -32,6 +34,7 @@ fun DiscoverScreen(
         participatesViewModel = participatesViewModel,
         usersViewModel = usersViewModel,
         tagsViewModel = tagsViewModel,
-        isTodayEvents = false
+        isTodayEvents = false,
+        notificationsViewModel = notificationsViewModel
     )
 }

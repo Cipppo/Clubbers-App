@@ -8,6 +8,7 @@ import com.example.clubbers.utilities.CreateParticipatedEventTimeLine
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import java.text.SimpleDateFormat
@@ -22,7 +23,8 @@ fun SelectEventForPostScreen(
     adminsViewModel: AdminsViewModel,
     eventHasTagsViewModel: EventHasTagsViewModel,
     participatesViewModel: ParticipatesViewModel,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    notificationsViewModel: NotificationsViewModel
 ) {
     participatesViewModel.getEvents(userId)
     val events by participatesViewModel.events.collectAsState()
@@ -45,6 +47,7 @@ fun SelectEventForPostScreen(
         eventHasTagsViewModel = eventHasTagsViewModel,
         participatesViewModel = participatesViewModel,
         usersViewModel = usersViewModel,
-        passedEvents = postEvents
+        passedEvents = postEvents,
+        notificationsViewModel = notificationsViewModel
     )
 }

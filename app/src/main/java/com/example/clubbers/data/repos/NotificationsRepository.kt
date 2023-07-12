@@ -26,4 +26,8 @@ class NotificationsRepository(private val notificationsDAO: NotificationsDAO) {
     suspend fun readAllNotifications(receiverId: Int): Unit{
         notificationsDAO.readAllNotifications(receiverId)
     }
+
+    suspend fun insert(notification: Notification){
+        notificationsDAO.insert(notification)
+    }
 }

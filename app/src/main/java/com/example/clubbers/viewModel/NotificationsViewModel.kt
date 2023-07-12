@@ -45,4 +45,7 @@ class NotificationsViewModel @Inject constructor(
         repository.readAllNotifications(userId)
     }
 
+    fun addNewNotification(notification: Notification) = viewModelScope.launch {
+        repository.insert(notification)
+    }
 }
