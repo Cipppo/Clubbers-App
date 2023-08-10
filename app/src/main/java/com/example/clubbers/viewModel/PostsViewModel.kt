@@ -7,6 +7,7 @@ import com.example.clubbers.data.repos.PostsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,7 +24,16 @@ class PostsViewModel @Inject constructor(
     val posts: StateFlow<List<Post>> get() = _posts
 
 
-    val allPosts = repository.posts
+    val allPosts: StateFlow<List<Post>> get () = _allPost
+
+    val _allPost = MutableStateFlow<List<Post>>(emptyList())
+
+    fun getAllPosts() = viewModelScope.launch {
+        repository.getAllPosts()
+            .collect{ posts ->
+                _allPost.value = posts
+            }
+    }
 
     fun getPostsByUserId(userId: Int) = viewModelScope.launch {
         repository.getPostsByUserId(userId)
