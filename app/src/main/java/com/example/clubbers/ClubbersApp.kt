@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -81,7 +82,7 @@ import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.UserOptionScreen
 import com.example.clubbers.ui.UserSearchPage
-import com.example.clubbers.ui.notificationsScreen
+import com.example.clubbers.ui.NotificationScreen
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventLocationViewModel
@@ -142,6 +143,7 @@ fun TopAppBarFunction (
     onSettingsPressed: () -> Unit,
     onTagPressed: () -> Unit,
     onSearchPressed: () -> Unit,
+    onNotificationsPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -181,6 +183,12 @@ fun TopAppBarFunction (
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = "User Search"
+                    )
+                }
+                IconButton(onClick = onNotificationsPressed ) {
+                    Icon(
+                        imageVector = Icons.Filled.Notifications,
+                        contentDescription = "Notifications"
                     )
                 }
             }
@@ -357,6 +365,8 @@ fun NavigationApp (
                     onSettingsPressed = { navController.navigate(AppScreen.UserOption.name) },
                     onSearchPressed = { navController.navigate(AppScreen.UserSearch.name) },
                     onTagPressed = { navController.navigate(AppScreen.SearchTag.name) },
+                    onNotificationsPressed = {
+                        navController.navigate(AppScreen.Notifications.name)},
                     modifier = Modifier
                         .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
                         .alpha(alpha.value)
@@ -528,16 +538,16 @@ private fun NavigationGraph(
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
 
             EventScreen(
-                /*
+
                 eventsViewModel = eventsViewModel,
                 adminsViewModel = adminsViewModel,
                 eventHasTagsViewModel = eventHasTagsViewModel,
                 participatesViewModel = participatesViewModel,
                 usersViewModel = usersViewModel,
                 postsViewModel = postsViewModel,
-                onClickAction = { navController.navigate(AppScreen.Post.name) }
+                onClickAction = { navController.navigate(AppScreen.Post.name) },
+                notificationsViewModel = sharedNotificationsViewModel
 
-                 */
             )
         }
 
@@ -786,7 +796,10 @@ private fun NavigationGraph(
 
         // Notifications Screen
         composable(route = AppScreen.Notifications.name){
-            notificationsScreen()
+            NotificationScreen(
+                notificationsViewModel = sharedNotificationsViewModel,
+                usersViewModel = usersViewModel,
+                modifier = modifier)
         }
 
         composable(route = AppScreen.UserSearch.name){
