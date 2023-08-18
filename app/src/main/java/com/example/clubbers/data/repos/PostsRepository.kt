@@ -36,7 +36,4 @@ class PostsRepository(private val postsDAO: PostsDAO) {
         return postsDAO.getPostsByEventId(eventId)
     }
 
-    suspend fun getAllPosts(): Flow<List<Post>> {
-        return postsDAO.getAllPosts()
-    }
 }

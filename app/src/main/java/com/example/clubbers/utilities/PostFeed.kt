@@ -106,7 +106,7 @@ fun PostFeed(
                             )
                             .heightIn(min = 180.dp)
                     )
-                    Text(post.postCaption)
+                    Text("PostCaption")
                 }
             }
         }

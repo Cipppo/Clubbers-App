@@ -33,8 +33,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.example.clubbers.R
 import com.example.clubbers.data.entities.Notification
 import com.example.clubbers.data.entities.User
@@ -61,12 +59,11 @@ fun PersonalProfileScreen(
     eventsViewModel: EventsViewModel,
     userFollowsUsersViewModel: UserFollowsUsersViewModel,
     userFollowsAdminsViewModel: UserFollowsAdminsViewModel,
-    notificationsViewModel: NotificationsViewModel,
-    onBookedEventClick: () -> Unit
+    notificationsViewModel: NotificationsViewModel
 ){
 
 
-    val selectedMenu = remember{ mutableStateOf("Posts")}
+    val selectedMenu = remember{ mutableStateOf("Possts")}
     val user = usersViewModel.userSelected.collectAsState().value
     Log.d("USERUSER", user?.userName.toString())
 
@@ -75,8 +72,10 @@ fun PersonalProfileScreen(
     val currentUser = usersViewModel.userByMail.collectAsState().value
 
     var followers = remember { mutableStateOf(0) }
+    var followed = 0
 
     followers.value = countFollowers(userId = user?.userId.toString().toInt(), userFollowsUsersViewModel = userFollowsUsersViewModel)
+    followed = countFollowed(userId = user?.userId.toString().toInt(), userFollowsUsersViewModel = userFollowsUsersViewModel)
     var personalProfile = true
 
     var amIFollowingResult = remember {
@@ -99,7 +98,6 @@ fun PersonalProfileScreen(
     val userName = user?.userName.orEmpty()
     val userBio = user?.userBio.orEmpty()
     val userId = user?.userId.toString().toInt()
-    val propicUri = user?.userImage
 
     Box(
         modifier = Modifier
@@ -118,14 +116,7 @@ fun PersonalProfileScreen(
                     .fillMaxWidth()
                     .weight(1f)) {
                     Image(
-                        painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(
-                                LocalContext.current
-                            ).data(data = propicUri).apply(block = fun ImageRequest.Builder.() {
-                                crossfade(true)
-                                placeholder(R.drawable.ic_launcher_foreground)
-                                error(R.drawable.ic_launcher_foreground)
-                            }).build()),
+                        painter = painterResource(id = R.drawable.default_avatar),
                         contentDescription = "Profile Avatar",
                         modifier = Modifier
                             .size(80.dp)
@@ -140,6 +131,12 @@ fun PersonalProfileScreen(
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         Text(text = followers.value.toString(), style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = "Followed", style = TextStyle(fontWeight = FontWeight.Bold))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(text = followed.toString(), style = TextStyle(fontWeight = FontWeight.Bold))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         Text(text = "Events", style = TextStyle(fontWeight = FontWeight.Bold))
@@ -200,12 +197,31 @@ fun PersonalProfileScreen(
                                 25.dp
                             }))
                 }
+                IconButton(
+                    onClick = {selectedMenu.value = "Been"}
+                ){
+                    Icon(
+                        painter = painterResource(id = R.drawable.been_icon),
+                        contentDescription = "Been icon",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(
+                            if(selectedMenu.value == "Been"){
+                                45.dp
+                            }else{
+                                25.dp
+                            }
+                        )
+                    )
+                }
             }
             if(selectedMenu.value == "Posts"){
                 PostFeed(user, postsViewModel, eventsViewModel)
             }
             if(selectedMenu.value == "Booked"){
-                UserBookedEvents(userId, participatesViewModel, eventsViewModel, onBookedEventClick)
+                UserBookedEvents(userId, participatesViewModel, eventsViewModel)
+            }
+            if(selectedMenu.value == "Been"){
+                UserBookedEvents(userId, participatesViewModel, eventsViewModel)
             }
         }
     }

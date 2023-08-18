@@ -340,7 +340,7 @@ fun NavigationApp (
 
     var postsViewModel = hiltViewModel<PostsViewModel>()
     postsViewModel.getAllPosts()
-    var posts = postsViewModel.allPosts.collectAsState(initial = listOf()).value
+    var posts = postsViewModel.allPost.collectAsState(initial = listOf()).value
 
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -749,6 +749,7 @@ private fun NavigationGraph(
             val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
             val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
 
+
             if(userType == "USER"){
                 PersonalProfileScreen(
                     onOption = {navController.navigate(AppScreen.UserOption.name)},
@@ -759,8 +760,7 @@ private fun NavigationGraph(
                     eventsViewModel = sharedEventsViewModel,
                     userFollowsAdminsViewModel = userFollowsAdminsViewModel,
                     userFollowsUsersViewModel = userFollowsUsersViewModel,
-                    notificationsViewModel = notificationsViewModel,
-                    onBookedEventClick = {navController.navigate(AppScreen.Event.name)}
+                    notificationsViewModel = notificationsViewModel
                 )
             }else{
                 AdminProfileScreen()
