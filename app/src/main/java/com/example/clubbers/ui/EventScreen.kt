@@ -23,6 +23,7 @@ import com.example.clubbers.viewModel.UsersViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventScreen(
+    /*
     modifier: Modifier = Modifier,
     eventsViewModel: EventsViewModel,
     postsViewModel: PostsViewModel,
@@ -32,7 +33,10 @@ fun EventScreen(
     usersViewModel: UsersViewModel,
     onClickAction: () -> Unit,
     notificationsViewModel: NotificationsViewModel
+
+     */
 ) {
+    /*
     val event = eventsViewModel.eventSelected
     postsViewModel.getPostsByEventId(event!!.eventId)
     val posts by postsViewModel.posts.collectAsState()
@@ -66,4 +70,6 @@ fun EventScreen(
             }
         }
     }
+
+     */
 }

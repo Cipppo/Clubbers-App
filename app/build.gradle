@@ -103,7 +103,7 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:$nav_version"
 
     // Coil (image loading) dependencies
-    implementation "io.coil-kt:coil-compose:2.3.0"
+    implementation "io.coil-kt:coil-compose:2.4.0"
 
     // Google Maps dependencies
     implementation "com.google.android.gms:play-services-maps:18.1.0"

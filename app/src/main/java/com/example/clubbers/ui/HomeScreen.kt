@@ -22,14 +22,16 @@ import com.example.clubbers.viewModel.UsersViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    /*
     modifier: Modifier = Modifier,
     postsViewModel: PostsViewModel,
     eventsViewModel: EventsViewModel,
     usersViewModel: UsersViewModel,
     userFollowsUsersViewModel: UserFollowsUsersViewModel,
     user: User
-
+     */
 ) {
+    /*
     val sharedPreferences = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
     val userMail = sharedPreferences.getString("USER_LOGGED", "None")
 
@@ -53,4 +55,6 @@ fun HomeScreen(
     }
 
     Log.d("2", "2")
+
+     */
 }
