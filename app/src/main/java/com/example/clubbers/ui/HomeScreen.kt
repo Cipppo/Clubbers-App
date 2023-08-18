@@ -42,7 +42,7 @@ fun HomeScreen(
     val userIdList = userFollowed.map { user -> user.userId }
 
     postsViewModel.getAllPosts()
-    val posts = postsViewModel.allPost.collectAsState(initial = listOf()).value
+    val posts = postsViewModel.allPosts.collectAsState(initial = listOf()).value
 
     var postList = emptyList<Post>()
 

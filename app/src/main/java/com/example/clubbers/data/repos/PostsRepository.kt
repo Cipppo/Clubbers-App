@@ -8,9 +8,6 @@ class PostsRepository(private val postsDAO: PostsDAO) {
 
 
 
-    fun getAllPosts(): Flow<List<Post>>{
-       return postsDAO.getPosts()
-    }
 
     suspend fun insertNewPost(post: Post) {
         postsDAO.insert(post)

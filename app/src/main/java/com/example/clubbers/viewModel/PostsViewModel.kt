@@ -44,17 +44,6 @@ class PostsViewModel @Inject constructor(
             }
     }
 
-    private val _allPosts = MutableStateFlow<List<Post>>(emptyList())
-
-    val allPost: Flow<List<Post>> get() = _allPosts
-
-    fun getAllPosts() = viewModelScope.launch {
-        repository.getAllPosts()
-            .collect {
-                posts ->
-                    _allPosts.value = posts
-            }
-    }
 
 
     fun getPostById(postId: Int) = viewModelScope.launch {
