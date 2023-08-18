@@ -35,7 +35,7 @@ import com.example.clubbers.viewModel.PostsViewModel
 fun PostFeed(
     user: User?,
     postsViewModel: PostsViewModel,
-    eventsViewModel: EventsViewModel
+    eventsViewModel: EventsViewModel,
 ){
 
 
@@ -84,7 +84,7 @@ fun PostFeed(
                         Spacer(modifier = Modifier.padding(end = 8.dp))
                         eventsViewModel.getEventById(post.postEventId)
                         var eventName = eventsViewModel.eventSelected?.eventName
-                        Text(text= "username is been at $eventName", style = MaterialTheme.typography.bodySmall)
+                        Text(text= "${user?.userUsername} is been at $eventName", style = MaterialTheme.typography.bodySmall)
                     }
                     Image(
                         painter = rememberAsyncImagePainter(
@@ -94,7 +94,8 @@ fun PostFeed(
                                 crossfade(true)
                                 placeholder(R.drawable.ic_launcher_foreground)
                                 error(R.drawable.ic_launcher_foreground)
-                            }).build()),
+                            }).build()
+                        ),
                         contentDescription = "Description",
                         modifier = Modifier
                             .fillMaxWidth()

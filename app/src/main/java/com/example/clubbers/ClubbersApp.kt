@@ -62,6 +62,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.data.entities.User
 import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
@@ -99,6 +100,7 @@ import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
 import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 sealed class AppScreen(val name: String) {
@@ -461,14 +463,17 @@ fun NavigationApp (
             modifier = Modifier
                 .alpha(alpha.value)
         ) {
-            NavigationGraph(
-                startRequestingData,
-                startLocationUpdates,
-                navController,
-                innerPadding,
-                warningViewModel,
-                sharedUsersViewModel = usersViewModel
-            )
+            if (loggedUser != null) {
+                NavigationGraph(
+                    startRequestingData,
+                    startLocationUpdates,
+                    navController,
+                    innerPadding,
+                    warningViewModel,
+                    sharedUsersViewModel = usersViewModel,
+                    loggedUser = loggedUser
+                )
+            }
             val context = LocalContext.current
             if (warningViewModel.showConnectivitySnackBar.value) {
                 ConnectivitySnackBarComposable(
@@ -491,7 +496,8 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier,
-    sharedUsersViewModel: UsersViewModel
+    sharedUsersViewModel: UsersViewModel,
+    loggedUser: User,
 ) {
     val isLoggedIn =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -502,6 +508,7 @@ private fun NavigationGraph(
     val sharedPostsViewModel = hiltViewModel<PostsViewModel>()
     val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
     val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
+    val sharedPostViewModel = hiltViewModel<PostsViewModel>()
     val sharedUsersFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
 
 
@@ -517,7 +524,8 @@ private fun NavigationGraph(
                 postsViewModel = postsViewModel,
                 eventsViewModel = sharedEventsViewModel,
                 usersViewModel = sharedUsersViewModel,
-                usersFollowsUsersViewModel = sharedUsersFollowsUsersViewModel,
+                userFollowsUsersViewModel = sharedUsersFollowsUsersViewModel,
+                user = loggedUser
             )
         }
 
@@ -736,7 +744,6 @@ private fun NavigationGraph(
         composable(route = AppScreen.Profile.name) {
             val postViewModel = hiltViewModel<PostsViewModel>()
             val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
-            val personalProfileEventsViewModel = hiltViewModel<EventsViewModel>()
             val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
             val userFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
             val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
@@ -749,7 +756,7 @@ private fun NavigationGraph(
                     usersViewModel = sharedUsersViewModel,
                     postsViewModel = postViewModel,
                     participatesViewModel = participatesViewModel,
-                    eventsViewModel = personalProfileEventsViewModel,
+                    eventsViewModel = sharedEventsViewModel,
                     userFollowsAdminsViewModel = userFollowsAdminsViewModel,
                     userFollowsUsersViewModel = userFollowsUsersViewModel,
                     notificationsViewModel = notificationsViewModel,

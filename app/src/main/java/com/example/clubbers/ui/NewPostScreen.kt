@@ -1,6 +1,7 @@
 package com.example.clubbers.ui
 
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -69,7 +70,6 @@ fun NewPostScreen(
     val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
         context.packageName + ".provider", file)
-
     val takenPhotoSheetState = rememberSheetState()
     val picOrGalleryState = rememberSheetState()
     
