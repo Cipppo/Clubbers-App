@@ -83,6 +83,7 @@ import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.UserOptionScreen
 import com.example.clubbers.ui.UserSearchPage
 import com.example.clubbers.ui.NotificationScreen
+import com.example.clubbers.ui.NotificationScreenRouter
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventLocationViewModel
@@ -498,6 +499,7 @@ private fun NavigationGraph(
     val eventLocationViewModel = hiltViewModel<EventLocationViewModel>()
     val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
     val sharedNotificationsViewModel = hiltViewModel<NotificationsViewModel>()
+    val sharedAdminsViewModel = hiltViewModel<AdminsViewModel>()
 
     NavHost(
         navController = navController,
@@ -723,7 +725,6 @@ private fun NavigationGraph(
             val userFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
             val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
 
-
             if(userType == "USER"){
                 PersonalProfileScreen(
                     onOption = {navController.navigate(AppScreen.UserOption.name)},
@@ -796,10 +797,11 @@ private fun NavigationGraph(
 
         // Notifications Screen
         composable(route = AppScreen.Notifications.name){
-            NotificationScreen(
+            NotificationScreenRouter(
                 notificationsViewModel = sharedNotificationsViewModel,
                 usersViewModel = usersViewModel,
-                modifier = modifier)
+                modifier = modifier,
+                adminsViewModel = sharedAdminsViewModel)
         }
 
         composable(route = AppScreen.UserSearch.name){

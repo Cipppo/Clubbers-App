@@ -72,14 +72,15 @@ fun NotificationScreenRouter(
             adminsViewModel = adminsViewModel,
             user = user
         )
-    }else if(userType == "ADMIN"){
+    }else if(userType == "CLUB"){
         adminsViewModel.getAdminByMail(userEmail.orEmpty())
-        val user by adminsViewModel.adminByMail.collectAsState()
-        NotificationScreen(
+        val admin = adminsViewModel.adminByMail.collectAsState().value
+        AdminNotificationScreen(
             modifier = modifier,
             usersViewModel = usersViewModel,
             notificationsViewModel = notificationsViewModel,
             adminsViewModel = adminsViewModel,
+            admin = admin,
         )
     }
 
@@ -165,6 +166,83 @@ fun notificationItem(
                     }
                 }
             }
+
+
+    }
+    Spacer(modifier = Modifier.height(10.dp))
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun AdminNotificationScreen(
+    modifier: Modifier,
+    usersViewModel: UsersViewModel,
+    notificationsViewModel: NotificationsViewModel,
+    adminsViewModel: AdminsViewModel,
+    admin: Admin?){
+
+
+
+
+
+    val userId = admin?.adminId
+
+
+
+    notificationsViewModel.getAllUserNotifications(admin?.adminId.toString().toInt())
+    var notifications = notificationsViewModel.allUserNotifications.collectAsState().value.reversed()
+
+
+
+
+    Scaffold(modifier = modifier) { innerPadding ->
+        Spacer(modifier = Modifier.height(10.dp))
+        LazyColumn(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            content = {
+                stickyHeader {
+                }
+                items(notifications.size) { index ->
+                    AdminNotificationItem(modifier = modifier, notification = notifications[index], usersViewModel)
+                }
+            }
+        )
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdminNotificationItem(
+    modifier: Modifier,
+    notification: Notification,
+    usersViewModel: UsersViewModel,
+){
+
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+    ) {
+        if(notification.notification_type == "FOLLOW"){
+            usersViewModel.getUserById(notification.senderId)
+            var from = usersViewModel.userById.collectAsState().value?.userUsername
+            Row(Modifier.fillMaxWidth()){
+                Text(text = "NUOVO FOLLOWER!\n${from} ${notification.message}", fontWeight = FontWeight.Bold)
+            }
+        }
+        if(notification.notification_type == "SUBSCRIPTION") {
+            Row(Modifier.fillMaxWidth()) {
+                Text(
+                    text = "NUOVA ISCRIZIONE\n${notification.message}",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
 
     }
