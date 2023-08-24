@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,8 +52,11 @@ import com.example.clubbers.utilities.TakenPhotoCarouselDialog
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
+import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.PostsViewModel
+import com.example.clubbers.viewModel.UsersViewModel
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.util.Objects
 
@@ -208,6 +212,8 @@ fun NewPostScreen(
                         )
                     )
 
+
+
                     onPost()
                 } else {
                     Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
@@ -241,4 +247,5 @@ fun NewPostScreen(
         title = "Choose what to do",
         sheetState = picOrGalleryState
     )
+
 }

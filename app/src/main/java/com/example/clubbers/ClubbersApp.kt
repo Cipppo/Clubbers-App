@@ -633,7 +633,8 @@ private fun NavigationGraph(
                 startRequestingData = startRequestingData,
                 startLocationUpdates = startLocationUpdates,
                 warningViewModel = warningViewModel,
-                eventHasTagsViewModel = eventHasTagsViewModel
+                eventHasTagsViewModel = eventHasTagsViewModel,
+                notificationsViewModel = sharedNotificationsViewModel
             )
         }
 

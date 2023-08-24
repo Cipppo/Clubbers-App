@@ -74,7 +74,8 @@ fun NotificationScreenRouter(
         )
     }else if(userType == "CLUB"){
         adminsViewModel.getAdminByMail(userEmail.orEmpty())
-        val admin = adminsViewModel.adminByMail.collectAsState().value
+        val admin by adminsViewModel.adminByMail.collectAsState()
+        Log.d("AdminAdmin", admin?.adminEmail.toString())
         AdminNotificationScreen(
             modifier = modifier,
             usersViewModel = usersViewModel,
@@ -87,7 +88,7 @@ fun NotificationScreenRouter(
 
 }
 
-// DIVIDERE LA NOTIFICATIONSCREEN PER ADMIN E PER USER 
+// DIVIDERE LA NOTIFICATIONSCREEN PER ADMIN E PER USER
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)

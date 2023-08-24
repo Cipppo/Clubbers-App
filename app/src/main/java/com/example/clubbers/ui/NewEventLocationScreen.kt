@@ -1,5 +1,6 @@
 package com.example.clubbers.ui
 
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.widget.Toast
@@ -35,10 +36,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
 import com.example.clubbers.R
 import com.example.clubbers.data.details.LocationDetails
 import com.example.clubbers.data.entities.Event
 import com.example.clubbers.data.entities.EventHasTag
+import com.example.clubbers.data.entities.Notification
 import com.example.clubbers.utilities.MapView
 import com.example.clubbers.utilities.getFilesFromAppDir
 import com.example.clubbers.utilities.saveImage
@@ -46,6 +49,7 @@ import com.example.clubbers.viewModel.EventHasTagsViewModel
 import com.example.clubbers.viewModel.EventLocationViewModel
 import com.example.clubbers.viewModel.EventsViewModel
 import com.example.clubbers.viewModel.LocationsViewModel
+import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.WarningViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -68,7 +72,9 @@ fun NewEventLocationScreen(
     eventHasTagsViewModel: EventHasTagsViewModel,
     locationsViewModel: LocationsViewModel,
     warningViewModel: WarningViewModel,
-    adminId: Int
+    adminId: Int,
+    notificationsViewModel: NotificationsViewModel,
+
 ) {
     val context = LocalContext.current
 
@@ -304,6 +310,22 @@ fun NewEventLocationScreen(
                                 )
                             )
                         }
+
+                        val new_event = Event(
+                                eventName = eventTitle,
+                                eventImage = localImageDir,
+                                eventLocation = eventLocation,
+                                eventLocationLat = eventLocationLat,
+                                eventLocationLon = eventLocationLon,
+                                eventDescription = description,
+                                timeStart = Date.from(startEventDate!!.atZone(ZoneId.systemDefault()).toInstant()),
+                                timeEnd = Date.from(endEventDate!!.atZone(ZoneId.systemDefault()).toInstant()),
+                                maxParticipants = maxParticipants,
+                                participants = 0,
+                                eventAdminId = adminId
+                            )
+
+                        sendNewEventCreatedNotification(notificationsViewModel = notificationsViewModel, event = new_event, context = context)
                         onEvent()
                     } else {
                         Toast.makeText(context, "Please take a photo", Toast.LENGTH_SHORT).show()
@@ -324,4 +346,24 @@ fun NewEventLocationScreen(
             Text(text = "Post event")
         }
     }
+}
+
+fun sendNewEventCreatedNotification(notificationsViewModel: NotificationsViewModel, context: Context, event: Event){
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notification = NotificationCompat.Builder(context, "1")
+        .setContentTitle("Evento creato con successo !")
+        .setContentText("${event.eventName} è stato creato con successo ed una notifica è stata inviata ai tuoi followers!")
+        .setSmallIcon(R.drawable.baseline_notifications_24)
+        .build()
+    notificationManager.notify(1, notification)
+
+    val new_notification = Notification(
+        senderId = event.eventAdminId,
+        receiverId = 0,
+        message = "Il Club che stai seguendo ha appena creato l'evento ${event.eventName}",
+        notification_type = "EVENT_CREATION"
+    )
+
+    notificationsViewModel.addNewNotification(new_notification)
+
 }
