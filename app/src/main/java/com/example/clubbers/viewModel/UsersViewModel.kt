@@ -22,9 +22,6 @@ class UsersViewModel @Inject constructor(
         repository.insertNewUser(user)
     }
 
-
-
-
     private var _userSelected = MutableStateFlow<User?>(null)
     val userSelected: StateFlow<User?> get() = _userSelected
 
