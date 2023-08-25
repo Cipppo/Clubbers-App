@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.text.style.TextAppearanceSpan
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
@@ -64,6 +65,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
 import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
+import com.example.clubbers.ui.ClubSearchScreen
 import com.example.clubbers.ui.ConnectivitySnackBarComposable
 import com.example.clubbers.ui.DiscoverScreen
 import com.example.clubbers.ui.EventScreen
@@ -127,6 +129,7 @@ sealed class AppScreen(val name: String) {
     object UserOption : AppScreen("User Option Page")
     object Notifications : AppScreen("User Notifications Page")
     object UserSearch : AppScreen("User Search Page")
+    object ClubSearch : AppScreen("Club Search Page")
     // TODO: If there will be more screens, add them here
 }
 
@@ -145,6 +148,8 @@ fun TopAppBarFunction (
     onTagPressed: () -> Unit,
     onSearchPressed: () -> Unit,
     onNotificationsPressed: () -> Unit,
+    onClubSearchPressed: () -> Unit,
+    onProfileSearchPressed: () -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -190,6 +195,20 @@ fun TopAppBarFunction (
                     Icon(
                         imageVector = Icons.Filled.Notifications,
                         contentDescription = "Notifications"
+                    )
+                }
+            }else if (currentScreen == AppScreen.UserSearch.name){
+                IconButton(onClick = onClubSearchPressed) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.club_account),
+                        contentDescription = "Switch to Club Search"
+                    )
+                }
+            }else if (currentScreen == AppScreen.ClubSearch.name){
+                IconButton(onClick = onProfileSearchPressed) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.normal_account),
+                        contentDescription = "Switch to Club Search"
                     )
                 }
             }
@@ -368,6 +387,8 @@ fun NavigationApp (
                     onTagPressed = { navController.navigate(AppScreen.SearchTag.name) },
                     onNotificationsPressed = {
                         navController.navigate(AppScreen.Notifications.name)},
+                    onClubSearchPressed = {navController.navigate(AppScreen.ClubSearch.name)},
+                    onProfileSearchPressed = {navController.navigate(AppScreen.UserSearch.name)},
                     modifier = Modifier
                         .shadow(shadowAlpha.value.dp, RoundedCornerShape(1.dp))
                         .alpha(alpha.value)
@@ -809,6 +830,14 @@ private fun NavigationGraph(
             UserSearchPage(modifier = Modifier.fillMaxSize(),
                 onClickAction = {navController.navigate(AppScreen.Profile.name)},
                 usersViewModel = usersViewModel)
+        }
+
+        composable(route = AppScreen.ClubSearch.name){
+            ClubSearchScreen(
+                onClickAction = {},
+                adminsViewModel = sharedAdminsViewModel,
+                modifier = modifier
+            )
         }
 
     }
