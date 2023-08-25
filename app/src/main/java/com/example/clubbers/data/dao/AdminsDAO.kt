@@ -40,4 +40,7 @@ interface AdminsDAO {
 
     @Query("SELECT * FROM admins")
     fun getAllAdmins(): Flow<List<Admin>>
+
+    @Query("SELECT * FROM admins WHERE admin_username = :adminUsername")
+    fun getAdminByUsername(adminUsername: String): Flow<Admin>
 }

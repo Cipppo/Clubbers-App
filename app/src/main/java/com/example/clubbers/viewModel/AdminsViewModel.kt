@@ -20,6 +20,15 @@ class AdminsViewModel @Inject constructor(
 
     val admins = repository.admins
 
+    private var _adminSelected = MutableStateFlow<Admin?>(null)
+
+    val adminSelected: StateFlow<Admin?> get() = _adminSelected
+
+    fun selectAdmin(admin: Admin){
+        _adminSelected.value = admin
+    }
+
+
     fun addNewAdmin(admin: Admin) = viewModelScope.launch {
         repository.insertNewAdmin(admin)
     }
@@ -68,4 +77,17 @@ class AdminsViewModel @Inject constructor(
     }
 
     fun getAllAdmins(): Flow<List<Admin>> = repository.getAllAdmins()
+
+    private val _adminByUsername = MutableStateFlow<Admin?>(null)
+
+    val adminByUsername: StateFlow<Admin?> get() = _adminByUsername
+
+    fun getAdminByUsername(adminUsername: String){
+        viewModelScope.launch {
+            repository.getAdminByUsername(adminUsername)
+                .collect { admin ->
+                    _adminByUsername.value = admin
+                }
+        }
+    }
 }

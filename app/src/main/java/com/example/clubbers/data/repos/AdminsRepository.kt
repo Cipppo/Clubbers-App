@@ -35,4 +35,8 @@ class AdminsRepository(private val adminsDAO: AdminsDAO) {
     fun getAllAdmins(): Flow<List<Admin>>{
         return adminsDAO.getAllAdmins()
     }
+
+    fun getAdminByUsername(adminUsername: String) : Flow<Admin>{
+        return adminsDAO.getAdminByUsername(adminUsername = adminUsername)
+    }
 }
