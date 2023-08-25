@@ -88,7 +88,7 @@ fun NotificationScreenRouter(
 
 }
 
-// DIVIDERE LA NOTIFICATIONSCREEN PER ADMIN E PER USER
+
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
