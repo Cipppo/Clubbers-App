@@ -65,13 +65,13 @@ fun personalProfileScreenRouter(
         var admin = adminsViewModel.adminByMail.collectAsState().value
 
         val adminProfile = Admin(
-            adminId = admin?.adminId.toString().toInt(),
-            adminUsername = admin?.adminUsername.toString(),
-            adminEmail = admin?.adminEmail.toString(),
-            adminPassword = admin?.adminPassword.toString(),
-            adminImage = admin?.adminImage.toString(),
-            adminBio = admin?.adminBio.toString(),
-            adminAddress = admin?.adminAddress.toString(),
+            adminId = 1,
+            adminUsername = "admin1",
+            adminEmail = "admin1",
+            adminPassword = "admin1",
+            adminImage = "",
+            adminBio = "prova bio admin1",
+            adminAddress = "prova address admin1",
             isAdmin = true
         )
 
