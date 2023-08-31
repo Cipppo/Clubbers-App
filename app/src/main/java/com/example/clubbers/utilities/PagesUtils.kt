@@ -627,7 +627,8 @@ fun EventItem(
                                     date = timeStart,
                                     place = place.name,
                                     notificationsViewModel = notificationsViewModel,
-                                    userId = userId)
+                                    userId = userId,
+                                    eventAdminId = event.eventAdminId)
                                 eventsViewModel.updateEvent(event)
                             }
                         },
@@ -658,7 +659,7 @@ fun EventItem(
     )
 }
 
-fun sendEventParticipationNotification(context: Context, eventTitle: String, date: String, place: String, notificationsViewModel: NotificationsViewModel, userId: Int){
+fun sendEventParticipationNotification(context: Context, eventTitle: String, eventAdminId: Int, date: String, place: String, notificationsViewModel: NotificationsViewModel, userId: Int){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val notification = NotificationCompat.Builder(context, "1")
         .setContentTitle("Stai partecipando all'evento $eventTitle !")
@@ -670,6 +671,8 @@ fun sendEventParticipationNotification(context: Context, eventTitle: String, dat
 
     val notification_type = "SUBSCRIPTION"
 
+    val admin_notification_type = "USER_JOINED_EVENT"
+
     val new_notification = Notification(
         senderId = 0,
         receiverId = userId,
@@ -677,7 +680,15 @@ fun sendEventParticipationNotification(context: Context, eventTitle: String, dat
         notification_type = notification_type
     )
 
+    val admin_notification = Notification(
+        senderId = 0,
+        receiverId = eventAdminId,
+        message = "Un utente si è iscritto al tuo evento: ${eventTitle}",
+        notification_type = admin_notification_type
+    )
+
     notificationsViewModel.addNewNotification(notification = new_notification)
+    notificationsViewModel.addNewNotification(notification = admin_notification)
 
 }
 
