@@ -149,24 +149,24 @@ fun notificationItem(
             .fillMaxWidth()
             .padding(2.dp),
         ) {
-            if(user?.isAdmin == false){
-                if(notification.notification_type == "FOLLOW"){
-                    usersViewModel.getUserById(notification.senderId)
-                    var from = usersViewModel.userById.collectAsState().value?.userUsername
-                    Row(Modifier.fillMaxWidth()){
-                        Text(text = "NUOVO FOLLOWER!\n${from} ${notification.message}", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }else{
-                if(notification.notification_type == "SUBSCRIPTION") {
-                    Row(Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "NUOVA ISCRIZIONE\n${notification.message}",
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+
+            if(notification.notification_type == "FOLLOW"){
+                usersViewModel.getUserById(notification.senderId)
+                var from = usersViewModel.userById.collectAsState().value?.userUsername
+                Row(Modifier.fillMaxWidth()){
+                    Text(text = "NUOVO FOLLOWER!\n${from} ${notification.message}", fontWeight = FontWeight.Bold)
                 }
             }
+
+            if(notification.notification_type == "SUBSCRIPTION") {
+                Row(Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "NUOVA ISCRIZIONE\n${notification.message}",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
 
 
     }
@@ -236,14 +236,7 @@ fun AdminNotificationItem(
                 Text(text = "NUOVO FOLLOWER!\n${from} ${notification.message}", fontWeight = FontWeight.Bold)
             }
         }
-        if(notification.notification_type == "SUBSCRIPTION") {
-            Row(Modifier.fillMaxWidth()) {
-                Text(
-                    text = "NUOVA ISCRIZIONE\n${notification.message}",
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+
 
 
     }
