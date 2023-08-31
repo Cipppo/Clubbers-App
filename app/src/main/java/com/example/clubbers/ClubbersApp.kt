@@ -63,6 +63,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.clubbers.data.ClubbersDatabase
+import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.ui.AdminProfileScreen
 import com.example.clubbers.ui.ClubRegistrationScreen
 import com.example.clubbers.ui.ClubSearchScreen
@@ -132,6 +133,8 @@ sealed class AppScreen(val name: String) {
     object UserSearch : AppScreen("User Search Page")
     object ClubSearch : AppScreen("Club Search Page")
     // TODO: If there will be more screens, add them here
+    object ClubProfile : AppScreen("Club profile Screen")
+    object UserProfile : AppScreen("Clubber profile screen")
 }
 
 @HiltAndroidApp
@@ -534,6 +537,18 @@ private fun NavigationGraph(
     val sharedEventHasTagsViewModel = hiltViewModel<EventHasTagsViewModel>()
     val sharedNotificationsViewModel = hiltViewModel<NotificationsViewModel>()
     val sharedAdminsViewModel = hiltViewModel<AdminsViewModel>()
+    val sharedEventsViewModel = hiltViewModel<EventsViewModel>()
+
+    val adminProfile = Admin(
+        adminId = 1,
+        adminUsername = "admin1",
+        adminEmail = "admin1",
+        adminPassword = "admin1",
+        adminImage = "",
+        adminBio = "prova bio admin1",
+        adminAddress = "prova address admin1",
+        isAdmin = true
+    )
 
     NavHost(
         navController = navController,
@@ -858,17 +873,45 @@ private fun NavigationGraph(
 
         composable(route = AppScreen.UserSearch.name){
             UserSearchPage(modifier = Modifier.fillMaxSize(),
-                onClickAction = {navController.navigate(AppScreen.Profile.name)},
+                onClickAction = {
+                    navController.navigate(AppScreen.UserProfile.name)},
                 usersViewModel = usersViewModel)
         }
 
         composable(route = AppScreen.ClubSearch.name){
             ClubSearchScreen(
-                onClickAction = {},
+                onClickAction = {navController.navigate(AppScreen.ClubProfile.name)},
                 adminsViewModel = sharedAdminsViewModel,
                 modifier = modifier
             )
         }
 
+        composable(route = AppScreen.ClubProfile.name){
+            AdminProfileScreen(
+                modifier = modifier,
+                adminsViewModel = sharedAdminsViewModel,
+                eventsViewModel = sharedEventsViewModel,
+                notificationsViewModel = sharedNotificationsViewModel
+            )
+        }
+
+        composable(route = AppScreen.UserProfile.name){
+            val participatesViewModel = hiltViewModel<ParticipatesViewModel>()
+            val usersFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
+            val usersFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
+            PersonalProfileScreen(
+                onOption = { /*TODO*/ },
+                onNotify = { /*TODO*/ },
+                usersViewModel = usersViewModel,
+                postsViewModel = postsViewModel,
+                participatesViewModel = participatesViewModel,
+                eventsViewModel = sharedEventsViewModel,
+                userFollowsUsersViewModel = usersFollowsUsersViewModel,
+                userFollowsAdminsViewModel = usersFollowsAdminsViewModel,
+                notificationsViewModel = sharedNotificationsViewModel
+            ) {
+
+            }
+        }
     }
 }
