@@ -85,7 +85,7 @@ fun PersonalProfileScreen(
         mutableStateOf(false)
     }
 
-    if ( user?.userEmail.orEmpty() != userEmail ){
+    if ( user?.userEmail.orEmpty() != userEmail && userType != "CLUB"){
         personalProfile = false
         amIFollowingResult.value = amIFollowing(
             currentUserId = currentUser?.userId.toString().toInt(),
