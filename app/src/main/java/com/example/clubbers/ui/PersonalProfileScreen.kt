@@ -68,6 +68,8 @@ fun PersonalProfileScreen(
 
     val selectedMenu = remember{ mutableStateOf("Posts")}
     val user = usersViewModel.userSelected.collectAsState().value
+    val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
+
     Log.d("USERUSER", user?.userName.toString())
 
     val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
