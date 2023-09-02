@@ -32,4 +32,8 @@ class EventsRepository(private val eventsDAO: EventsDAO) {
         val currentTime = System.currentTimeMillis()
         return eventsDAO.getFutureEvents(currentTime)
     }
+
+    fun getEventsByAdminId(admin_id: Int): Flow<List<Event>>{
+        return eventsDAO.getEventsByAdminId(admin_id)
+    }
 }

@@ -37,4 +37,7 @@ interface EventsDAO {
     // Get future events
     @Query("SELECT * FROM events WHERE time_end > :currentTime ORDER BY time_start ASC")
     fun getFutureEvents(currentTime: Long): Flow<List<Event>>
+
+   @Query("SELECT * FROM events WHERE event_admin_id = :admin_id")
+   fun getEventsByAdminId(admin_id: Int): Flow<List<Event>>
 }

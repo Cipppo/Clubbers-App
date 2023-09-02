@@ -67,4 +67,15 @@ class EventsViewModel @Inject constructor(
     fun updateEvent(event: Event) = viewModelScope.launch {
         repository.updateEvent(event)
     }
+
+    private val _eventsByAdminId = MutableStateFlow<List<Event>>(emptyList())
+
+    val eventsByAdId: StateFlow<List<Event>> get() = _eventsByAdminId
+
+    fun getEventsByAdminId(admin_id: Int) = viewModelScope.launch{
+        repository.getEventsByAdminId(admin_id)
+            .collect {
+                _eventsByAdminId.value = it
+            }
+    }
 }

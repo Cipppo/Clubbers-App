@@ -785,6 +785,8 @@ private fun NavigationGraph(
                 usersViewModel = usersViewModel,
                 notificationsViewModel = sharedNotificationsViewModel,
                 adminsViewModel = sharedAdminsViewModel,
+                locationsViewModel = locationsViewModel,
+                startRequestingData = startRequestingData
             )
             /*
             if(userType == "USER"){
@@ -887,11 +889,17 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.ClubProfile.name){
+            val userFollowsAdminsViewModel = hiltViewModel<UserFollowsAdminsViewModel>()
+            val locationsViewModel = hiltViewModel<LocationsViewModel>()
             AdminProfileScreen(
                 modifier = modifier,
                 adminsViewModel = sharedAdminsViewModel,
                 eventsViewModel = sharedEventsViewModel,
-                notificationsViewModel = sharedNotificationsViewModel
+                notificationsViewModel = sharedNotificationsViewModel,
+                usersViewModel = usersViewModel,
+                userFollowsAdminsViewModel = userFollowsAdminsViewModel,
+                startRequestingData = startRequestingData,
+                locationsViewModel = locationsViewModel,
             )
         }
 

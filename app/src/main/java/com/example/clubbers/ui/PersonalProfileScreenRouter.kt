@@ -9,6 +9,7 @@ import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventsViewModel
+import com.example.clubbers.viewModel.LocationsViewModel
 import com.example.clubbers.viewModel.NotificationsViewModel
 import com.example.clubbers.viewModel.ParticipatesViewModel
 import com.example.clubbers.viewModel.PostsViewModel
@@ -27,6 +28,8 @@ fun personalProfileScreenRouter(
     usersViewModel: UsersViewModel,
     notificationsViewModel: NotificationsViewModel,
     adminsViewModel: AdminsViewModel,
+    startRequestingData: () -> Unit,
+    locationsViewModel: LocationsViewModel
 ){
 
     val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
@@ -80,7 +83,11 @@ fun personalProfileScreenRouter(
             modifier = modifier,
             adminsViewModel = adminsViewModel,
             eventsViewModel = eventsViewModel,
-            notificationsViewModel = notificationsViewModel
+            notificationsViewModel = notificationsViewModel,
+            usersViewModel = usersViewModel,
+            userFollowsAdminsViewModel = usersFollowsAdminsViewModel,
+            startRequestingData = startRequestingData,
+            locationsViewModel = locationsViewModel
         )
     }
 
