@@ -3,9 +3,12 @@
 package com.example.clubbers.ui
 
 import android.content.Context
+import android.content.Intent
 import android.inputmethodservice.Keyboard
+import android.net.Uri
 import android.util.Log
 import android.widget.Space
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,8 +79,12 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.LocalTime
+import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -88,7 +96,8 @@ fun AdminProfileScreen(
     userFollowsAdminsViewModel: UserFollowsAdminsViewModel,
     usersViewModel: UsersViewModel,
     startRequestingData: () -> Unit,
-    locationsViewModel: LocationsViewModel
+    locationsViewModel: LocationsViewModel,
+    onEventClick: () -> Unit
 ) {
 
 
@@ -100,7 +109,7 @@ fun AdminProfileScreen(
 
     var locationLatLng by rememberSaveable { mutableStateOf(LatLng(    44.17798799874249,12.4224273951512)) }
 
-
+    var context = LocalContext.current
 
     var initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
 
@@ -118,7 +127,7 @@ fun AdminProfileScreen(
 
 
     userFollowsAdminsViewModel.getUsers(admin.adminId)
-    var followersCount = userFollowsAdminsViewModel.users.collectAsState().value
+    var followersCount = userFollowsAdminsViewModel.users.collectAsState().value.count()
 
     var followers = remember { mutableStateOf(followersCount) }
     var personalProfile = userEmail == admin.adminUsername
@@ -309,42 +318,46 @@ fun upcomingSection(admin_id: Int, eventsViewModel: EventsViewModel, onEventClic
     ){
         items(events){event ->
             eventsViewModel.selectEvent(event)
-            val selectedEvent = eventsViewModel.eventSelected
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                onClick = {eventsViewModel.selectEvent(event)
-                            onEventClick()}
-            ){
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ){
-                        Spacer(modifier = Modifier.height(2.dp))
-                        if(selectedEvent != null){
-                            Image(
-                                painter = rememberAsyncImagePainter(
-                                    ImageRequest.Builder(
-                                        LocalContext.current
-                                    ).data(data = selectedEvent.eventImage).apply(block = fun ImageRequest.Builder.() {
-                                        crossfade(true)
-                                        placeholder(R.drawable.ic_launcher_foreground)
-                                        error(R.drawable.ic_launcher_foreground)
-                                    }).build()
-                                ),
-                                contentDescription = "Event Banner",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .heightIn(min = 100.dp)
-                            )
+            if(event.timeStart.toInstant() > Calendar.getInstance().toInstant()){
+                val selectedEvent = eventsViewModel.eventSelected
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    onClick = {eventsViewModel.selectEvent(event)
+                        onEventClick()}
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            if (selectedEvent != null) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        ImageRequest.Builder(
+                                            LocalContext.current
+                                        ).data(data = selectedEvent.eventImage)
+                                            .apply(block = fun ImageRequest.Builder.() {
+                                                crossfade(true)
+                                                placeholder(R.drawable.ic_launcher_foreground)
+                                                error(R.drawable.ic_launcher_foreground)
+                                            }).build()
+                                    ),
+                                    contentDescription = "Event Banner",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                            shape = MaterialTheme.shapes.small
+                                        )
+                                        .heightIn(min = 100.dp)
+                                )
+                            }
                         }
+                        Text(event.eventName)
                     }
                 }
             }
@@ -353,7 +366,37 @@ fun upcomingSection(admin_id: Int, eventsViewModel: EventsViewModel, onEventClic
 }
 
 
+fun openDialer(phone: Long, context: Context ){
 
+    val uri = Uri.parse("tel:$phone")
+
+    Log.d("CHIAM", "1")
+
+    val i = Intent(Intent.ACTION_DIAL, uri)
+    try{
+        context.startActivity(i)
+    }catch(s: SecurityException){
+        Toast.makeText(context, "An error occurred", Toast.LENGTH_LONG)
+            .show()
+    }
+
+}
+
+fun openMaps(context: Context, markerLocation: LatLng){
+
+    val uri = Uri.parse("google.streetview:cbll=${markerLocation.latitude},${markerLocation.longitude}")
+    val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+
+    mapIntent.setPackage("com.google.android.apps.maps")
+
+    try{
+        context.startActivity(mapIntent)
+    }catch(s: SecurityException){
+        Toast.makeText(context, "An error occurred", Toast.LENGTH_LONG)
+            .show()
+    }
+
+}
 
 @Composable
 fun LocationSection(admin_address: String, initialCameraPosition: CameraPosition, startRequestingData: () -> Unit, context: Context, locationsViewModel: LocationsViewModel, markerLocation: LatLng){
@@ -361,7 +404,7 @@ fun LocationSection(admin_address: String, initialCameraPosition: CameraPosition
     var eventLocation by rememberSaveable { mutableStateOf("") }
     var eventLocationLat by rememberSaveable { mutableStateOf(0.0)}
     var eventLocationLon by rememberSaveable { mutableStateOf(0.0)}
-
+    var phoneNumber = 3206770451
         /*
     var latLong = LatLng(
         44.17798799874249,
@@ -372,8 +415,22 @@ fun LocationSection(admin_address: String, initialCameraPosition: CameraPosition
 
     var latLong = LatLng(0.0, 0.0)
 
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Button(onClick = { openMaps(context = context, markerLocation = markerLocation) },
+            modifier = Modifier.padding(10.dp)) {
+                Text("Open in maps")
+            }
+            Button(onClick = { openDialer(phoneNumber, context = context) },
+                modifier = Modifier.padding(10.dp)) {
+                Text("Call")
+            }
+        }
+        MapView(placeName = admin_address, initialCameraPosition = initialCameraPosition, markerPosition = markerLocation)
 
-    MapView(placeName = admin_address, initialCameraPosition = initialCameraPosition, markerPosition = markerLocation)
+    }
+
 }
 
 
@@ -394,44 +451,48 @@ fun PastSection(admin_id: Int, eventsViewModel: EventsViewModel, onEventClick: (
         items(events){event ->
             eventsViewModel.selectEvent(event)
             val selectedEvent = eventsViewModel.eventSelected
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                onClick = {eventsViewModel.selectEvent(event)
-                    onEventClick()}
-            ){
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ){
-                        Spacer(modifier = Modifier.height(2.dp))
-                        if(selectedEvent != null){
-                            Image(
-                                painter = rememberAsyncImagePainter(
-                                    ImageRequest.Builder(
-                                        LocalContext.current
-                                    ).data(data = selectedEvent.eventImage).apply(block = fun ImageRequest.Builder.() {
-                                        crossfade(true)
-                                        placeholder(R.drawable.ic_launcher_foreground)
-                                        error(R.drawable.ic_launcher_foreground)
-                                    }).build()
-                                ),
-                                contentDescription = "Event Banner",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .heightIn(min = 100.dp)
-                            )
+            if(event.timeStart.toInstant() < Calendar.getInstance().toInstant()){
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    onClick = {eventsViewModel.selectEvent(event)
+                        onEventClick()}
+                ){
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ){
+                            Spacer(modifier = Modifier.height(2.dp))
+                            if(selectedEvent != null){
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        ImageRequest.Builder(
+                                            LocalContext.current
+                                        ).data(data = selectedEvent.eventImage).apply(block = fun ImageRequest.Builder.() {
+                                            crossfade(true)
+                                            placeholder(R.drawable.ic_launcher_foreground)
+                                            error(R.drawable.ic_launcher_foreground)
+                                        }).build()
+                                    ),
+                                    contentDescription = "Event Banner",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                            shape = MaterialTheme.shapes.small
+                                        )
+                                        .heightIn(min = 100.dp)
+                                )
+                            }
                         }
+                        Text(event.eventName)
                     }
                 }
             }
+
         }
     }
 }

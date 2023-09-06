@@ -786,7 +786,8 @@ private fun NavigationGraph(
                 notificationsViewModel = sharedNotificationsViewModel,
                 adminsViewModel = sharedAdminsViewModel,
                 locationsViewModel = locationsViewModel,
-                startRequestingData = startRequestingData
+                startRequestingData = startRequestingData,
+                onEventClick = {navController.navigate(AppScreen.Event.name)}
             )
             /*
             if(userType == "USER"){
@@ -900,6 +901,7 @@ private fun NavigationGraph(
                 userFollowsAdminsViewModel = userFollowsAdminsViewModel,
                 startRequestingData = startRequestingData,
                 locationsViewModel = locationsViewModel,
+                onEventClick = {navController.navigate(AppScreen.Event.name)}
             )
         }
 

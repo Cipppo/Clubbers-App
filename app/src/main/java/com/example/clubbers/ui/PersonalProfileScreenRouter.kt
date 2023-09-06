@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.room.util.convertByteToUUID
+import com.example.clubbers.AppScreen
 import com.example.clubbers.data.entities.Admin
 import com.example.clubbers.data.entities.User
 import com.example.clubbers.viewModel.AdminsViewModel
@@ -29,7 +31,8 @@ fun personalProfileScreenRouter(
     notificationsViewModel: NotificationsViewModel,
     adminsViewModel: AdminsViewModel,
     startRequestingData: () -> Unit,
-    locationsViewModel: LocationsViewModel
+    locationsViewModel: LocationsViewModel,
+    onEventClick: () -> Unit,
 ){
 
     val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
@@ -87,7 +90,8 @@ fun personalProfileScreenRouter(
             usersViewModel = usersViewModel,
             userFollowsAdminsViewModel = usersFollowsAdminsViewModel,
             startRequestingData = startRequestingData,
-            locationsViewModel = locationsViewModel
+            locationsViewModel = locationsViewModel,
+            onEventClick = onEventClick
         )
     }
 
