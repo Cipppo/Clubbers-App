@@ -22,26 +22,29 @@ import com.example.clubbers.viewModel.UsersViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    /*
+
     modifier: Modifier = Modifier,
     postsViewModel: PostsViewModel,
     eventsViewModel: EventsViewModel,
     usersViewModel: UsersViewModel,
     userFollowsUsersViewModel: UserFollowsUsersViewModel,
-    user: User
-     */
+
 ) {
-    /*
+
     val sharedPreferences = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
     val userMail = sharedPreferences.getString("USER_LOGGED", "None")
 
     usersViewModel.getUserIdByEmail(userMail.orEmpty())
+    val user = usersViewModel.userByMail.collectAsState().value
+    val userId = user?.userId.toString()
 
-    val userId = user.userId
 
-    userFollowsUsersViewModel.getFollowed(userId)
+
+    //userFollowsUsersViewModel.getFollowed(userId.toInt())
+    /*
     val userFollowed = userFollowsUsersViewModel.followed.collectAsState().value
     val userIdList = userFollowed.map { user -> user.userId }
+
 
     postsViewModel.getAllPosts()
     val posts = postsViewModel.allPosts.collectAsState(initial = listOf()).value
@@ -54,7 +57,9 @@ fun HomeScreen(
         }
     }
 
+     */
+
     Log.d("2", "2")
 
-     */
+
 }

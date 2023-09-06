@@ -284,9 +284,9 @@ fun AdminProfileScreen(
             }
             //TODO aggiornare gli eventClick
             if(selectedMenu.value == "Upcoming"){
-                upcomingSection(admin_id = admin.adminId, eventsViewModel = eventsViewModel, onEventClick = {})
+                upcomingSection(admin_id = admin.adminId, eventsViewModel = eventsViewModel, onEventClick = onEventClick)
             }else if(selectedMenu.value == "Past"){
-                PastSection(admin_id = admin.adminId, eventsViewModel = eventsViewModel, onEventClick = {})
+                PastSection(admin_id = admin.adminId, eventsViewModel = eventsViewModel, onEventClick = onEventClick)
             }else if(selectedMenu.value == "Location"){
                 LocationSection(
                     admin_address = admin.adminAddress,

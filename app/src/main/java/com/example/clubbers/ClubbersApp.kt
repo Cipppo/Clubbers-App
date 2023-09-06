@@ -538,6 +538,7 @@ private fun NavigationGraph(
     val sharedNotificationsViewModel = hiltViewModel<NotificationsViewModel>()
     val sharedAdminsViewModel = hiltViewModel<AdminsViewModel>()
     val sharedEventsViewModel = hiltViewModel<EventsViewModel>()
+    val sharedUsersFollowsUsersViewModel = hiltViewModel<UserFollowsUsersViewModel>()
 
     val adminProfile = Admin(
         adminId = 1,
@@ -557,7 +558,10 @@ private fun NavigationGraph(
     ) {
         // Home Screen
         composable(route = AppScreen.Home.name) {
-            HomeScreen()
+            HomeScreen(postsViewModel = postsViewModel,
+            eventsViewModel = sharedEventsViewModel,
+            usersViewModel = usersViewModel,
+            userFollowsUsersViewModel = sharedUsersFollowsUsersViewModel)
         }
 
         // Today's Events Screen
@@ -779,7 +783,7 @@ private fun NavigationGraph(
                 modifier = modifier,
                 postsViewModel = postsViewModel,
                 participatesViewModel = participatesViewModel,
-                eventsViewModel = personalProfileEventsViewModel,
+                eventsViewModel = eventsViewModel,
                 usersFollowsUsersViewModel = userFollowsUsersViewModel,
                 usersFollowsAdminsViewModel = userFollowsAdminsViewModel,
                 usersViewModel = usersViewModel,
@@ -895,7 +899,7 @@ private fun NavigationGraph(
             AdminProfileScreen(
                 modifier = modifier,
                 adminsViewModel = sharedAdminsViewModel,
-                eventsViewModel = sharedEventsViewModel,
+                eventsViewModel = eventsViewModel,
                 notificationsViewModel = sharedNotificationsViewModel,
                 usersViewModel = usersViewModel,
                 userFollowsAdminsViewModel = userFollowsAdminsViewModel,
@@ -915,13 +919,12 @@ private fun NavigationGraph(
                 usersViewModel = usersViewModel,
                 postsViewModel = postsViewModel,
                 participatesViewModel = participatesViewModel,
-                eventsViewModel = sharedEventsViewModel,
+                eventsViewModel = eventsViewModel,
                 userFollowsUsersViewModel = usersFollowsUsersViewModel,
                 userFollowsAdminsViewModel = usersFollowsAdminsViewModel,
-                notificationsViewModel = sharedNotificationsViewModel
-            ) {
-
-            }
+                notificationsViewModel = sharedNotificationsViewModel,
+                onEventClick = {navController.navigate(AppScreen.Event.name)}
+            )
         }
     }
 }

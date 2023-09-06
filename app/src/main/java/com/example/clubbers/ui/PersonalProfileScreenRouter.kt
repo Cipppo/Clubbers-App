@@ -62,10 +62,9 @@ fun personalProfileScreenRouter(
             eventsViewModel = eventsViewModel,
             userFollowsUsersViewModel = usersFollowsUsersViewModel,
             userFollowsAdminsViewModel = usersFollowsAdminsViewModel,
-            notificationsViewModel = notificationsViewModel
-        ) {
-
-        }
+            notificationsViewModel = notificationsViewModel,
+            onEventClick = onEventClick
+        )
     }else if (userType == "CLUB"){
         adminsViewModel.getAdminByMail(adminMail = userEmail)
         var admin = adminsViewModel.adminByMail.collectAsState().value

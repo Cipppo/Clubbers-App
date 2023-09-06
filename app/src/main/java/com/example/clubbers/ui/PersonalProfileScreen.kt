@@ -62,7 +62,7 @@ fun PersonalProfileScreen(
     userFollowsUsersViewModel: UserFollowsUsersViewModel,
     userFollowsAdminsViewModel: UserFollowsAdminsViewModel,
     notificationsViewModel: NotificationsViewModel,
-    onBookedEventClick: () -> Unit
+    onEventClick: () -> Unit
 ){
 
 
@@ -207,7 +207,7 @@ fun PersonalProfileScreen(
                 PostFeed(user, postsViewModel, eventsViewModel)
             }
             if(selectedMenu.value == "Booked"){
-                UserBookedEvents(userId, participatesViewModel, eventsViewModel, onBookedEventClick)
+                UserBookedEvents(userId, participatesViewModel, eventsViewModel, onEventClick)
             }
         }
     }
