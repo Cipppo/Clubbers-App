@@ -602,7 +602,6 @@ fun EventItem(
                 isUserParticipating = participants.contains(user)
 
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val eventStartDate = sdf.format(event.timeStart)
                 val eventEndDate = sdf.format(event.timeEnd)
                 val currentDate = sdf.format(System.currentTimeMillis())
 
@@ -638,7 +637,7 @@ fun EventItem(
                             }
                         },
                         enabled = event.participants < event.maxParticipants!! &&
-                                currentDate in eventStartDate..eventEndDate,
+                                currentDate < eventEndDate
                     ) {
                         if (isUserParticipating) {
                             Text(
