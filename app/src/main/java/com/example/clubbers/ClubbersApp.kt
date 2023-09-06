@@ -502,7 +502,8 @@ fun NavigationApp (
                 navController,
                 innerPadding,
                 warningViewModel,
-                usersViewModel = usersViewModel
+                usersViewModel = usersViewModel,
+                isAdmin = isAdmin
             )
             val context = LocalContext.current
             if (warningViewModel.showConnectivitySnackBar.value) {
@@ -526,7 +527,8 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     warningViewModel: WarningViewModel,
     modifier: Modifier = Modifier,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    isAdmin: Boolean
 ) {
     val isLoggedIn =
         LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -555,7 +557,7 @@ private fun NavigationGraph(
 
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) AppScreen.Home.name else AppScreen.Login.name,
+        startDestination = if (isLoggedIn && !isAdmin) AppScreen.Home.name else if (isLoggedIn) AppScreen.Profile.name else AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
         // Home Screen
