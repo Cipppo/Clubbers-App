@@ -601,51 +601,52 @@ fun EventItem(
                 var isUserParticipating by rememberSaveable { mutableStateOf(false) }
                 isUserParticipating = participants.contains(user)
 
+
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val eventEndDate = sdf.format(event.timeEnd)
                 val currentDate = sdf.format(System.currentTimeMillis())
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    ElevatedButton(
-                        onClick = {
-                            val participant = user?.let {
-                                Participates(
-                                    eventId = event.eventId,
-                                    userId = it.userId
-                                )
-                            }
-                            if (isUserParticipating) participant?.let {
-                                participatesViewModel.deleteParticipant(it)
-                                event.participants--
-                                eventsViewModel.updateEvent(event)
-                            } else participant?.let {
-                                participatesViewModel.addNewParticipant(it)
-                                event.participants++
-                                sendEventParticipationNotification(
-                                    context = context,
-                                    eventTitle = eventTitle,
-                                    date = timeStart,
-                                    place = place.name,
-                                    notificationsViewModel = notificationsViewModel,
-                                    userId = userId,
-                                    eventAdminId = event.eventAdminId)
-                                eventsViewModel.updateEvent(event)
-                            }
-                        },
-                        enabled = event.participants < event.maxParticipants!! &&
-                                currentDate < eventEndDate
+                if (eventEndDate < currentDate) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        if (isUserParticipating) {
-                            Text(
-                                text = "Leave",
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        } else {
-                            Text(text = "Join")
+                        ElevatedButton(
+                            onClick = {
+                                val participant = user?.let {
+                                    Participates(
+                                        eventId = event.eventId,
+                                        userId = it.userId
+                                    )
+                                }
+                                if (isUserParticipating) participant?.let {
+                                    participatesViewModel.deleteParticipant(it)
+                                    event.participants--
+                                    eventsViewModel.updateEvent(event)
+                                } else participant?.let {
+                                    participatesViewModel.addNewParticipant(it)
+                                    event.participants++
+                                    sendEventParticipationNotification(
+                                        context = context,
+                                        eventTitle = eventTitle,
+                                        date = timeStart,
+                                        place = place.name,
+                                        notificationsViewModel = notificationsViewModel,
+                                        userId = userId,
+                                        eventAdminId = event.eventAdminId)
+                                    eventsViewModel.updateEvent(event)
+                                }
+                            },
+                            enabled = event.participants < event.maxParticipants!!
+                        ) {
+                            if (isUserParticipating) {
+                                Text(
+                                    text = "Leave",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else {
+                                Text(text = "Join")
+                            }
                         }
                     }
                 }
