@@ -605,7 +605,9 @@ fun EventItem(
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val eventEndDate = sdf.format(event.timeEnd)
                 val currentDate = sdf.format(System.currentTimeMillis())
-                if (currentDate < eventEndDate) {
+                if (
+                    eventEndDate >= currentDate
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
