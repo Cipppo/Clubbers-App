@@ -36,7 +36,8 @@ import java.util.Objects
 
 @Composable
 fun UserOptionScreen(
-    onLogout : () -> Unit
+    onLogout : () -> Unit,
+    onPropicChange: () -> Unit,
 ){
 
     val context = LocalContext.current
@@ -93,8 +94,7 @@ fun UserOptionScreen(
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(start = 4.dp)
-            .clickable { picOrGalleryState.show()
-                       changeProPic(context = context, capturedImageUri = capturedImageUri.value, photoType)
+            .clickable { onPropicChange()
             },
             verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -122,15 +122,6 @@ fun UserOptionScreen(
         }
 
 
-        PicOrGalleyChoicePopup(
-            context = context,
-            uri = uri,
-            galleryLauncher = galleryLauncher,
-            cameraLauncher = cameraLauncher,
-            permissionLauncher = permissionLauncher,
-            title = "choose What to do",
-            sheetState = picOrGalleryState
-        )
     }
 }
 
@@ -142,7 +133,3 @@ fun logout(onLogout: () -> Unit, sharedPreferences: SharedPreferences) {
     onLogout()
 }
 
-fun changeProPic(context: Context, capturedImageUri: Uri, photoType: String){
-    saveImage(context = context, context.applicationContext.contentResolver, capturedImageUri = capturedImageUri, photoType)
-
-}

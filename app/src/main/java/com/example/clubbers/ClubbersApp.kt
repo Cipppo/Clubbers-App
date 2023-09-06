@@ -87,6 +87,7 @@ import com.example.clubbers.ui.UserOptionScreen
 import com.example.clubbers.ui.UserSearchPage
 import com.example.clubbers.ui.NotificationScreen
 import com.example.clubbers.ui.NotificationScreenRouter
+import com.example.clubbers.ui.changeProPicScreen
 import com.example.clubbers.ui.personalProfileScreenRouter
 import com.example.clubbers.viewModel.AdminsViewModel
 import com.example.clubbers.viewModel.EventHasTagsViewModel
@@ -102,6 +103,7 @@ import com.example.clubbers.viewModel.UserFollowsUsersViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
+import com.maxkeppeker.sheets.core.icons.sharp.Apps
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -135,6 +137,7 @@ sealed class AppScreen(val name: String) {
     // TODO: If there will be more screens, add them here
     object ClubProfile : AppScreen("Club profile Screen")
     object UserProfile : AppScreen("Clubber profile screen")
+    object ProPicChange : AppScreen("Propic change Screen")
 }
 
 @HiltAndroidApp
@@ -865,7 +868,8 @@ private fun NavigationGraph(
                 onLogout = {
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Login.name)
-                }
+                },
+                onPropicChange = {navController.navigate(AppScreen.ProPicChange.name)}
             )
         }
 
@@ -925,6 +929,10 @@ private fun NavigationGraph(
                 notificationsViewModel = sharedNotificationsViewModel,
                 onEventClick = {navController.navigate(AppScreen.Event.name)}
             )
+        }
+
+        composable(route = AppScreen.ProPicChange.name){
+            changeProPicScreen()
         }
     }
 }

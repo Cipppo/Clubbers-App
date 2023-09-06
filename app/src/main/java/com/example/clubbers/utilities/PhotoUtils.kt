@@ -68,8 +68,9 @@ fun saveImage(context: Context, contentResolver: ContentResolver, capturedImageU
     var filename = "Image_" + SystemClock.currentThreadTimeMillis() + ".jpg"
     val file = File(appDir, filename)
     val sharedPreferences = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+    val userMail = sharedPreferences.getString("USER_LOGGED", "None")
     with(sharedPreferences.edit()) {
-        putString("ACTUAL_PROPIC", filename)
+        putString("${userMail}_ACTUAL_PROPIC", filename)
         apply()
     }
     val fileOutputStream = file.outputStream()
