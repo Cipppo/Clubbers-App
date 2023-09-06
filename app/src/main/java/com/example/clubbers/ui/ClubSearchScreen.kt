@@ -1,5 +1,6 @@
 package com.example.clubbers.ui
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -76,11 +77,6 @@ fun ClubSearchScreen(
                 .fillMaxSize(),
             content = {
                 stickyHeader {
-                    AdminAutocompleteSearchbar(
-                        users = admins,
-                        adminsViewModel = adminsViewModel,
-                        onSearchAction = { TODO() }
-                    )
                     Divider(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                         thickness = 1.dp,
@@ -214,7 +210,13 @@ fun AdminItem(
     onClickAction: () -> Unit,
     adminsViewModel: AdminsViewModel
 ){
-    val proPicUri = admin.adminImage
+    var proPicUri = admin.adminImage
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${admin.adminEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+
+    if(proPicUri == ""){
+        proPicUri = propicChanged
+    }
+
 
     Card(
         modifier = Modifier

@@ -114,6 +114,8 @@ fun AdminProfileScreen(
     var initialCameraPosition = CameraPosition.fromLatLngZoom(locationLatLng, 10f)
 
 
+
+
     val admin = Admin(
         adminId = 1,
         adminUsername = "admin1",
@@ -124,6 +126,10 @@ fun AdminProfileScreen(
         adminAddress = "prova address admin1",
         isAdmin = true
     )
+
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${admin.adminEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+
+    val proPicUri = propicChanged
 
 
     userFollowsAdminsViewModel.getUsers(admin.adminId)
@@ -167,7 +173,7 @@ fun AdminProfileScreen(
                         painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(
                                 LocalContext.current
-                            ).data(data = admin.adminImage)
+                            ).data(data = proPicUri)
                                 .apply(block = fun ImageRequest.Builder.() {
                                     crossfade(true)
                                     placeholder(R.drawable.ic_launcher_foreground)

@@ -76,11 +76,6 @@ fun UserSearchPage(
                     .fillMaxSize(),
                 content = {
                     stickyHeader {
-                        AutoCompleteSearchBar(
-                            users = users,
-                            usersViewModel = usersViewModel,
-                            onSearchAction = { TODO() }
-                        )
                         Divider(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                             thickness = 1.dp,

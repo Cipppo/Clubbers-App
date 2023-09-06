@@ -442,7 +442,7 @@ fun EventItem(
 
     val eventTitle = event.eventName
     val adminName = admin?.adminUsername
-    val proPicUri = admin?.adminImage
+    var proPicUri = admin?.adminImage
     val imageUri = event.eventImage
     val caption = event.eventDescription.orEmpty()
     val tagsList = tags?.map { it.tagName }
@@ -454,6 +454,12 @@ fun EventItem(
         longitude = event.eventLocationLon
     )
 
+
+    var propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${admin?.adminEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+
+    if(proPicUri == ""){
+        proPicUri = propicChanged
+    }
 
     val context = LocalContext.current
 
