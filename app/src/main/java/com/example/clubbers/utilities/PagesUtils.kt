@@ -101,6 +101,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import kotlin.math.absoluteValue
 
@@ -602,12 +603,8 @@ fun EventItem(
                 isUserParticipating = participants.contains(user)
 
 
-                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val eventEndDate = sdf.format(event.timeEnd)
-                val currentDate = sdf.format(System.currentTimeMillis())
-                if (
-                    eventEndDate >= currentDate
-                ) {
+                val currentDate = System.currentTimeMillis()
+                if (event.timeEnd >= Date(currentDate)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
