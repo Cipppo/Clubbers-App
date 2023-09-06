@@ -601,6 +601,11 @@ fun EventItem(
                 var isUserParticipating by rememberSaveable { mutableStateOf(false) }
                 isUserParticipating = participants.contains(user)
 
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val eventStartDate = sdf.format(event.timeStart)
+                val eventEndDate = sdf.format(event.timeEnd)
+                val currentDate = sdf.format(System.currentTimeMillis())
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -632,7 +637,8 @@ fun EventItem(
                                 eventsViewModel.updateEvent(event)
                             }
                         },
-                        enabled = event.participants < event.maxParticipants!!
+                        enabled = event.participants < event.maxParticipants!! &&
+                                currentDate in eventStartDate..eventEndDate,
                     ) {
                         if (isUserParticipating) {
                             Text(
