@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Environment
 import android.os.SystemClock
 import android.provider.MediaStore
+import androidx.compose.ui.platform.LocalContext
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
@@ -64,7 +65,13 @@ fun saveImage(context: Context, contentResolver: ContentResolver, capturedImageU
     if (!appDir.exists()) {
         appDir.mkdir()
     }
-    val file = File(appDir, "Image_" + SystemClock.currentThreadTimeMillis() + ".jpg")
+    var filename = "Image_" + SystemClock.currentThreadTimeMillis() + ".jpg"
+    val file = File(appDir, filename)
+    val sharedPreferences = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+    with(sharedPreferences.edit()) {
+        putString("ACTUAL_PROPIC", filename)
+        apply()
+    }
     val fileOutputStream = file.outputStream()
     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
     fileOutputStream.close()
