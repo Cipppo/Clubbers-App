@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.os.Build
-import android.text.style.TextAppearanceSpan
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
@@ -77,6 +76,7 @@ import com.example.clubbers.ui.LoginScreen
 import com.example.clubbers.ui.NewEventLocationScreen
 import com.example.clubbers.ui.NewEventScreen
 import com.example.clubbers.ui.NewPostScreen
+import com.example.clubbers.ui.NotificationScreenRouter
 import com.example.clubbers.ui.PersonalProfileScreen
 import com.example.clubbers.ui.PostScreen
 import com.example.clubbers.ui.RegistrationScreen
@@ -85,8 +85,6 @@ import com.example.clubbers.ui.SelectEventForPostScreen
 import com.example.clubbers.ui.TodayScreen
 import com.example.clubbers.ui.UserOptionScreen
 import com.example.clubbers.ui.UserSearchPage
-import com.example.clubbers.ui.NotificationScreen
-import com.example.clubbers.ui.NotificationScreenRouter
 import com.example.clubbers.ui.changeProPicScreen
 import com.example.clubbers.ui.personalProfileScreenRouter
 import com.example.clubbers.viewModel.AdminsViewModel
@@ -103,7 +101,6 @@ import com.example.clubbers.viewModel.UserFollowsUsersViewModel
 import com.example.clubbers.viewModel.UsersAndAdminsViewsViewModel
 import com.example.clubbers.viewModel.UsersViewModel
 import com.example.clubbers.viewModel.WarningViewModel
-import com.maxkeppeker.sheets.core.icons.sharp.Apps
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -246,17 +243,19 @@ fun BottomAppBarFunction (
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                IconButton(
-                    onClick = onHomeButtonClicked
-                ) {
-                    Icon(
-                        Icons.Filled.Home,
-                        contentDescription = "Go to Home Screen",
-                        tint = if (currentScreen == AppScreen.Home.name)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.secondary
-                    )
+                if (!isAdmin) {
+                    IconButton(
+                        onClick = onHomeButtonClicked
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Go to Home Screen",
+                            tint = if (currentScreen == AppScreen.Home.name)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
                 if (!isAdmin) {
                     IconButton(
