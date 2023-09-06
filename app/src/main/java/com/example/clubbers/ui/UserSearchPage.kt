@@ -1,5 +1,6 @@
 package com.example.clubbers.ui
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -229,7 +230,16 @@ fun UserItem(
     onClickAction: () -> Unit,
     usersViewModel: UsersViewModel
 ){
-    val proPicUri = user.userImage
+    var proPicUri = ""
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${user.userEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+
+
+    if(user.userImage == ""){
+        proPicUri = propicChanged
+    }else{
+        proPicUri = user.userImage
+    }
+
 
     Card(
         modifier = Modifier

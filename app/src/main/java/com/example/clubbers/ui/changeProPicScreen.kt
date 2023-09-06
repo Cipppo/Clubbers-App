@@ -38,11 +38,14 @@ import com.example.clubbers.R
 import com.example.clubbers.utilities.PicOrGalleyChoicePopup
 import com.example.clubbers.utilities.createImageFile
 import com.example.clubbers.utilities.saveImage
+import com.example.clubbers.utilities.saveProPicChanged
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.util.Objects
 
 @Composable
-fun changeProPicScreen(){
+fun changeProPicScreen(
+    onProPicChanged: () -> Unit,
+){
 
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
@@ -174,7 +177,7 @@ fun changeProPicScreen(){
 
 
 fun saveProPic(context: Context, capturedImageUri: Uri, photoType: String){
-    saveImage(context = context, context.contentResolver, capturedImageUri = capturedImageUri, photoType)
+    saveProPicChanged(context = context, context.contentResolver, capturedImageUri = capturedImageUri, photoType)
     val sharedPreferences = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
     val userMail = sharedPreferences.getString("USER_LOGGED", "None")
     val propic = sharedPreferences.getString("${userMail}_ACTUAL_PROPIC", "None")

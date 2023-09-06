@@ -100,6 +100,16 @@ fun HomeScreen(
 
 
     userFollowsUsersViewModel.getFollowed(user.userId)
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${user?.userEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+
+    var propicUri = ""
+
+    if(user?.userImage == ""){
+        propicUri = propicChanged
+    }else{
+        propicUri = user?.userImage!!
+    }
+
 
     val userFollowed = userFollowsUsersViewModel.followed.collectAsState().value
 
@@ -120,8 +130,24 @@ fun HomeScreen(
     if(postList == emptyList<Post>()){
         Text("No posts to be shown")
     }else{
-        LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight()){
+        LazyColumn(modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()){
             items(postList){post ->
+
+                val userId = post.postUserId
+                usersViewModel.getUserById(userId = userId)
+                val postUser = usersViewModel.userById.collectAsState().value
+                val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${postUser?.userEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+                var propicUri = ""
+                if(postUser?.userImage == ""){
+                    propicUri = propicChanged
+                }else{
+                    propicUri = postUser?.userImage!!
+                }
+
+
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -136,7 +162,7 @@ fun HomeScreen(
                                 painter = rememberAsyncImagePainter(
                                     ImageRequest.Builder(
                                         LocalContext.current
-                                    ).data(data = user?.userImage).apply(block = fun ImageRequest.Builder.() {
+                                    ).data(data = propicUri).apply(block = fun ImageRequest.Builder.() {
                                         crossfade(true)
                                         placeholder(R.drawable.ic_launcher_foreground)
                                         error(R.drawable.ic_launcher_foreground)
@@ -154,7 +180,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.padding(end = 8.dp))
                             eventsViewModel.getEventById(post.postEventId)
                             var eventName = eventsViewModel.eventSelected?.eventName
-                            Text(text= "${user?.userUsername} is been at $eventName", style = MaterialTheme.typography.bodySmall)
+                            Text(text= "${postUser?.userUsername} is been at $eventName", style = MaterialTheme.typography.bodySmall)
                         }
                         Image(
                             painter = rememberAsyncImagePainter(

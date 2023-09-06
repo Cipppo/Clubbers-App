@@ -65,11 +65,12 @@ fun PersonalProfileScreen(
     onEventClick: () -> Unit
 ){
 
-
+    val sharedPreferences = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
+    val userMail = sharedPreferences.getString("USER_LOGGED", "None")
     val selectedMenu = remember{ mutableStateOf("Posts")}
     val user = usersViewModel.userSelected.collectAsState().value
     val userType = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_TYPE", "NONE").orEmpty()
-
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${userMail}_ACTUAL_PROPIC", "NONE").orEmpty()
     Log.d("USERUSER", user?.userName.toString())
 
     val userEmail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None").orEmpty()
@@ -101,7 +102,13 @@ fun PersonalProfileScreen(
     val userName = user?.userName.orEmpty()
     val userBio = user?.userBio.orEmpty()
     val userId = user?.userId.toString().toInt()
-    val propicUri = user?.userImage
+    var propicUri = user?.userImage
+
+    Log.d("URURURU", propicUri.toString())
+    if(propicUri == ""){
+        propicUri = propicChanged
+    }
+
 
     Box(
         modifier = Modifier

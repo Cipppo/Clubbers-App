@@ -3,6 +3,7 @@ package com.example.clubbers.utilities
 import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -710,11 +711,18 @@ fun PostItem(
 ) {
     usersViewModel.getUserById(post.postUserId)
     val user by usersViewModel.userById.collectAsState()
+    val userMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None")
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${userMail}_ACTUAL_PROPIC", "NONE").orEmpty()
 
     val proPicUri = user?.userImage
     val userName = user?.userName
     val imageUriList: List<Uri> = post.postImage.split(",").map { Uri.parse(it) }
 
+    if(proPicUri == ""){
+        proPicUri == propicChanged
+    }
+
+    Log.d("Puri", proPicUri.toString())
     ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)

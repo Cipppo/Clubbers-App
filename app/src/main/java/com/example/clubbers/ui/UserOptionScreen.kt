@@ -38,6 +38,7 @@ import java.util.Objects
 fun UserOptionScreen(
     onLogout : () -> Unit,
     onPropicChange: () -> Unit,
+    onProPicChanged: () -> Unit,
 ){
 
     val context = LocalContext.current

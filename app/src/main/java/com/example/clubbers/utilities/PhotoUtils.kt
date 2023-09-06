@@ -67,10 +67,42 @@ fun saveImage(context: Context, contentResolver: ContentResolver, capturedImageU
     }
     var filename = "Image_" + SystemClock.currentThreadTimeMillis() + ".jpg"
     val file = File(appDir, filename)
+    val fileOutputStream = file.outputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
+    fileOutputStream.close()
+}
+
+fun saveProPicChanged(context: Context, contentResolver: ContentResolver, capturedImageUri: Uri, photoType: String){
+    val bitmap = getBitmap(capturedImageUri, contentResolver)
+
+    // Save image to gallery
+    val values = ContentValues()
+    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+    values.put(MediaStore.Images.Media.DISPLAY_NAME, "Image_" + SystemClock.currentThreadTimeMillis())
+
+    val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+
+    val outputStream = imageUri?.let { contentResolver.openOutputStream(it) }
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+    outputStream?.close()
+
+    // Save image to app directory
+    val directoryName = when(photoType) {
+        "Event" -> "Events"
+        "Post" -> "Posts"
+        "ProPic" -> "ProPics"
+        else -> throw IllegalArgumentException("Invalid photo type")
+    }
+    val appDir = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), directoryName)
+    if (!appDir.exists()) {
+        appDir.mkdir()
+    }
+    var filename = "Image_" + SystemClock.currentThreadTimeMillis() + ".jpg"
+    val file = File(appDir, filename)
     val sharedPreferences = context.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE)
     val userMail = sharedPreferences.getString("USER_LOGGED", "None")
     with(sharedPreferences.edit()) {
-        putString("${userMail}_ACTUAL_PROPIC", filename)
+        putString("${userMail}_ACTUAL_PROPIC", file.toString())
         apply()
     }
     val fileOutputStream = file.outputStream()

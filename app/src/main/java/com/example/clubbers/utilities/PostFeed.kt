@@ -1,5 +1,6 @@
 package com.example.clubbers.utilities
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,17 @@ fun PostFeed(
     postsViewModel.getPostsByUserId(userId = user?.userId.toString().toInt())
     val posts = postsViewModel.posts.collectAsState().value.reversed()
 
+    val userMail = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("USER_LOGGED", "None")
+    val propicChanged = LocalContext.current.getSharedPreferences("USER_LOGGED", Context.MODE_PRIVATE).getString("${user?.userEmail}_ACTUAL_PROPIC", "NONE").orEmpty()
+
+
+    var propicUri = ""
+
+    if(user?.userImage == ""){
+        propicUri = propicChanged
+    }else{
+        propicUri = user?.userImage!!
+    }
 
 
 
@@ -66,7 +78,7 @@ fun PostFeed(
                             painter = rememberAsyncImagePainter(
                                 ImageRequest.Builder(
                                     LocalContext.current
-                                ).data(data = user?.userImage).apply(block = fun ImageRequest.Builder.() {
+                                ).data(data = propicUri).apply(block = fun ImageRequest.Builder.() {
                                     crossfade(true)
                                     placeholder(R.drawable.ic_launcher_foreground)
                                     error(R.drawable.ic_launcher_foreground)

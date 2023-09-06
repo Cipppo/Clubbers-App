@@ -233,6 +233,8 @@ fun BottomAppBarFunction (
     onNewEventButtonClicked: () -> Unit,
     onDiscoverButtonClicked: () -> Unit,
     onProfileButtonClicked: () -> Unit,
+    onSearchPressed: () -> Unit,
+    onNotificationsPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar (
@@ -307,6 +309,20 @@ fun BottomAppBarFunction (
                                 MaterialTheme.colorScheme.primary
                             else
                                 MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+                if(isAdmin){
+                    IconButton(onClick =  onSearchPressed ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "User Search"
+                        )
+                    }
+                    IconButton(onClick = onNotificationsPressed ) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            contentDescription = "Notifications"
                         )
                     }
                 }
@@ -487,7 +503,9 @@ fun NavigationApp (
                         }
                         */
                         navController.navigate(AppScreen.Profile.name)
-                    }
+                    },
+                    onSearchPressed = {navController.navigate(AppScreen.UserSearch.name)},
+                    onNotificationsPressed = {navController.navigate(AppScreen.Notifications.name)}
                 )
             }
         }
@@ -870,7 +888,8 @@ private fun NavigationGraph(
                     navController.backQueue.clear()
                     navController.navigate(AppScreen.Login.name)
                 },
-                onPropicChange = {navController.navigate(AppScreen.ProPicChange.name)}
+                onPropicChange = {navController.navigate(AppScreen.ProPicChange.name)},
+                onProPicChanged = {navController.navigate(AppScreen.Profile.name)}
             )
         }
 
@@ -933,7 +952,9 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.ProPicChange.name){
-            changeProPicScreen()
+            changeProPicScreen(
+                onProPicChanged = {navController.navigate(AppScreen.Profile.name)}
+            )
         }
     }
 }
